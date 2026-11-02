@@ -62,6 +62,16 @@ add_library(npp_pugixml STATIC ${NPP_LEGACY_SRC_DIR}/pugixml/pugixml.cpp)
 target_include_directories(npp_pugixml PUBLIC ${NPP_LEGACY_SRC_DIR}/pugixml)
 
 # ---------------------------------------------------------------------------
+# uchardet (charset detection, as bundled with upstream)
+# ---------------------------------------------------------------------------
+file(GLOB NPP_UCHARDET_SOURCES CONFIGURE_DEPENDS ${NPP_LEGACY_SRC_DIR}/uchardet/*.cpp)
+add_library(npp_uchardet STATIC ${NPP_UCHARDET_SOURCES})
+target_include_directories(npp_uchardet PUBLIC ${NPP_LEGACY_SRC_DIR}/uchardet)
+if(NOT MSVC)
+    target_compile_options(npp_uchardet PRIVATE -w) # third-party code, keep build output clean
+endif()
+
+# ---------------------------------------------------------------------------
 # Qt Advanced Docking System (git submodule, pinned tag)
 # ---------------------------------------------------------------------------
 if(NPP_DOCKING_BACKEND STREQUAL "ADS")

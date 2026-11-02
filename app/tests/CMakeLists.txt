@@ -37,3 +37,4 @@ function(npp_core_add_test name)
 endfunction()
 
 npp_core_add_test(util SOURCES core/test_util.cpp)
+npp_core_add_test(encoding SOURCES core/test_encoding.cpp)

@@ -1,0 +1,67 @@
+[
+ {
+  "file": "utf8.txt",
+  "mode": 4,
+  "codepage": -1
+ },
+ {
+  "file": "utf8-bom.txt",
+  "mode": 1,
+  "codepage": -1
+ },
+ {
+  "file": "utf16le-bom.txt",
+  "mode": 3,
+  "codepage": -1
+ },
+ {
+  "file": "utf16be-bom.txt",
+  "mode": 2,
+  "codepage": -1
+ },
+ {
+  "file": "utf16le-nobom.txt",
+  "mode": 7,
+  "codepage": -1
+ },
+ {
+  "file": "ascii.txt",
+  "mode": 5,
+  "codepage": -1
+ },
+ {
+  "file": "cp949.txt",
+  "mode": 0,
+  "codepage": 949
+ },
+ {
+  "file": "shift_jis.txt",
+  "mode": 0,
+  "codepage": 932
+ },
+ {
+  "file": "gbk.txt",
+  "mode": 0,
+  "codepage": 936
+ },
+ {
+  "file": "big5.txt",
+  "mode": 0,
+  "codepage": 950
+ },
+ {
+  "file": "cp1252.txt",
+  "mode": 0,
+  "codepage": 1252
+ },
+ {
+  "file": "cp1251.txt",
+  "mode": 0,
+  "codepage": 1251
+ },
+ {
+  "file": "koi8r.txt",
+  "mode": 0,
+  "codepage": 20866
+ }
+]
