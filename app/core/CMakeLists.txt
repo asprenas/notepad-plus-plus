@@ -38,6 +38,24 @@ add_library(npp_core STATIC
 
     shortcut/Shortcuts.h
     shortcut/Shortcuts.cpp
+
+    lang/LangTypes.inc
+    lang/LangType.h
+    lang/LangType.cpp
+    lang/LanguageRegistry.h
+    lang/LanguageRegistry.cpp
+    lang/StyleRegistry.h
+    lang/StyleRegistry.cpp
+    lang/UserLanguage.h
+    lang/UserLanguage.cpp
+    lang/LexerSpecs.inc
+    lang/LexerSpecs.h
+    lang/LexerSpecs.cpp
+
+    editor/IEditor.h
+    editor/IEditor.cpp
+    editor/EditorLanguage.h
+    editor/EditorLanguage.cpp
 )
 
 if(WIN32)
@@ -52,5 +70,8 @@ target_include_directories(npp_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)   # #
 target_link_libraries(npp_core
     PUBLIC  Qt6::Core
     PUBLIC  npp_pugixml        # pugixml types appear in a few core headers (XmlHelpers)
-    PRIVATE npp_uchardet)
+    PRIVATE npp_uchardet
+            npp_lexilla)       # CreateLexer() (plain C++ library, no Qt)
+# Scintilla / Lexilla public headers only (message and style constants)
+target_include_directories(npp_core PUBLIC ${NPP_SCINTILLA_DIR}/include ${NPP_LEXILLA_DIR}/include)
 set_target_properties(npp_core PROPERTIES AUTOMOC OFF)
