@@ -56,6 +56,10 @@ add_library(npp_core STATIC
     editor/IEditor.cpp
     editor/EditorLanguage.h
     editor/EditorLanguage.cpp
+
+    buffer/Buffer.h
+    buffer/FileManager.h
+    buffer/FileManager.cpp
 )
 
 if(WIN32)
