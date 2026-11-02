@@ -82,6 +82,30 @@ ADS는 Linux에서 `Qt6::GuiPrivate`(qt6-base-private-dev)와 `xcb`가 필요하
 QT_QPA_PLATFORM=offscreen ./build/linux-release/bin/notepadpp-qt --screenshot out.png some-file.cpp
 ```
 
+## 로컬 CI
+
+GitHub은 저장소로만 사용하며 GitHub Actions는 비활성화되어 있다. 모든 검증은 로컬에서 수행한다.
+**push 전에 실행한다.**
+
+```bash
+bash ci/local-ci.sh                 # 정적 검사 + Windows(네이티브) + Linux(Docker), ADS/QT 백엔드 모두
+bash ci/local-ci.sh --linux         # Linux만
+bash ci/local-ci.sh --windows --backend ADS
+bash ci/local-ci.sh --no-smoke      # 스크린샷 스모크 실행 생략
+```
+
+| 대상 | 실행 방식 | 빌드 위치 |
+|---|---|---|
+| Windows | Qt 설치본 MinGW kit (`NPP_QT_DIR`, `NPP_QT_TOOLS`로 경로 변경) | `build/ci/windows-mingw-<backend>/` |
+| Linux (Windows 호스트) | Docker 이미지 `npp-qt-linux`, 빌드 트리는 Docker 볼륨 `npp-qt-linux-build`(증분 빌드) | 볼륨 내부 |
+| Linux (Linux 호스트) | 네이티브 | `build/ci/linux-<backend>/` |
+| macOS | 2026-11-09 주 추가 예정 | |
+
+결과: 마지막에 요약 표 출력, 실패 시 종료 코드 1. 로그 `build/ci/logs/`, 스크린샷 `build/ci/artifacts/`.
+Docker Desktop이 꺼져 있으면 Linux 항목은 `FAIL (no docker)`로 표시된다.
+
+Linux 빌드 볼륨 초기화: `docker volume rm npp-qt-linux-build`
+
 ## 정적 검사
 
 ```bash

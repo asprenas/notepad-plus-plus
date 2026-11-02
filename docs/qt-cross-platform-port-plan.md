@@ -129,10 +129,10 @@
 | 빌드 | CMake 3.24+ 단일 루트 `CMakeLists.txt` + CMake Presets | Qt 6 공식 지원, 3플랫폼 공통 |
 | 의존성 관리 | vcpkg (manifest 모드) 또는 시스템 패키지 + Qt 공식 설치본 | Boost 헤더, ADS(Qt Advanced Docking System) |
 | 언어 표준 | C++20 | |
-| 컴파일러 | MSVC 2022 또는 MinGW 13 (Windows), GCC 13+/Clang 17+ (Linux), Apple Clang (macOS) | 로컬 개발은 Qt 설치본의 MinGW kit, CI는 MSVC |
+| 컴파일러 | MSVC 2022 또는 MinGW 13 (Windows), GCC 13+/Clang 17+ (Linux), Apple Clang (macOS) | 로컬 개발·CI 모두 Qt 설치본의 MinGW kit. MSVC는 프리셋만 유지(검증하려면 Qt msvc2022_64 kit 설치 필요) |
 | 정규식 | 기존 `boostregex` 유지 | 검색 동작 동일성 확보 |
 | 패키징 | Windows: 설치본(Qt IFW/Inno Setup/WiX 중 택1) + 포터블 zip, Linux: AppImage → Flatpak/deb/rpm, macOS: `.app` + `.dmg` | |
-| CI | GitHub Actions 매트릭스 (windows-latest, ubuntu-24.04, macos-14) | |
+| CI | **로컬 전용** `ci/local-ci.sh` (Windows 네이티브 + Linux Docker, ADS/QT 백엔드). GitHub Actions 사용 안 함 | 2026-11-02 결정: GitHub은 저장소로만 사용 |
 
 ### 4.2 추가 확정 사항 (2026-11-02, 판단 자료: 부록 A, B)
 
@@ -279,7 +279,7 @@
 
 - **단위 테스트** (GoogleTest 또는 Qt Test): 코어 — 설정 XML 왕복(round-trip), 인코딩 감지/변환, EOL 변환, 경로 처리, 세션, UDL 파싱, 단축키 변환 테이블, 비 BMP 문자(이모지 등) 처리.
 - **기존 테스트 자산 재활용**: `PowerEditor/Test/FunctionList`, `UrlDetection`, `xmlValidator`를 CTest에 편입.
-- **UI 테스트**: Qt Test 스모크 테스트, CI에서 `QT_QPA_PLATFORM=offscreen` 실행.
+- **UI 테스트**: Qt Test 스모크 테스트, 로컬 CI(`ci/local-ci.sh`)에서 `QT_QPA_PLATFORM=offscreen` 실행.
 - **호환성 테스트**: Windows Notepad++ 사용자 설정 폴더를 그대로 복사해 3플랫폼에서 로드.
 - **수동 검증 매트릭스**: Windows 10/11 × Linux(X11/Wayland, GNOME/KDE) × macOS(arm64/x86_64) × 한국어 IME × HiDPI.
 
@@ -292,7 +292,7 @@
 | UI 재작성 공수 과소평가 (`StaticDialog` 57개, `.rc` 리소스 다수) | 일정 지연 | 높음 | P0–P3 단계적 진행, Qt Designer `.ui`로 신속 작성 |
 | 개인 프로젝트 리소스 한계 | 일정 지연 | 높음 | MVP 범위 엄격히 관리, 사용 빈도 낮은 기능 후순위 |
 | 문자열 전환 중 회귀 (부록 A) | 문자 깨짐, 크래시 | 중 | 코어 추출과 동시 진행 + 비 BMP 문자 테스트 케이스 |
-| 3플랫폼 동시 지원 부담 (CI, IME, 단축키, 배포) | 품질 편차 | 중 | CI 매트릭스 초기 구축, 플랫폼별 체크리스트 |
+| 3플랫폼 동시 지원 부담 (CI, IME, 단축키, 배포) | 품질 편차 | 중 | 로컬 CI로 Windows/Linux 상시 검증, macOS는 Mac 장비에서 같은 스크립트 실행, 플랫폼별 체크리스트 |
 | 플러그인 생태계 부재 | 사용성 저하 | 높음 | 7장 계획, 핵심 기능 내장화 검토 |
 | ADS의 Wayland/macOS 플로팅 동작 이슈 | 사용성 저하 | 중 | `DockManager` 추상화로 구현 교체 가능하게 유지, 0단계 스파이크에서 확인 |
 | 원본 Notepad++와 설정 폴더 공유 | 원본 설정 손상 | 중 | 개발·테스트 중 포터블 모드 사용, 설정 파일 백업 |
@@ -337,8 +337,8 @@ notepad-plus-plus/
 | 작업 브랜치 | `qt-port` (기준점에서 분기). fork의 `master`는 업스트림 미러로 두고 사용하지 않음 |
 | 기능 브랜치 | 필요 시 `qt-port`에서 `feat/<주제>` 분기 후 병합 |
 | 업스트림 수정 반영 | 필요한 수정만 `upstream` fetch 후 `cherry-pick` 또는 수동 반영 |
-| 공개 저장소 유의 | 비밀정보(인증서, 서명 키, 토큰) 커밋 금지. CI 비밀값은 GitHub Secrets 사용 |
-| CI | fork의 GitHub Actions 사용. 업스트림 워크플로(`.github/workflows`, `appveyor.yml`)는 0단계에서 Qt 빌드용으로 교체 |
+| 공개 저장소 유의 | 비밀정보(인증서, 서명 키, 토큰) 커밋 금지 |
+| CI | **GitHub은 저장소로만 사용, CI는 로컬에서만 수행** (2026-11-02). fork의 GitHub Actions 비활성화(저장소 설정 `actions enabled=false`). push 전 `bash ci/local-ci.sh` 실행 |
 
 ---
 
@@ -346,7 +346,7 @@ notepad-plus-plus/
 
 - [x] 결정 사항 확정: 문자열 UTF-8, `DockManager` + ADS, 명칭/설정 폴더 보류 (2026-11-02)
 - [x] 소스 관리 구성: fork `qt-port` 브랜치, 기준 태그 `v8.9.8.1` (2026-11-02, 11.1절)
-- [x] 업스트림 CI 워크플로 제거(`CI_build.yml`, `release-notifier.yml`, `appveyor.yml`) → `.github/workflows/qt-build.yml`로 교체 (2026-11-02)
+- [x] 업스트림 CI 워크플로 제거(`CI_build.yml`, `release-notifier.yml`, `appveyor.yml`), fork GitHub Actions 비활성화 (2026-11-02)
 - [ ] 문자열 변환 규칙 문서화 및 `L"`/`std::wstring` 일괄 변환 스크립트 작성 (부록 A.4) — 1단계 착수 시
 - [x] `DockManager` 인터페이스 작성: `app/ui/docking/DockManager.h` (부록 B.4)
 - [x] ADS를 git submodule로 추가: `app/thirdparty/qtads` @ `v5.1.1`
@@ -354,7 +354,7 @@ notepad-plus-plus/
 - [x] `scintilla/qt/ScintillaEditBase` + `lexilla` + `boostregex` + `pugixml` CMake 타깃화 (`app/thirdparty/CMakeLists.txt`)
 - [x] 샘플 Qt 앱: 파일 열기/저장, 렉서 적용, `langs.model.xml`·`stylers.model.xml` 키워드·색상 적용, 한글 UTF-8 표시
 - [ ] **한글 IME 입력 수동 확인** (Windows MS IME, Linux ibus/fcitx5) — 자동 테스트 불가, 사용자 확인 필요
-- [x] GitHub Actions: windows(MSVC) / ubuntu(26.04 컨테이너) × ADS/QT 백엔드 → 2026-11-09 주 macos 추가
+- [x] 로컬 CI `ci/local-ci.sh`: Windows(MinGW) / Linux(Docker, Ubuntu 26.04) × ADS/QT 백엔드 → 2026-11-09 주 macOS 추가
 - [ ] macOS 빌드 환경: Xcode CLT, Qt 6 (Universal), `macdeployqt` 동작 확인 (2026-11-09 주)
 - [~] 도킹 스파이크: ADS/QT 두 백엔드로 탭 그룹·상태 저장·백엔드 전환 시 레이아웃 폴백 확인 (Windows, Linux offscreen). **남음**: 플로팅 드래그 수동 확인, Linux Wayland/X11 실기, macOS
 - [ ] `Parameters.cpp`, `Buffer.cpp`, `Common.cpp`의 Win32 API 사용 목록 상세 추출 — 1단계 착수 시
@@ -368,10 +368,10 @@ notepad-plus-plus/
 |---|---|
 | Windows (MinGW 13.1, Qt 6.12.0) | 빌드·테스트·실행 통과 (ADS, QT 백엔드 모두) |
 | Linux (Ubuntu 26.04 Docker, GCC, Qt 6.10) | 빌드·테스트·offscreen 실행 통과 (ADS, QT 백엔드 모두) |
-| Windows MSVC | CI에서 검증 (로컬에 Qt msvc kit 없음) |
+| Windows MSVC | GitHub Actions에서 1회 검증 통과 (Qt 6.8 LTS, 2026-11-02, run 41436956777·41437732085). 이후 로컬 CI 대상 아님 — 로컬에 Qt msvc kit 없음 |
 | 자동 테스트 (`app/tests/test_editor_smoke.cpp`) | UTF-8 텍스트, Boost regex(lookahead — 기본 엔진엔 없는 기능으로 연결 확인), Lexilla(`cpp`, Npp UDL `user`), 모델 XML 로드, 확장자→언어, cpp 키워드 스타일이 Npp와 동일 |
 | Linux 이식 중 발견한 vendored 소스 문제 | 2건 수정 — `docs/third-party-patches.md` |
-| 도킹 추상화 검사 | `ci/check-docking-abstraction.sh` (CI 포함) |
+| 도킹 추상화 검사 | `ci/check-docking-abstraction.sh` (로컬 CI 포함) |
 
 발견 사항:
 - Qt 온라인 설치본 MinGW kit에 Core5Compat 기본 미포함 → 별도 설치 필요 (`docs/build.md`).
