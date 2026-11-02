@@ -39,12 +39,17 @@ ctest --test-dir build/windows-mingw-debug --output-on-failure
 
 ## Windows — MSVC
 
-Qt `msvc2022_64` kit 필요. "x64 Native Tools Command Prompt"에서:
+Qt `msvc2022_64` kit (Core5Compat 포함) + Visual Studio C++ 워크로드 필요.
+VS 2026(MSVC 19.5x)에서도 `msvc2022_64` kit 사용 가능 (MSVC 2015 이후 ABI 호환). "x64 Native Tools Command Prompt"에서:
 
 ```bat
-cmake --preset windows-msvc-release -DCMAKE_PREFIX_PATH=C:/Qt/6.8.3/msvc2022_64
+set PATH=C:\Programs\Qt\Tools\Ninja;C:\Programs\Qt\6.12.0\msvc2022_64\bin;%PATH%
+cmake --preset windows-msvc-release -DCMAKE_PREFIX_PATH=C:/Programs/Qt/6.12.0/msvc2022_64
 cmake --build --preset windows-msvc-release
+ctest --test-dir build/windows-msvc-release --output-on-failure
 ```
+
+Git Bash에서는 `bash ci/local-ci.sh --msvc`가 vswhere로 VS를 찾아 `vcvars64.bat` 환경에서 같은 과정을 수행한다.
 
 ## Linux — Docker (권장, 호스트에 Qt 설치 불필요)
 
@@ -88,15 +93,17 @@ GitHub은 저장소로만 사용하며 GitHub Actions는 비활성화되어 있�
 **push 전에 실행한다.**
 
 ```bash
-bash ci/local-ci.sh                 # 정적 검사 + Windows(네이티브) + Linux(Docker), ADS/QT 백엔드 모두
+bash ci/local-ci.sh                 # 정적 검사 + Windows(MinGW, MSVC) + Linux(Docker), ADS/QT 백엔드 모두
 bash ci/local-ci.sh --linux         # Linux만
+bash ci/local-ci.sh --msvc          # Windows MSVC만 (--mingw: MinGW만, --windows: 둘 다)
 bash ci/local-ci.sh --windows --backend ADS
 bash ci/local-ci.sh --no-smoke      # 스크린샷 스모크 실행 생략
 ```
 
 | 대상 | 실행 방식 | 빌드 위치 |
 |---|---|---|
-| Windows | Qt 설치본 MinGW kit (`NPP_QT_DIR`, `NPP_QT_TOOLS`로 경로 변경) | `build/ci/windows-mingw-<backend>/` |
+| Windows MinGW | Qt 설치본 MinGW kit (`NPP_QT_DIR`, `NPP_QT_TOOLS`로 경로 변경) | `build/ci/windows-mingw-<backend>/` |
+| Windows MSVC | Qt `msvc2022_64` kit (`NPP_QT_MSVC_DIR`) + vswhere로 찾은 Visual Studio | `build/ci/windows-msvc-<backend>/` |
 | Linux (Windows 호스트) | Docker 이미지 `npp-qt-linux`, 빌드 트리는 Docker 볼륨 `npp-qt-linux-build`(증분 빌드) | 볼륨 내부 |
 | Linux (Linux 호스트) | 네이티브 | `build/ci/linux-<backend>/` |
 | macOS | 2026-11-09 주 추가 예정 | |

@@ -129,10 +129,10 @@
 | 빌드 | CMake 3.24+ 단일 루트 `CMakeLists.txt` + CMake Presets | Qt 6 공식 지원, 3플랫폼 공통 |
 | 의존성 관리 | vcpkg (manifest 모드) 또는 시스템 패키지 + Qt 공식 설치본 | Boost 헤더, ADS(Qt Advanced Docking System) |
 | 언어 표준 | C++20 | |
-| 컴파일러 | MSVC 2022 또는 MinGW 13 (Windows), GCC 13+/Clang 17+ (Linux), Apple Clang (macOS) | 로컬 개발·CI 모두 Qt 설치본의 MinGW kit. MSVC는 프리셋만 유지(검증하려면 Qt msvc2022_64 kit 설치 필요) |
+| 컴파일러 | MSVC 2022 또는 MinGW 13 (Windows), GCC 13+/Clang 17+ (Linux), Apple Clang (macOS) | 로컬 CI에서 MinGW 13.1과 MSVC 19.51(VS 2026, Qt `msvc2022_64` kit) 둘 다 검증 |
 | 정규식 | 기존 `boostregex` 유지 | 검색 동작 동일성 확보 |
 | 패키징 | Windows: 설치본(Qt IFW/Inno Setup/WiX 중 택1) + 포터블 zip, Linux: AppImage → Flatpak/deb/rpm, macOS: `.app` + `.dmg` | |
-| CI | **로컬 전용** `ci/local-ci.sh` (Windows 네이티브 + Linux Docker, ADS/QT 백엔드). GitHub Actions 사용 안 함 | 2026-11-02 결정: GitHub은 저장소로만 사용 |
+| CI | **로컬 전용** `ci/local-ci.sh` (Windows MinGW·MSVC + Linux Docker, ADS/QT 백엔드). GitHub Actions 사용 안 함 | 2026-11-02 결정: GitHub은 저장소로만 사용 |
 
 ### 4.2 추가 확정 사항 (2026-11-02, 판단 자료: 부록 A, B)
 
@@ -354,7 +354,7 @@ notepad-plus-plus/
 - [x] `scintilla/qt/ScintillaEditBase` + `lexilla` + `boostregex` + `pugixml` CMake 타깃화 (`app/thirdparty/CMakeLists.txt`)
 - [x] 샘플 Qt 앱: 파일 열기/저장, 렉서 적용, `langs.model.xml`·`stylers.model.xml` 키워드·색상 적용, 한글 UTF-8 표시
 - [ ] **한글 IME 입력 수동 확인** (Windows MS IME, Linux ibus/fcitx5) — 자동 테스트 불가, 사용자 확인 필요
-- [x] 로컬 CI `ci/local-ci.sh`: Windows(MinGW) / Linux(Docker, Ubuntu 26.04) × ADS/QT 백엔드 → 2026-11-09 주 macOS 추가
+- [x] 로컬 CI `ci/local-ci.sh`: Windows(MinGW, MSVC) / Linux(Docker, Ubuntu 26.04) × ADS/QT 백엔드 → 2026-11-09 주 macOS 추가
 - [ ] macOS 빌드 환경: Xcode CLT, Qt 6 (Universal), `macdeployqt` 동작 확인 (2026-11-09 주)
 - [~] 도킹 스파이크: ADS/QT 두 백엔드로 탭 그룹·상태 저장·백엔드 전환 시 레이아웃 폴백 확인 (Windows, Linux offscreen). **남음**: 플로팅 드래그 수동 확인, Linux Wayland/X11 실기, macOS
 - [ ] `Parameters.cpp`, `Buffer.cpp`, `Common.cpp`의 Win32 API 사용 목록 상세 추출 — 1단계 착수 시
@@ -368,7 +368,7 @@ notepad-plus-plus/
 |---|---|
 | Windows (MinGW 13.1, Qt 6.12.0) | 빌드·테스트·실행 통과 (ADS, QT 백엔드 모두) |
 | Linux (Ubuntu 26.04 Docker, GCC, Qt 6.10) | 빌드·테스트·offscreen 실행 통과 (ADS, QT 백엔드 모두) |
-| Windows MSVC | GitHub Actions에서 1회 검증 통과 (Qt 6.8 LTS, 2026-11-02, run 41436956777·41437732085). 이후 로컬 CI 대상 아님 — 로컬에 Qt msvc kit 없음 |
+| Windows MSVC (VS 2026 / MSVC 19.51, Qt 6.12.0 `msvc2022_64`) | 로컬 CI에서 빌드·테스트·실행 통과 (ADS, QT 백엔드). 경고 1건은 ADS 소스(`DockManager.cpp` nodiscard), 프로젝트 코드 경고 0건 |
 | 자동 테스트 (`app/tests/test_editor_smoke.cpp`) | UTF-8 텍스트, Boost regex(lookahead — 기본 엔진엔 없는 기능으로 연결 확인), Lexilla(`cpp`, Npp UDL `user`), 모델 XML 로드, 확장자→언어, cpp 키워드 스타일이 Npp와 동일 |
 | Linux 이식 중 발견한 vendored 소스 문제 | 2건 수정 — `docs/third-party-patches.md` |
 | 도킹 추상화 검사 | `ci/check-docking-abstraction.sh` (로컬 CI 포함) |
