@@ -50,6 +50,7 @@ jobs:
         shell: bash
         env:
           QT_QPA_PLATFORM: offscreen
+          QT_QPA_FONTDIR: C:\Windows\Fonts   # offscreen plugin has no font database on Windows
         run: ./build/windows-msvc-release/bin/notepadpp-qt.exe --screenshot screenshot-windows-${{ matrix.dock }}.png app/ui/MainWindow.cpp
       - uses: actions/upload-artifact@v7
         if: always()
