@@ -82,6 +82,11 @@ if bash "$ROOT/ci/check-docking-abstraction.sh" >"$LOG_DIR/static.log" 2>&1; the
 else
     cat "$LOG_DIR/static.log"; record "static: docking abstraction" FAIL
 fi
+if bash "$ROOT/ci/check-core-rules.sh" >"$LOG_DIR/static-core.log" 2>&1; then
+    record "static: core rules" PASS
+else
+    cat "$LOG_DIR/static-core.log"; record "static: core rules" FAIL
+fi
 
 # ---------------------------------------------------------------------------
 run_windows() { # backend
