@@ -123,13 +123,13 @@
 | 항목 | 결정 | 근거 |
 |---|---|---|
 | UI 프레임워크 | Qt 6.5+ LTS (권장 6.8 LTS), Qt Widgets — **전 플랫폼** | 2026-11-02 결정: Windows도 Qt 전환 |
-| 대상 플랫폼 | Windows 10/11 x64, Linux x86_64, macOS (arm64 + x86_64) | macOS는 2026-11-09 주 추가 |
+| 대상 플랫폼 | Windows 10/11 x64, Linux x86_64 (기준: Ubuntu 26.04 / Qt 6.10 이상 배포판), macOS (arm64 + x86_64) | macOS는 2026-11-09 주 추가. Ubuntu 24.04는 Qt 6.4라 패키지 Qt로는 미지원 |
 | 프로젝트 성격 | 개인 독립 포크 | 2026-11-02 결정 |
 | 편집 엔진 | 동봉된 `scintilla/qt/ScintillaEditBase` | Notepad++와 동일 Scintilla 버전 유지 |
 | 빌드 | CMake 3.24+ 단일 루트 `CMakeLists.txt` + CMake Presets | Qt 6 공식 지원, 3플랫폼 공통 |
 | 의존성 관리 | vcpkg (manifest 모드) 또는 시스템 패키지 + Qt 공식 설치본 | Boost 헤더, ADS(Qt Advanced Docking System) |
 | 언어 표준 | C++20 | |
-| 컴파일러 | MSVC 2022 (Windows), GCC 13+/Clang 17+ (Linux), Apple Clang (macOS) | |
+| 컴파일러 | MSVC 2022 또는 MinGW 13 (Windows), GCC 13+/Clang 17+ (Linux), Apple Clang (macOS) | 로컬 개발은 Qt 설치본의 MinGW kit, CI는 MSVC |
 | 정규식 | 기존 `boostregex` 유지 | 검색 동작 동일성 확보 |
 | 패키징 | Windows: 설치본(Qt IFW/Inno Setup/WiX 중 택1) + 포터블 zip, Linux: AppImage → Flatpak/deb/rpm, macOS: `.app` + `.dmg` | |
 | CI | GitHub Actions 매트릭스 (windows-latest, ubuntu-24.04, macos-14) | |
@@ -346,18 +346,38 @@ notepad-plus-plus/
 
 - [x] 결정 사항 확정: 문자열 UTF-8, `DockManager` + ADS, 명칭/설정 폴더 보류 (2026-11-02)
 - [x] 소스 관리 구성: fork `qt-port` 브랜치, 기준 태그 `v8.9.8.1` (2026-11-02, 11.1절)
-- [ ] 업스트림 CI 워크플로 비활성화/교체 (fork Actions에서 Win32 빌드가 돌지 않도록)
-- [ ] 문자열 변환 규칙 문서화 및 `L"`/`std::wstring` 일괄 변환 스크립트 작성 (부록 A.4)
-- [ ] `DockManager` 인터페이스 초안 작성 (부록 B.4)
-- [ ] ADS를 의존성으로 추가 (vcpkg 또는 git submodule, 버전 고정)
-- [ ] 루트 CMake + Presets: Windows(MSVC), Linux(GCC) 구성
-- [ ] `scintilla/qt/ScintillaEditBase` + `lexilla` + `boostregex` CMake 타깃화
-- [ ] 샘플 Qt 앱: 파일 열기, 렉서 적용, `stylers.model.xml` 일부 색상 적용, 한글 IME 확인
-- [ ] GitHub Actions: windows / ubuntu 빌드 → 2026-11-09 주 macos 추가
-- [ ] macOS 빌드 환경: Xcode CLT, Qt 6 (Universal), `macdeployqt` 동작 확인
-- [ ] 도킹 스파이크: `DockManager` + ADS로 탭 그룹·플로팅·상태 저장 프로토타입, Windows·Linux(X11/Wayland)·macOS 확인
-- [ ] `Parameters.cpp`, `Buffer.cpp`, `Common.cpp`의 Win32 API 사용 목록 상세 추출
+- [x] 업스트림 CI 워크플로 제거(`CI_build.yml`, `release-notifier.yml`, `appveyor.yml`) → `.github/workflows/qt-build.yml`로 교체 (2026-11-02)
+- [ ] 문자열 변환 규칙 문서화 및 `L"`/`std::wstring` 일괄 변환 스크립트 작성 (부록 A.4) — 1단계 착수 시
+- [x] `DockManager` 인터페이스 작성: `app/ui/docking/DockManager.h` (부록 B.4)
+- [x] ADS를 git submodule로 추가: `app/thirdparty/qtads` @ `v5.1.1`
+- [x] 루트 CMake + Presets: Windows(MinGW/MSVC), Linux(GCC), macOS(프리셋만) 구성
+- [x] `scintilla/qt/ScintillaEditBase` + `lexilla` + `boostregex` + `pugixml` CMake 타깃화 (`app/thirdparty/CMakeLists.txt`)
+- [x] 샘플 Qt 앱: 파일 열기/저장, 렉서 적용, `langs.model.xml`·`stylers.model.xml` 키워드·색상 적용, 한글 UTF-8 표시
+- [ ] **한글 IME 입력 수동 확인** (Windows MS IME, Linux ibus/fcitx5) — 자동 테스트 불가, 사용자 확인 필요
+- [x] GitHub Actions: windows(MSVC) / ubuntu(26.04 컨테이너) × ADS/QT 백엔드 → 2026-11-09 주 macos 추가
+- [ ] macOS 빌드 환경: Xcode CLT, Qt 6 (Universal), `macdeployqt` 동작 확인 (2026-11-09 주)
+- [~] 도킹 스파이크: ADS/QT 두 백엔드로 탭 그룹·상태 저장·백엔드 전환 시 레이아웃 폴백 확인 (Windows, Linux offscreen). **남음**: 플로팅 드래그 수동 확인, Linux Wayland/X11 실기, macOS
+- [ ] `Parameters.cpp`, `Buffer.cpp`, `Common.cpp`의 Win32 API 사용 목록 상세 추출 — 1단계 착수 시
 - [ ] 기능 체크리스트(메뉴 기준 전체 기능 목록) 작성 → 단계별 범위 확정
+
+---
+
+### 12.1 0단계 진행 결과 (2026-11-02)
+
+| 항목 | 결과 |
+|---|---|
+| Windows (MinGW 13.1, Qt 6.12.0) | 빌드·테스트·실행 통과 (ADS, QT 백엔드 모두) |
+| Linux (Ubuntu 26.04 Docker, GCC, Qt 6.10) | 빌드·테스트·offscreen 실행 통과 (ADS, QT 백엔드 모두) |
+| Windows MSVC | CI에서 검증 (로컬에 Qt msvc kit 없음) |
+| 자동 테스트 (`app/tests/test_editor_smoke.cpp`) | UTF-8 텍스트, Boost regex(lookahead — 기본 엔진엔 없는 기능으로 연결 확인), Lexilla(`cpp`, Npp UDL `user`), 모델 XML 로드, 확장자→언어, cpp 키워드 스타일이 Npp와 동일 |
+| Linux 이식 중 발견한 vendored 소스 문제 | 2건 수정 — `docs/third-party-patches.md` |
+| 도킹 추상화 검사 | `ci/check-docking-abstraction.sh` (CI 포함) |
+
+발견 사항:
+- Qt 온라인 설치본 MinGW kit에 Core5Compat 기본 미포함 → 별도 설치 필요 (`docs/build.md`).
+- Ubuntu 24.04 패키지 Qt는 6.4 → Linux 기준 배포판을 Ubuntu 26.04(Qt 6.10)로 조정. 24.04 지원이 필요하면 aqtinstall 등으로 Qt를 별도 설치해야 함.
+- 키워드 클래스(`instre1`, `type1` …) → Scintilla 키워드 세트 매핑이 언어별로 다름 (upstream `setXxxLexer`). 0단계는 C 계열만 처리, 1단계에서 전 언어 이식 필요.
+- ADS `DockManager.h`와 프로젝트 `docking/DockManager.h` 파일명이 같음 → ADS 헤더는 `<...>`, 프로젝트 헤더는 `"..."`로 include하는 규칙으로 구분.
 
 ---
 
@@ -493,6 +513,9 @@ class DockManager : public QObject {
     Q_OBJECT
 public:
     virtual ~DockManager() = default;
+
+    virtual QString backendName() const = 0;          // "ADS", "QT"
+    virtual void setCentralWidget(QWidget* widget) = 0; // editor area (ADS needs its own central dock widget)
 
     virtual void addPanel(const PanelDesc& desc, QWidget* content) = 0;
     virtual void removePanel(const std::string& id) = 0;

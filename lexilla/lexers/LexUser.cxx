@@ -21,7 +21,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <map>
 #include <vector>
 #include <assert.h>
+#include <cstring>
+#ifdef _WIN32 // [npp-qt] not needed by the lexer itself; guarded for non-Windows builds
 #include <windows.h>
+#else
+#include <cstdio>
+// [npp-qt] MSVC CRT _itoa replacement (only base 10 is used in this file)
+static char* _itoa(int value, char* buffer, int /*radix*/)
+{
+	std::sprintf(buffer, "%d", value);
+	return buffer;
+}
+#endif
 
 #include "ILexer.h"
 #include "LexAccessor.h"
