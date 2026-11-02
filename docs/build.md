@@ -154,3 +154,7 @@ Windows: 레지스트리 `HKCU\Software\NotepadPlusPlusQt`, Linux: `~/.config/No
    실행/디버그 구성에 `PATH` 설정이 필요 없다.
 3. CLion에서 `CMakeLists.txt` → **Load CMake Project**, Settings → Build → CMake에서 `clion-msvc-debug` 프로필 활성화.
 4. CMake 로드 후 실행 대상(`notepadpp-qt`, `test_editor_smoke`)별 실행 구성이 자동 생성된다.
+5. 디버깅: Settings → Toolchains → **Visual Studio** 툴체인의 Debugger = **Bundled LLDB**.
+   CLion이 자동 생성하는 기본 `Debug` 프로필(MinGW 툴체인)은 **비활성화**한다.
+   켜져 있으면 MSVC 빌드에 GDB가 붙어 PDB 심볼을 못 읽고 중단점이 동작하지 않는다.
+   LLDB로 붙으면 Qt 타입(`QString`, `QByteArray` 등) 값도 표시된다.
