@@ -262,6 +262,16 @@
 
 > 1인 개인 프로젝트 기준으로는 기간이 더 늘어날 수 있음. 0단계 결과로 재산정.
 
+단계별 세부 계획서:
+[0 준비](phase-0-preparation.md) ·
+[1 코어 추출](phase-1-core-extraction.md) ·
+[2 MVP](phase-2-mvp.md) ·
+[3 검색/편집](phase-3-search-edit.md) ·
+[4 설정/테마](phase-4-settings-theme.md) ·
+[5 패널/부가 기능](phase-5-panels-extras.md) ·
+[6 패키징/안정화](phase-6-packaging-stabilization.md) ·
+[7 플러그인 API](phase-7-plugin-api.md)
+
 | 단계 | 기간 | 산출물 | 완료 기준 |
 |---|---|---|---|
 | **0. 준비/스파이크** | 2–3주 | 3플랫폼 CMake + CI 골격, Scintilla Qt + Lexilla 샘플 앱, 도킹 스파이크(QDockWidget vs ADS), 결정 대기 항목 확정 | 샘플 앱이 Windows/Linux(1주차), macOS(2주차, 11-09 주)에서 빌드·실행. C++ 파일 하이라이팅, 한글 IME 입력 동작 |
