@@ -29,7 +29,12 @@ if(NOT NPP_DOCKING_BACKEND MATCHES "^(ADS|QT)$")
 endif()
 message(STATUS "Docking backend: ${NPP_DOCKING_BACKEND}")
 
-include(CTest) # BUILD_TESTING option (ON by default)
+# Plain enable_testing() instead of include(CTest): the latter adds ~28 CDash
+# dashboard targets (Nightly*, Continuous*, ...) that clutter IDE run configurations.
+option(BUILD_TESTING "Build tests" ON)
+if(BUILD_TESTING)
+    enable_testing()
+endif()
 
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets Core5Compat)
 qt_standard_project_setup()
