@@ -37,6 +37,21 @@ set_target_properties(notepadpp-qt PROPERTIES
     MACOSX_BUNDLE_BUNDLE_NAME "Notepad++ Qt"
     MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}")
 
+# --- Windows: copy Qt runtime next to the executable (IDE run/debug without PATH setup)
+option(NPP_DEPLOY_QT_RUNTIME "Run windeployqt after building (Windows)" OFF)
+if(WIN32 AND NPP_DEPLOY_QT_RUNTIME)
+    if(TARGET Qt6::windeployqt)
+        set(NPP_WINDEPLOYQT $<TARGET_FILE:Qt6::windeployqt>)
+    else()
+        find_program(NPP_WINDEPLOYQT windeployqt HINTS "${QT6_INSTALL_PREFIX}/bin" REQUIRED)
+    endif()
+    add_custom_command(TARGET notepadpp-qt POST_BUILD
+        COMMAND "${NPP_WINDEPLOYQT}" --no-translations --no-system-d3d-compiler --no-opengl-sw
+                --no-compiler-runtime --verbose 0 "$<TARGET_FILE:notepadpp-qt>"
+        COMMENT "windeployqt: copying Qt runtime next to notepadpp-qt"
+        VERBATIM)
+endif()
+
 # --- runtime data (upstream model files) next to the executable ---------------
 if(APPLE)
     set(NPP_DATA_OUT "$<TARGET_BUNDLE_CONTENT_DIR:notepadpp-qt>/Resources/data")

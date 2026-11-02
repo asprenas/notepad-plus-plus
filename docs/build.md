@@ -124,3 +124,33 @@ bash ci/check-docking-abstraction.sh   # ADS 사용이 app/ui/docking/ads/ 밖�
 0단계 샘플은 창/도킹 상태를 `QSettings`(조직명 `NotepadPlusPlusQt`)에 저장한다.
 Windows: 레지스트리 `HKCU\Software\NotepadPlusPlusQt`, Linux: `~/.config/NotepadPlusPlusQt/`.
 기존 Notepad++ 설정 파일(`%APPDATA%\Notepad++`)은 아직 읽거나 쓰지 않는다 (1단계 `npp-core`에서 도입).
+
+## CLion
+
+로컬 경로가 들어가는 설정은 저장소에 넣지 않는다 (`CMakeUserPresets.json`, `.idea/`는 gitignore 대상).
+
+1. 툴체인: CLion의 **Visual Studio** 툴체인 + Qt `msvc2022_64` kit 사용.
+   CLion 기본 MinGW 툴체인(GCC 16, win32 스레드)은 Qt kit의 MinGW 13.1(posix)과 런타임이 달라 섞어 쓰면 안 된다.
+2. 저장소 루트에 `CMakeUserPresets.json` 작성 (예):
+
+   ```json
+   {
+     "version": 6,
+     "configurePresets": [{
+       "name": "clion-msvc-debug",
+       "inherits": "windows-msvc-debug",
+       "binaryDir": "${sourceDir}/build/clion-msvc-debug",
+       "cacheVariables": {
+         "CMAKE_PREFIX_PATH": "C:/Programs/Qt/6.12.0/msvc2022_64",
+         "NPP_DEPLOY_QT_RUNTIME": "ON"
+       },
+       "vendor": { "jetbrains.com/clion": { "toolchain": "Visual Studio" } }
+     }],
+     "buildPresets": [{ "name": "clion-msvc-debug", "configurePreset": "clion-msvc-debug" }]
+   }
+   ```
+
+   `NPP_DEPLOY_QT_RUNTIME=ON`이면 빌드 후 `windeployqt`가 Qt DLL·플러그인을 실행 파일 옆에 복사하므로
+   실행/디버그 구성에 `PATH` 설정이 필요 없다.
+3. CLion에서 `CMakeLists.txt` → **Load CMake Project**, Settings → Build → CMake에서 `clion-msvc-debug` 프로필 활성화.
+4. CMake 로드 후 실행 대상(`notepadpp-qt`, `test_editor_smoke`)별 실행 구성이 자동 생성된다.
