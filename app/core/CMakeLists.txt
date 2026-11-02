@@ -20,6 +20,24 @@ add_library(npp_core STATIC
 
     i18n/NativeLanguage.h
     i18n/NativeLanguage.cpp
+
+    config/XmlHelpers.h
+    config/XmlHelpers.cpp
+    config/GuiConfigFields.inc
+    config/GuiConfig.h
+    config/GuiConfig.cpp
+    config/ConfigFile.h
+    config/ConfigFile.cpp
+    config/AppPaths.h
+    config/AppPaths.cpp
+    config/ContextMenuConfig.h
+    config/ContextMenuConfig.cpp
+
+    session/Session.h
+    session/Session.cpp
+
+    shortcut/Shortcuts.h
+    shortcut/Shortcuts.cpp
 )
 
 if(WIN32)
@@ -33,5 +51,6 @@ endif()
 target_include_directories(npp_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)   # #include "core/..."
 target_link_libraries(npp_core
     PUBLIC  Qt6::Core
-    PRIVATE npp_uchardet npp_pugixml)
+    PUBLIC  npp_pugixml        # pugixml types appear in a few core headers (XmlHelpers)
+    PRIVATE npp_uchardet)
 set_target_properties(npp_core PROPERTIES AUTOMOC OFF)

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<NotepadPlus>
+    <ScintillaContextMenu>
+        <Item MenuEntryName="Edit" MenuItemName="Cut" />
+        <Item id="42002" />
+        <Item id="0" />
+        <Item FolderName="Style token" id="43022" ItemNameAs="Using 1st Style" />
+        <Item PluginEntryName="MIME Tools" PluginCommandItemName="Base64 Encode" />
+        <Item id="42020" customFlag="kept" />
+    </ScintillaContextMenu>
+</NotepadPlus>

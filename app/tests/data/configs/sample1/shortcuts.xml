@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<NotepadPlus>
+    <InternalCommands>
+        <Shortcut id="41001" Ctrl="yes" Alt="yes" Shift="no" Key="78" />
+        <Shortcut id="42079" Ctrl="no" Alt="no" Shift="no" Key="0" nth="1" />
+    </InternalCommands>
+    <Macros>
+        <Macro name="Trim Trailing Space and Save" Ctrl="no" Alt="yes" Shift="yes" Key="83">
+            <Action type="2" message="0" wParam="42024" lParam="0" sParam="" />
+            <Action type="2" message="0" wParam="41006" lParam="0" sParam="" />
+        </Macro>
+        <Macro name="Old CRLF macro" Ctrl="no" Alt="no" Shift="no" Key="0" FolderName="Legacy">
+            <Action type="1" message="2170" wParam="0" lParam="0" sParam="a" />
+            <Action type="1" message="2170" wParam="0" lParam="0" sParam="&#x0D;" />
+            <Action type="1" message="2170" wParam="0" lParam="0" sParam="&#x0A;" />
+            <Action type="1" message="2170" wParam="0" lParam="0" sParam="b" />
+        </Macro>
+    </Macros>
+    <UserDefinedCommands>
+        <Command name="Search on Google" Ctrl="yes" Alt="yes" Shift="no" Key="71" FolderName="Web">https://www.google.com/search?q=$(CURRENT_WORD)</Command>
+    </UserDefinedCommands>
+    <PluginCommands>
+        <PluginCommand moduleName="ComparePlugin.dll" internalID="0" Ctrl="yes" Alt="yes" Shift="no" Key="67" />
+    </PluginCommands>
+    <ScintillaKeys>
+        <ScintKey ScintID="2180" menuCmdID="42005" Ctrl="no" Alt="no" Shift="no" Key="46">
+            <NextKey Ctrl="no" Alt="no" Shift="yes" Key="46" />
+        </ScintKey>
+    </ScintillaKeys>
+</NotepadPlus>
