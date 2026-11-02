@@ -60,6 +60,9 @@ add_library(npp_core STATIC
     buffer/Buffer.h
     buffer/FileManager.h
     buffer/FileManager.cpp
+
+    search/Search.h
+    search/Search.cpp
 )
 
 if(WIN32)

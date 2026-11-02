@@ -54,6 +54,7 @@ public:
     FileManager& operator=(const FileManager&) = delete;
 
     const FileManagerSettings& settings() const noexcept { return m_settings; }
+    const IEditor& scratchEditor() const noexcept { return m_scratch; }
     void setSettings(const FileManagerSettings& s) { m_settings = s; }
 
     // --- documents -------------------------------------------------------------------------
