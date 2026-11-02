@@ -166,3 +166,13 @@ PowerEditor/src/MISC/md5/RCa06792
 *.db
 *.sln
 *.opendb
+# Qt port (qt-port branch)
+.idea/
+/build/
+/build-*/
+/out/
+CMakeUserPresets.json
+*.user
+.qtcreator/
+.vscode/
+vcpkg_installed/
