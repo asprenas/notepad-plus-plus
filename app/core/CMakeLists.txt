@@ -17,6 +17,9 @@ add_library(npp_core STATIC
     encoding/Codepage.h
     encoding/CharsetDetector.h
     encoding/CharsetDetector.cpp
+
+    i18n/NativeLanguage.h
+    i18n/NativeLanguage.cpp
 )
 
 if(WIN32)
