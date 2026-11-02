@@ -3,15 +3,19 @@
 # every check runs on the developer machine.
 #
 # Usage: ci/local-ci.sh [options]
-#   --windows          Windows native build (MinGW Qt kit)        [default on Windows hosts]
+#   --windows          Windows native builds: MinGW + MSVC        [default on Windows hosts]
+#   --mingw            Windows MinGW build only
+#   --msvc             Windows MSVC build only
 #   --linux            Linux build (native on Linux, Docker elsewhere) [default on all hosts]
 #   --backend B        ADS | QT | all (docking backend)            [default: all]
 #   --no-smoke         skip the --screenshot smoke run
 #   -h, --help
 #
 # Environment (Windows):
-#   NPP_QT_DIR     Qt kit prefix   (default C:/Programs/Qt/6.12.0/mingw_64)
-#   NPP_QT_TOOLS   Qt Tools dir    (default C:/Programs/Qt/Tools; mingw1310_64 + Ninja)
+#   NPP_QT_DIR        MinGW Qt kit prefix (default C:/Programs/Qt/6.12.0/mingw_64)
+#   NPP_QT_MSVC_DIR   MSVC Qt kit prefix  (default C:/Programs/Qt/6.12.0/msvc2022_64)
+#   NPP_QT_TOOLS      Qt Tools dir        (default C:/Programs/Qt/Tools; mingw1310_64 + Ninja)
+#   Visual Studio (C++ workload) is located with vswhere.
 #
 # Output: build/ci/<target>-<backend>/  logs: build/ci/logs/  screenshots: build/ci/artifacts/
 set -uo pipefail
@@ -30,10 +34,12 @@ case "$(uname -s)" in
     *)                    HOST=unknown ;;
 esac
 
-DO_WINDOWS=0; DO_LINUX=0; EXPLICIT=0; BACKENDS=(ADS QT); SMOKE=1
+DO_MINGW=0; DO_MSVC=0; DO_LINUX=0; EXPLICIT=0; BACKENDS=(ADS QT); SMOKE=1
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --windows) DO_WINDOWS=1; EXPLICIT=1 ;;
+        --windows) DO_MINGW=1; DO_MSVC=1; EXPLICIT=1 ;;
+        --mingw)   DO_MINGW=1; EXPLICIT=1 ;;
+        --msvc)    DO_MSVC=1; EXPLICIT=1 ;;
         --linux)   DO_LINUX=1; EXPLICIT=1 ;;
         --backend)
             shift
@@ -43,14 +49,14 @@ while [[ $# -gt 0 ]]; do
                 *) echo "--backend must be ADS, QT or all"; exit 2 ;;
             esac ;;
         --no-smoke) SMOKE=0 ;;
-        -h|--help) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -h|--help) sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) echo "unknown option: $1"; exit 2 ;;
     esac
     shift
 done
 if [[ $EXPLICIT -eq 0 ]]; then
     DO_LINUX=1
-    [[ $HOST == windows ]] && DO_WINDOWS=1
+    [[ $HOST == windows ]] && { DO_MINGW=1; DO_MSVC=1; }
 fi
 
 mkdir -p "$LOG_DIR" "$ART_DIR"
@@ -104,6 +110,52 @@ run_windows() { # backend
     record "$name" PASS
 }
 
+run_windows_msvc() { # backend
+    local b="$1" name="windows-msvc-$b"
+    local qt="${NPP_QT_MSVC_DIR:-C:/Programs/Qt/6.12.0/msvc2022_64}" tools="${NPP_QT_TOOLS:-C:/Programs/Qt/Tools}"
+    local bdir="$CI_DIR/$name" log="$LOG_DIR/$name.log"
+    : >"$log"
+    echo "== $name"
+    if [[ ! -d "$qt" ]]; then echo "  Qt kit not found: $qt (set NPP_QT_MSVC_DIR)"; record "$name" "FAIL (no Qt)"; return; fi
+
+    local vswhere="/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe" vs
+    vs="$("$vswhere" -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 \
+            -property installationPath 2>/dev/null | tr -d '\r')"
+    if [[ -z "$vs" ]]; then echo "  Visual Studio C++ tools not found"; record "$name" "FAIL (no MSVC)"; return; fi
+
+    # MSVC needs the vcvars environment: configure/build/test run from a generated batch file.
+    local bat="$CI_DIR/$name.bat"
+    local w_root w_bdir w_tools w_qt
+    w_root="$(cygpath -w "$ROOT")"; w_bdir="$(cygpath -w "$bdir")"
+    w_tools="$(cygpath -w "$tools")"; w_qt="$(cygpath -w "$qt")"
+    {
+        echo '@echo off'
+        echo "call \"$vs\\VC\\Auxiliary\\Build\\vcvars64.bat\" >nul 2>&1 || exit /b 10"
+        echo "set \"PATH=$w_tools\\Ninja;$w_qt\\bin;%PATH%\""
+        echo "cd /d \"$w_root\""
+        echo "cmake --preset windows-msvc-release -B \"$w_bdir\" -DCMAKE_PREFIX_PATH=$qt -DNPP_DOCKING_BACKEND=$b || exit /b 11"
+        echo "cmake --build \"$w_bdir\" -j || exit /b 12"
+        echo "ctest --test-dir \"$w_bdir\" --output-on-failure || exit /b 13"
+    } >"$bat"
+
+    printf '  %-12s ... ' "build+test"
+    cmd //c "$(cygpath -w "$bat")" >>"$log" 2>&1
+    local rc=$?
+    case $rc in
+        0)  echo ok ;;
+        10) echo "FAILED (vcvars64.bat)"; record "$name" "FAIL (vcvars)"; return ;;
+        11) echo "FAILED (see ${log#$ROOT/})"; record "$name" "FAIL (configure)"; return ;;
+        12) echo "FAILED (see ${log#$ROOT/})"; record "$name" "FAIL (build)"; return ;;
+        *)  echo "FAILED (see ${log#$ROOT/})"; record "$name" "FAIL (test)"; return ;;
+    esac
+    if [[ $SMOKE -eq 1 ]]; then
+        step smoke "$log" env PATH="$(cygpath -u "$qt")/bin:$PATH" QT_QPA_PLATFORM=offscreen QT_QPA_FONTDIR='C:\Windows\Fonts' \
+            timeout 60 "$bdir/bin/notepadpp-qt.exe" --screenshot "$ART_DIR/$name.png" "$ROOT/app/ui/MainWindow.cpp" \
+            || { record "$name" "FAIL (smoke)"; return; }
+    fi
+    record "$name" PASS
+}
+
 run_linux_native() { # backend
     local b="$1" name="linux-$b"
     local bdir="$CI_DIR/$name" log="$LOG_DIR/$name.log"
@@ -150,7 +202,14 @@ run_linux_docker() { # backend
 
 # ---------------------------------------------------------------------------
 for b in "${BACKENDS[@]}"; do
-    [[ $DO_WINDOWS -eq 1 ]] && { if [[ $HOST == windows ]]; then run_windows "$b"; else record "windows-$b" "SKIP (not a Windows host)"; fi; }
+    if [[ $DO_MINGW -eq 1 || $DO_MSVC -eq 1 ]]; then
+        if [[ $HOST != windows ]]; then
+            record "windows-$b" "SKIP (not a Windows host)"
+        else
+            [[ $DO_MINGW -eq 1 ]] && run_windows "$b"
+            [[ $DO_MSVC -eq 1 ]] && run_windows_msvc "$b"
+        fi
+    fi
     if [[ $DO_LINUX -eq 1 ]]; then
         if [[ $HOST == linux ]]; then run_linux_native "$b"; else run_linux_docker "$b"; fi
     fi
