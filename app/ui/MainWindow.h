@@ -177,6 +177,7 @@ private:
     // --- commands (SearchCommands.cpp)
     void registerSearchMiscCommands();
     void applyIndicatorStyles(ScintillaEditBase* e);
+    void applyRepresentations(EditorPane* pane);
     // --- find / replace (FindCommands.cpp)
     void registerFindCommands();
     void runFindAction(int action);

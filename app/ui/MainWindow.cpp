@@ -6,6 +6,7 @@
 #include "menu/CommandIds.h"
 #include "search/FindReplaceDialog.h"
 
+#include "core/editor/Representations.h"
 #include "core/editor/AutoCompletion.h"
 
 #include "core/encoding/EncodingMapper.h"
@@ -542,7 +543,22 @@ void MainWindow::applyEditorSettings(EditorPane* pane)
         e->send(SCI_MARKERSETBACK, static_cast<uptr_t>(num), 0x808080);
     }
     applyIndicatorStyles(e);
+    applyRepresentations(pane);
     applyScintillaKeys(e);
+}
+
+void MainWindow::applyRepresentations(EditorPane* pane)
+{
+    const GuiConfig& g = m_config.gui;
+    RepresentationOptions o;
+    o.eolMode = g.eolMode;
+    o.npcShow = g.npcShow;
+    o.npcMode = g.npcMode;
+    o.npcCustomColor = g.npcCustomColor;
+    o.npcIncludeCcUniEol = g.npcIncludeCcUniEol;
+    o.ccUniEolShow = g.ccUniEolShow;
+    o.colorsFrom(m_styles);
+    core::applyRepresentations(pane->adapter(), o);
 }
 
 void MainWindow::restoreWindowState()

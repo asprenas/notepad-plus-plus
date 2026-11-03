@@ -412,6 +412,20 @@ void MainWindow::registerViewCommands()
             p->editor()->send(SCI_SETVIEWEOL, on);
         }
     }, {}, [&g] { return g.whiteSpaceShow && g.eolShow; }});
+    r->setHandler(IDM_VIEW_NPC, {[this, &g] {
+        g.npcShow = !g.npcShow;
+        for (EditorPane* p : m_panes)
+            applyRepresentations(p);
+    }, {}, [&g] { return g.npcShow; }});
+    r->setHandler(IDM_VIEW_NPC_CCUNIEOL, {[this, &g] {
+        g.ccUniEolShow = !g.ccUniEolShow;
+        m_applyOptions.showCcUniEol = g.ccUniEolShow;
+        for (EditorPane* p : m_panes) {
+            applyRepresentations(p);
+            if (Buffer* b = buffer(p->current()))
+                applyLanguageToPane(p, b); // escape styles visibility
+        }
+    }, {}, [&g] { return g.ccUniEolShow; }});
     r->setHandler(IDM_VIEW_TAB_SPACE, {[toggleAll, &g] { toggleAll(g.whiteSpaceShow, SCI_SETVIEWWS, SCWS_VISIBLEALWAYS, SCWS_INVISIBLE); }, {}, [&g] { return g.whiteSpaceShow; }});
     r->setHandler(IDM_VIEW_EOL, {[toggleAll, &g] { toggleAll(g.eolShow, SCI_SETVIEWEOL, 1, 0); }, {}, [&g] { return g.eolShow; }});
     r->setHandler(IDM_VIEW_INDENT_GUIDE, {[toggleAll, &g] { toggleAll(g.indentGuideLine, SCI_SETINDENTATIONGUIDES, SC_IV_LOOKBOTH, SC_IV_NONE); }, {}, [&g] { return g.indentGuideLine; }});

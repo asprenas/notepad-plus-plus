@@ -101,6 +101,7 @@ void MainWindow::applyStylesToEditors()
                 m_langs.addUserExtensions(*t, ls.ext);
     for (EditorPane* p : m_panes) {
         applyIndicatorStyles(p->editor());
+        applyRepresentations(p);
         if (Buffer* b = buffer(p->current()))
             applyLanguageToPane(p, b);
     }

@@ -5,6 +5,8 @@
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
 #include "prefs/PreferencesDialog.h"
+#include "ShortcutMapper.h"
+#include "StyleConfigurator.h"
 
 #include "core/config/ConfigFile.h"
 
@@ -12,6 +14,9 @@
 #include <ScintillaEditBase.h>
 
 #include <QApplication>
+#include <QPalette>
+#include <QStyleHints>
+#include <QFile>
 #include <QCheckBox>
 #include <QDir>
 #include <QGroupBox>
@@ -58,6 +63,153 @@ private slots:
 #endif
         QVERIFY(d->control(QStringLiteral("Global"), 6124));
         QVERIFY(d->control(QStringLiteral("MISC"), 6331));
+    }
+
+    void preferenceCheckboxesRoundTrip()
+    {
+        // every bound check box changes config.xml, and unchecking restores it
+        PreferencesDialog* d = m_w->preferencesDialog();
+        int bound = 0;
+        for (const QString& tag : d->pageTags()) {
+            if (tag == QStringLiteral("FileAssoc"))
+                continue;
+            for (QCheckBox* cb : d->findChild<QWidget*>(tag)->findChildren<QCheckBox*>()) {
+                if (!cb->isEnabled())
+                    continue;
+                const std::string before = m_w->mutableConfig().saveToString();
+                cb->click();
+                const std::string after = m_w->mutableConfig().saveToString();
+                cb->click();
+                QCOMPARE(m_w->mutableConfig().saveToString(), before);
+                if (after != before)
+                    ++bound;
+            }
+        }
+        QVERIFY2(bound >= 100, qPrintable(QString::number(bound)));
+    }
+
+    void nonPrintingCharacters()
+    {
+        ScintillaEditBase* e = m_w->currentPane()->editor();
+        auto repr = [e](const char* c) {
+            char buf[32] = {};
+            e->send(SCI_GETREPRESENTATION, reinterpret_cast<uptr_t>(c), reinterpret_cast<sptr_t>(buf));
+            return QByteArray(buf);
+        };
+        QCOMPARE(repr("\xC2\xA0"), QByteArray());
+        QVERIFY(m_w->actions()->trigger(IDM_VIEW_NPC));
+        QCOMPARE(repr("\xC2\xA0"), QByteArray("NBSP"));
+        QCOMPARE(repr("\xEF\xBB\xBF"), QByteArray("ZWNBSP"));
+        m_w->mutableConfig().gui.npcMode = 2;
+        m_w->applySettings();
+        QCOMPARE(repr("\xC2\xA0"), QByteArray("U+00A0"));
+        QCOMPARE(repr("\x01"), QByteArray("SOH")); // C0 follows npcMode only with npcIncludeCcUniEol
+        m_w->mutableConfig().gui.npcIncludeCcUniEol = true;
+        m_w->applySettings();
+        QCOMPARE(repr("\x01"), QByteArray("U+0001"));
+        QVERIFY(m_w->actions()->trigger(IDM_VIEW_NPC));
+        QCOMPARE(repr("\xC2\xA0"), QByteArray());
+        QVERIFY(m_w->actions()->action(IDM_VIEW_NPC_CCUNIEOL)->isChecked());
+        QVERIFY(m_w->actions()->trigger(IDM_VIEW_NPC_CCUNIEOL));
+        QCOMPARE(repr("\xE2\x80\xA8"), QByteArray("\xE2\x80\x8B")); // hidden: zero-width space
+        QVERIFY(m_w->actions()->trigger(IDM_VIEW_NPC_CCUNIEOL));
+        QCOMPARE(repr("\xE2\x80\xA8"), QByteArray("U+2028"));
+    }
+
+    void lightDarkMode()
+    {
+        GuiConfig& g = m_w->mutableConfig().gui;
+        g.darkFollowSystem = false;
+        g.darkModeEnabled = true;
+        m_w->applyTheme();
+        QVERIFY(m_w->isDarkMode());
+        QVERIFY(qApp->palette().color(QPalette::Window).lightness() < 80);
+        QVERIFY(QString::fromStdString(m_w->currentThemePath()).endsWith(QStringLiteral("DarkModeDefault.xml")));
+        const Style* def = m_w->styles().globalStyle(STYLE_DEFAULT);
+        QVERIFY(def && def->bg >= 0 && (def->bg & 0xFF) < 0x80);
+        g.darkModeEnabled = false;
+        m_w->applyTheme();
+        QVERIFY(!m_w->isDarkMode());
+        QVERIFY(qApp->palette().color(QPalette::Window).lightness() > 160);
+        QVERIFY(!QString::fromStdString(m_w->currentThemePath()).contains(QStringLiteral("DarkModeDefault")));
+        g.darkFollowSystem = true; // follows the platform colour scheme
+        QCOMPARE(m_w->isDarkMode(), QGuiApplication::styleHints()->colorScheme() == Qt::ColorScheme::Dark);
+        g.darkFollowSystem = false;
+    }
+
+    void uiLanguageSwitch()
+    {
+        m_w->setUiLanguage("korean.xml");
+        QCOMPARE(m_w->menuBar()->actions().first()->text(), QStringLiteral("파일(&F)"));
+        QVERIFY(QFile::exists(QString::fromStdString(m_w->paths().nativeLangXml())));
+        PreferencesDialog* d = m_w->preferencesDialog();
+        d->translate();
+        auto* cb = qobject_cast<QCheckBox*>(d->control(QStringLiteral("Global"), 6122));
+        QVERIFY(cb);
+        QVERIFY(!cb->text().contains(QStringLiteral("Hide")));
+        m_w->setUiLanguage("english.xml");
+        QCOMPARE(m_w->menuBar()->actions().first()->text(), QStringLiteral("&File"));
+        QVERIFY(!QFile::exists(QString::fromStdString(m_w->paths().nativeLangXml())));
+    }
+
+    void styleConfiguratorSaves()
+    {
+        GuiConfig& g = m_w->mutableConfig().gui;
+        g.darkModeEnabled = false;
+        m_w->applyTheme();
+        QVERIFY(m_w->actions()->trigger(IDM_LANGSTYLE_CONFIG_DLG));
+        auto* dlg = qobject_cast<StyleConfigurator*>(m_w->styleConfigurator());
+        QVERIFY(dlg);
+        dlg->selectLanguage(QStringLiteral("cpp"));
+        dlg->selectStyle(QStringLiteral("COMMENT"));
+        dlg->setForeground(0x123456);
+        dlg->setBold(true);
+        QVERIFY(dlg->saveAndClose());
+        const LexerStyler* cpp = m_w->styles().lexer("cpp");
+        QVERIFY(cpp);
+        const Style* st = cpp->findById(1);
+        QVERIFY(st);
+        QCOMPARE(st->fg, 0x123456);
+        QVERIFY(st->fontStyle & 1);
+        StyleRegistry reread;
+        QVERIFY(reread.load(m_w->currentThemePath()));
+        QCOMPARE(reread.lexer("cpp")->findById(1)->fg, 0x123456);
+
+        // Cancel restores the previous styles
+        QVERIFY(m_w->actions()->trigger(IDM_LANGSTYLE_CONFIG_DLG));
+        dlg = qobject_cast<StyleConfigurator*>(m_w->styleConfigurator());
+        dlg->selectLanguage(QStringLiteral("cpp"));
+        dlg->selectStyle(QStringLiteral("COMMENT"));
+        dlg->setForeground(0x654321);
+        QCOMPARE(m_w->styles().lexer("cpp")->findById(1)->fg, 0x654321); // live preview
+        dlg->cancel();
+        QCOMPARE(m_w->styles().lexer("cpp")->findById(1)->fg, 0x123456);
+    }
+
+    void shortcutMapperConflictsAndResult()
+    {
+        ShortcutMapper sm(m_w->shortcuts(), m_w->actions(), &m_w->nativeLanguage());
+        QVERIFY(sm.rows().size() > 300);
+        QVERIFY(sm.conflicts().isEmpty());
+        KeyCombo ctrlN;
+        ctrlN.ctrl = true;
+        ctrlN.key = 'N';
+        QVERIFY(sm.setKey(0, IDM_FILE_CLOSE, ctrlN)); // Ctrl+N already = New
+        QVERIFY(!sm.conflicts().isEmpty());
+        KeyCombo f12;
+        f12.key = 0x7B; // VK_F12
+        f12.ctrl = f12.alt = f12.shift = true;
+        QVERIFY(sm.setKey(0, IDM_FILE_CLOSE, f12));
+        QVERIFY(sm.conflicts().isEmpty());
+        const ShortcutsFile out = sm.result();
+        bool found = false;
+        for (const auto& c : out.internalCommands)
+            if (c.id == IDM_FILE_CLOSE) {
+                found = true;
+                QCOMPARE(c.combo.key, 0x7B);
+            }
+        QVERIFY(found);
+        QCOMPARE(out.internalCommands.size(), size_t(1)); // only the changed default is written
     }
 
     void screenshots()
