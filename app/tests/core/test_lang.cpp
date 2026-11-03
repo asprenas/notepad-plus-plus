@@ -227,6 +227,46 @@ private slots:
         QCOMPARE(static_cast<int>(e.send(SCI_GETSTYLEAT, pos)), style);
     }
 
+    void langsXmlRoundTrip()
+    {
+        LanguageRegistry r = fx().langs;
+        LanguageRegistry back;
+        QVERIFY(back.loadFromString(r.saveToString()));
+        QCOMPARE(back.languages().size(), r.languages().size());
+        for (const auto& l : r.languages())
+            QVERIFY(back.find(l.type)->keywords == l.keywords);
+        r.findMutable(L_CPP)->keywords[0] += " myKeyword";
+        r.findMutable(L_CPP)->commentLine = "##";
+        QVERIFY(back.loadFromString(r.saveToString()));
+        QVERIFY(back.wordList(L_CPP, 0).find("myKeyword") != std::string::npos);
+        QCOMPARE(back.find(L_CPP)->commentLine, std::string("##"));
+        r.addUserExtensions(L_CPP, "zzz"); // stylers.xml user extensions stay out of langs.xml
+        QVERIFY(r.saveToString().find("zzz") == std::string::npos);
+    }
+
+    void udlRoundTrip()
+    {
+        UserLanguageRegistry udls;
+        udls.loadAll({}, NPP_ROOT_DIR "/PowerEditor/bin/userDefineLangs");
+        const std::string xml = userLanguagesToXml(udls.languages());
+        UserLanguageRegistry back;
+        QCOMPARE(back.loadFromString(xml), static_cast<int>(udls.languages().size()));
+        for (const auto& u : udls.languages()) {
+            const UserLanguage* b = back.find(u.name);
+            QVERIFY(b);
+            QCOMPARE(b->ext, u.ext);
+            QVERIFY(b->keywordLists == u.keywordLists);
+            QVERIFY(b->isPrefix == u.isPrefix);
+            QCOMPARE(b->caseIgnored, u.caseIgnored);
+            for (const Style& s : u.styles) {
+                QCOMPARE(b->style(s.styleId)->fg, s.fg);
+                QCOMPARE(b->style(s.styleId)->fontStyle, s.fontStyle);
+                QCOMPARE(b->style(s.styleId)->nesting, s.nesting);
+            }
+        }
+        QCOMPARE(userLanguagesToXml(back.languages()), xml);
+    }
+
     void userDefinedLanguage()
     {
         UserLanguageRegistry udls;

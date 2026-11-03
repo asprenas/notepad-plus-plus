@@ -41,6 +41,10 @@ struct UserLexerConfig {
 };
 UserLexerConfig buildUserLexerConfig(const UserLanguage& udl);
 
+// Serializes UDLs in the UDL 2.1 format (upstream UDL export / userDefineLang.xml).
+std::string userLanguagesToXml(const std::vector<UserLanguage>& udls);
+bool saveUserLanguages(const std::vector<UserLanguage>& udls, std::string_view utf8Path);
+
 class UserLanguageRegistry {
 public:
     // Adds the <UserLang> entries of one file. Returns the number added.

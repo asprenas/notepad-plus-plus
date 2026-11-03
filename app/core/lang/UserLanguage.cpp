@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <map>
+#include <sstream>
 
 namespace npp::core {
 
@@ -336,6 +337,81 @@ UserLexerConfig buildUserLexerConfig(const UserLanguage& u)
     // upstream also sets userDefine.udlName / userDefine.currentBufferID (pointer values used by
     // LexUser as cache keys); the editor layer adds them per buffer.
     return c;
+}
+
+std::string userLanguagesToXml(const std::vector<UserLanguage>& udls)
+{
+    static const char* const kListNames[kUdlKeywordListCount] = {
+        "Comments", "Numbers, prefix1", "Numbers, prefix2", "Numbers, extras1", "Numbers, extras2",
+        "Numbers, suffix1", "Numbers, suffix2", "Numbers, range", "Operators1", "Operators2",
+        "Folders in code1, open", "Folders in code1, middle", "Folders in code1, close",
+        "Folders in code2, open", "Folders in code2, middle", "Folders in code2, close",
+        "Folders in comment, open", "Folders in comment, middle", "Folders in comment, close",
+        "Keywords1", "Keywords2", "Keywords3", "Keywords4", "Keywords5", "Keywords6", "Keywords7", "Keywords8",
+        "Delimiters"};
+    static const char* const kStyleNames[kUdlStyleCount] = {
+        "DEFAULT", "COMMENTS", "LINE COMMENTS", "NUMBERS", "KEYWORDS1", "KEYWORDS2", "KEYWORDS3", "KEYWORDS4",
+        "KEYWORDS5", "KEYWORDS6", "KEYWORDS7", "KEYWORDS8", "OPERATORS", "FOLDER IN CODE1", "FOLDER IN CODE2",
+        "FOLDER IN COMMENT", "DELIMITERS1", "DELIMITERS2", "DELIMITERS3", "DELIMITERS4", "DELIMITERS5",
+        "DELIMITERS6", "DELIMITERS7", "DELIMITERS8"};
+    auto hex = [](int rgb) {
+        char b[8];
+        std::snprintf(b, sizeof(b), "%06X", rgb & 0xFFFFFF);
+        return std::string(b);
+    };
+    pugi::xml_document doc;
+    pugi::xml_node root = doc.append_child("NotepadPlus");
+    for (const auto& u : udls) {
+        pugi::xml_node ul = root.append_child("UserLang");
+        ul.append_attribute("name").set_value(u.name.c_str());
+        ul.append_attribute("ext").set_value(u.ext.c_str());
+        ul.append_attribute("udlVersion").set_value("2.1");
+        if (u.darkModeTheme)
+            ul.append_attribute("darkModeTheme").set_value("yes");
+        pugi::xml_node settings = ul.append_child("Settings");
+        pugi::xml_node g = settings.append_child("Global");
+        xml::setBool(g, "caseIgnored", u.caseIgnored);
+        xml::setBool(g, "allowFoldOfComments", u.allowFoldOfComments);
+        xml::setBool(g, "foldCompact", u.foldCompact);
+        xml::setInt(g, "forcePureLC", u.forcePureLC);
+        xml::setInt(g, "decimalSeparator", u.decimalSeparator);
+        pugi::xml_node pre = settings.append_child("Prefix");
+        for (int i = 0; i < kUdlKeywordGroups; ++i)
+            xml::setBool(pre, ("Keywords" + std::to_string(i + 1)).c_str(), u.isPrefix[static_cast<size_t>(i)]);
+        pugi::xml_node lists = ul.append_child("KeywordLists");
+        for (int i = 0; i < kUdlKeywordListCount; ++i) {
+            pugi::xml_node k = lists.append_child("Keywords");
+            k.append_attribute("name").set_value(kListNames[i]);
+            const std::string& w = u.keywordLists[static_cast<size_t>(i)];
+            if (!w.empty())
+                k.append_child(pugi::node_pcdata).set_value(w.c_str());
+        }
+        pugi::xml_node styles = ul.append_child("Styles");
+        for (const Style& s : u.styles) {
+            if (s.styleId < 0 || s.styleId >= kUdlStyleCount)
+                continue;
+            pugi::xml_node w = styles.append_child("WordsStyle");
+            w.append_attribute("name").set_value(kStyleNames[s.styleId]);
+            w.append_attribute("fgColor").set_value(s.fg >= 0 ? hex(s.fg).c_str() : "");
+            w.append_attribute("bgColor").set_value(s.bg >= 0 ? hex(s.bg).c_str() : "");
+            if (s.colorStyle >= 0)
+                w.append_attribute("colorStyle").set_value(s.colorStyle);
+            w.append_attribute("fontName").set_value(s.fontName.c_str());
+            if (s.fontStyle >= 0)
+                w.append_attribute("fontStyle").set_value(s.fontStyle);
+            if (s.fontSize >= 0)
+                w.append_attribute("fontSize").set_value(s.fontSize);
+            w.append_attribute("nesting").set_value(s.nesting);
+        }
+    }
+    std::ostringstream os;
+    doc.save(os, "    ", pugi::format_indent);
+    return os.str();
+}
+
+bool saveUserLanguages(const std::vector<UserLanguage>& udls, std::string_view utf8Path)
+{
+    return writeFileContent(utf8Path, userLanguagesToXml(udls));
 }
 
 } // namespace npp::core

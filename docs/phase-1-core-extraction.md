@@ -238,11 +238,11 @@ struct LexerSpec {
 
 - [x] `npp_core`는 QtCore 외 Qt 모듈 미사용 (`ci/check-core-rules.sh`)
 - [x] 코어에 `<windows.h>`, `wchar_t`, `std::wstring`, `L"` 없음 (`platform/win` 제외)
-- [~] 설정 파일 왕복: `config.xml`, `session.xml`, `shortcuts.xml`, `contextMenu.xml`, `stylers.xml` 완료. `langs.xml`, UDL은 읽기만 (편집 UI가 생기는 4·5단계에서 쓰기 추가)
+- [x] 설정 파일 왕복: `config.xml`, `session.xml`, `shortcuts.xml`, `contextMenu.xml`, `stylers.xml`, `langs.xml`, UDL(2.1 형식) 전부 저장·재로드 테스트 통과
 - [x] 인코딩 샘플 전부 바이트 일치
 - [x] 렉서: 28개 언어 33개 기준 토큰 테스트 통과, 전 언어 적용 확인 (9.3 참조)
 - [x] 샘플 앱이 코어 API로 동작, 기존 설정 폴더 로드
-- [~] 3플랫폼 로컬 CI: Windows·Linux 완료, macOS 대기
+- [~] 3플랫폼 로컬 CI: Windows(MinGW, MSVC)·Linux 통과. **macOS는 Mac 장비가 필요해 이 환경에서 실행 불가** — 0단계 P0-13(2026-11-09 주)에서 같은 `ci/local-ci.sh`로 확인
 
 ### 9.3 계획과 달라진 점
 

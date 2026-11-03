@@ -6,11 +6,68 @@
 
 #include <pugixml.hpp>
 
+#include <sstream>
+
 namespace npp::core {
+
+LanguageDef* LanguageRegistry::findMutable(LangType type)
+{
+    for (auto& l : m_langs)
+        if (l.type == type)
+            return &l;
+    return nullptr;
+}
+
+std::string LanguageRegistry::saveToString() const
+{
+    static const char* const kNames[kKeywordClassCount] = {
+        "instre1", "instre2", "type1", "type2", "type3", "type4", "type5", "type6", "type7",
+        "substyle1", "substyle2", "substyle3", "substyle4", "substyle5", "substyle6", "substyle7", "substyle8"};
+    pugi::xml_document doc;
+    doc.load_buffer(m_source.data(), m_source.size(), xml::kParseOptions);
+    pugi::xml_node root = doc.child("NotepadPlus");
+    if (!root)
+        root = doc.append_child("NotepadPlus");
+    pugi::xml_node langs = root.child("Languages");
+    if (!langs)
+        langs = root.append_child("Languages");
+    for (const auto& l : m_langs) {
+        pugi::xml_node ln = xml::childWithAttr(langs, "Language", "name", l.name, true);
+        auto attr = [&ln](const char* a, const std::string& v) {
+            if (v != ln.attribute(a).value() && (!v.empty() || ln.attribute(a)))
+                xml::setString(ln, a, v);
+        };
+        attr("ext", l.extAttribute);
+        attr("commentLine", l.commentLine);
+        attr("commentStart", l.commentStart);
+        attr("commentEnd", l.commentEnd);
+        if (l.tabSettings != ln.attribute("tabSettings").as_int(-1))
+            xml::setInt(ln, "tabSettings", l.tabSettings);
+        for (int c = 0; c < kKeywordClassCount; ++c) {
+            const std::string& words = l.keywords[static_cast<size_t>(c)];
+            pugi::xml_node kw = xml::childWithAttr(ln, "Keywords", "name", kNames[c], false);
+            if (!kw && words.empty())
+                continue;
+            if (!kw)
+                kw = xml::childWithAttr(ln, "Keywords", "name", kNames[c], true);
+            if (words != kw.text().get())
+                xml::setText(kw, words);
+        }
+    }
+    std::ostringstream os;
+    doc.save(os, "    ", pugi::format_indent);
+    return os.str();
+}
+
+bool LanguageRegistry::save(std::string_view utf8Path) const
+{
+    return writeFileContent(utf8Path, saveToString());
+}
 
 bool LanguageRegistry::loadFromString(std::string_view text)
 {
     m_langs.clear();
+    m_source = std::string(text);
     pugi::xml_document doc;
     if (!doc.load_buffer(text.data(), text.size(), xml::kParseOptions))
         return false;
@@ -24,6 +81,7 @@ bool LanguageRegistry::loadFromString(std::string_view text)
         if (def.name.empty() || !type)
             continue; // unknown language names are ignored, like upstream
         def.type = *type;
+        def.extAttribute = ln.attribute("ext").value();
         for (const auto& e : tokenize(ln.attribute("ext").value(), ' '))
             def.extensions.push_back(asciiLower(e));
         def.commentLine = ln.attribute("commentLine").value();
