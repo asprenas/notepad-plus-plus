@@ -30,6 +30,8 @@
 #include <QToolBar>
 #include <QUrl>
 
+#include <algorithm>
+
 namespace npp::ui {
 
 using namespace npp::core;
@@ -243,6 +245,28 @@ void MainWindow::registerFileCommands()
                 break;
 #endif
     }});
+    r->setHandler(IDM_FILE_OPEN_POWERSHELL, {[this] {
+        const Buffer* b = currentBuffer();
+        const QString dir = b && !b->isUntitled() ? QFileInfo(q(b->path)).absolutePath() : QDir::homePath();
+#if defined(Q_OS_WIN)
+        QProcess::startDetached(QStringLiteral("powershell.exe"), {QStringLiteral("-NoExit")}, dir);
+#else
+        QProcess::startDetached(QStringLiteral("pwsh"), {}, dir);
+#endif
+    }});
+    r->setHandler(IDM_FILE_OPEN_DEFAULT_VIEWER, {[this] {
+        if (const Buffer* b = currentBuffer(); b && !b->isUntitled())
+            QDesktopServices::openUrl(QUrl::fromLocalFile(q(b->path)));
+    }, hasFile});
+    r->setHandler(IDM_FILE_CONTAININGFOLDERASWORKSPACE, {[this] {
+        if (const Buffer* b = currentBuffer(); b && !b->isUntitled() && m_setWorkspaceRoot)
+            m_setWorkspaceRoot(QFileInfo(q(b->path)).absolutePath());
+    }, hasFile});
+    r->setHandler(IDM_FILE_OPENFOLDERASWORKSPACE, {[this] {
+        const QString dir = QFileDialog::getExistingDirectory(this, tr("Open Folder as Workspace"));
+        if (!dir.isEmpty() && m_setWorkspaceRoot)
+            m_setWorkspaceRoot(dir);
+    }});
     r->setHandler(IDM_FILE_LOADSESSION, {[this] {
         const QString f = QFileDialog::getOpenFileName(this, tr("Load Session"), {}, tr("All types (*.*)"));
         if (!f.isEmpty())
@@ -327,6 +351,10 @@ void MainWindow::registerEditCommands()
         const QString text = what == 0 ? full : what == 1 ? QFileInfo(full).fileName() : QDir::toNativeSeparators(QFileInfo(full).absolutePath());
         QApplication::clipboard()->setText(text);
     };
+    r->setHandler(IDM_EDIT_RTL, {[sci] { sci(SCI_SETBIDIRECTIONAL, SC_BIDIRECTIONAL_R2L); }, {},
+                                 [sci] { return sci(SCI_GETBIDIRECTIONAL) == SC_BIDIRECTIONAL_R2L; }});
+    r->setHandler(IDM_EDIT_LTR, {[sci] { sci(SCI_SETBIDIRECTIONAL, SC_BIDIRECTIONAL_DISABLED); }, {},
+                                 [sci] { return sci(SCI_GETBIDIRECTIONAL) != SC_BIDIRECTIONAL_R2L; }});
     r->setHandler(IDM_EDIT_FULLPATHTOCLIP, {[copyText] { copyText(0); }});
     r->setHandler(IDM_EDIT_FILENAMETOCLIP, {[copyText] { copyText(1); }});
     r->setHandler(IDM_EDIT_CURRENTDIRTOCLIP, {[copyText] { copyText(2); }});
@@ -407,6 +435,81 @@ void MainWindow::registerViewCommands()
             if (idx < p->count())
                 p->activate(p->bufferAt(idx));
         }});
+    auto activateAt = [this](auto index) {
+        EditorPane* p = currentPane();
+        if (p->count() > 0)
+            p->activate(p->bufferAt(index(p)));
+    };
+    r->setHandler(IDM_VIEW_TAB_START, {[activateAt] { activateAt([](EditorPane*) { return 0; }); }});
+    r->setHandler(IDM_VIEW_TAB_END, {[activateAt] { activateAt([](EditorPane* p) { return p->count() - 1; }); }});
+    auto moveTab = [this](auto target) {
+        EditorPane* p = currentPane();
+        const int from = p->currentIndex();
+        const int to = std::clamp(target(p, from), 0, p->count() - 1);
+        if (from >= 0 && to != from)
+            p->tabBar()->moveTab(from, to);
+    };
+    r->setHandler(IDM_VIEW_GOTO_START, {[moveTab] { moveTab([](EditorPane*, int) { return 0; }); }});
+    r->setHandler(IDM_VIEW_GOTO_END, {[moveTab] { moveTab([](EditorPane* p, int) { return p->count() - 1; }); }});
+    r->setHandler(IDM_VIEW_TAB_MOVEFORWARD, {[moveTab] { moveTab([](EditorPane*, int i) { return i + 1; }); }});
+    r->setHandler(IDM_VIEW_TAB_MOVEBACKWARD, {[moveTab] { moveTab([](EditorPane*, int i) { return i - 1; }); }});
+
+    auto viewIn = [this](const char* program) {
+        const Buffer* b = currentBuffer();
+        if (!b || b->isUntitled())
+            return;
+        const QString url = QUrl::fromLocalFile(q(b->path)).toString();
+        if (!program || !QProcess::startDetached(QString::fromLatin1(program), {url}))
+            QDesktopServices::openUrl(QUrl(url)); // fall back to the default browser
+    };
+    auto fileOpen = [this] { const Buffer* b = currentBuffer(); return b && !b->isUntitled(); };
+#if defined(Q_OS_WIN)
+    const char* firefox = "firefox.exe"; const char* chrome = "chrome.exe"; const char* edge = "msedge.exe";
+#else
+    const char* firefox = "firefox"; const char* chrome = "google-chrome"; const char* edge = "microsoft-edge";
+#endif
+    r->setHandler(IDM_VIEW_IN_FIREFOX, {[viewIn, firefox] { viewIn(firefox); }, fileOpen});
+    r->setHandler(IDM_VIEW_IN_CHROME, {[viewIn, chrome] { viewIn(chrome); }, fileOpen});
+    r->setHandler(IDM_VIEW_IN_EDGE, {[viewIn, edge] { viewIn(edge); }, fileOpen});
+    r->setHandler(IDM_VIEW_IN_IE, {[viewIn] { viewIn(nullptr); }, fileOpen}); // IE is gone: default browser
+
+    r->setHandler(IDM_VIEW_ZOOM_SYNC, {[this, &g] {
+        g.zoomSync = !g.zoomSync;
+        if (g.zoomSync)
+            otherPane()->editor()->send(SCI_SETZOOM, static_cast<uptr_t>(currentPane()->editor()->send(SCI_GETZOOM)));
+    }, {}, [&g] { return g.zoomSync; }});
+    for (EditorPane* p : m_panes)
+        connect(p->editor(), &ScintillaEditBase::zoom, this, [this, p, &g](int z) {
+            EditorPane* other = m_panes[static_cast<size_t>(1 - p->viewIndex())];
+            if (g.zoomSync && other->editor()->send(SCI_GETZOOM) != z)
+                other->editor()->send(SCI_SETZOOM, static_cast<uptr_t>(z));
+        });
+
+    // Distraction free / Post-it: hide the window chrome (upstream restores it on toggle)
+    auto windowChrome = [this](bool hide, bool postIt) {
+        menuBar()->setVisible(!hide && m_config.gui.menuBarShow);
+        statusBar()->setVisible(!hide && m_config.gui.statusBarShow);
+        for (QToolBar* tb : findChildren<QToolBar*>())
+            tb->setVisible(!hide && m_config.gui.toolbarShow);
+        for (EditorPane* p : m_panes)
+            p->tabBar()->setVisible(!hide);
+        if (postIt) {
+            setWindowFlag(Qt::FramelessWindowHint, hide);
+            setWindowFlag(Qt::WindowStaysOnTopHint, hide);
+            show();
+        } else {
+            hide ? showFullScreen() : showNormal();
+        }
+    };
+    r->setHandler(IDM_VIEW_DISTRACTIONFREE, {[this, windowChrome] {
+        m_distractionFree = !m_distractionFree;
+        windowChrome(m_distractionFree, false);
+    }, {}, [this] { return m_distractionFree; }});
+    r->setHandler(IDM_VIEW_POSTIT, {[this, windowChrome] {
+        m_postIt = !m_postIt;
+        windowChrome(m_postIt, true);
+    }, {}, [this] { return m_postIt; }});
+
     r->setHandler(IDM_VIEW_GOTO_ANOTHER_VIEW, {[this] { moveOrCloneToOtherView(false); }, [tabCount] { return tabCount() > 0; }});
     r->setHandler(IDM_VIEW_CLONE_TO_ANOTHER_VIEW, {[this] { moveOrCloneToOtherView(true); }, [tabCount] { return tabCount() > 0; }});
     r->setHandler(IDM_VIEW_SWITCHTO_OTHER_VIEW, {[this] {

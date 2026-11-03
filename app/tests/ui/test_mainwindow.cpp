@@ -12,8 +12,13 @@
 #include <ScintillaEditBase.h>
 
 #include <QAction>
+#include <QDateTime>
+#include <QKeySequence>
+#include <QLocalSocket>
+#include <QProcess>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QTemporaryDir>
 #include <QTest>
 
@@ -235,6 +240,81 @@ private slots:
         ScintillaEditBase* e = w->pane(0)->editor();
         QCOMPARE(e->send(SCI_LINEFROMPOSITION, static_cast<uptr_t>(e->send(SCI_GETCURRENTPOS))), sptr_t(2));
         QVERIFY(w->currentBuffer()->isReadOnly());
+    }
+
+    // Upstream-format settings folder: config.xml, shortcuts.xml, session.xml
+    void upstreamSettingsFolder()
+    {
+        QTemporaryDir user;
+        qputenv("NPP_QT_USER_DIR", user.path().toUtf8());
+        const QString py = work("compat.py");
+        writeAll(py, "import os\nprint(1)\n");
+        writeAll(user.filePath(QStringLiteral("config.xml")),
+                 "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<NotepadPlus><GUIConfigs>"
+                 "<GUIConfig name=\"Auto-detection\">auto</GUIConfig>"
+                 "<GUIConfig name=\"Backup\" isSnapshotMode=\"no\" />"
+                 "</GUIConfigs></NotepadPlus>\n");
+        writeAll(user.filePath(QStringLiteral("shortcuts.xml")),
+                 QStringLiteral("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<NotepadPlus><InternalCommands>"
+                                "<Shortcut id=\"%1\" Ctrl=\"yes\" Alt=\"yes\" Shift=\"no\" Key=\"83\" />"
+                                "</InternalCommands></NotepadPlus>\n").arg(IDM_FILE_SAVEALL).toUtf8());
+        writeAll(user.filePath(QStringLiteral("session.xml")),
+                 QStringLiteral("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<NotepadPlus><Session activeView=\"0\">"
+                                "<mainView activeIndex=\"0\"><File firstVisibleLine=\"0\" xOffset=\"0\" scrollWidth=\"1\" "
+                                "startPos=\"5\" endPos=\"5\" selMode=\"0\" offset=\"0\" wrapCount=\"1\" lang=\"Python\" "
+                                "encoding=\"-1\" userReadOnly=\"no\" filename=\"%1\" backupFilePath=\"\" "
+                                "originalFileLastModifTimestamp=\"0\" originalFileLastModifTimestampHigh=\"0\" "
+                                "tabColourId=\"-1\" RTL=\"no\" tabPinned=\"no\" mapFirstVisibleDisplayLine=\"-1\" "
+                                "mapFirstVisibleDocLine=\"-1\" mapLastVisibleDocLine=\"-1\" mapNbLine=\"-1\" "
+                                "mapHigherPos=\"-1\" mapWidth=\"-1\" mapHeight=\"-1\" mapKByteInDoc=\"0\" "
+                                "mapWrapIndentMode=\"-1\" mapIsWrap=\"no\" /></mainView><subView activeIndex=\"0\" />"
+                                "</Session></NotepadPlus>\n").arg(QDir::toNativeSeparators(py)).toUtf8());
+        {
+            auto w = makeWindow();
+            QCOMPARE(QFileInfo(QString::fromStdString(w->paths().sessionXml())), QFileInfo(user.filePath(QStringLiteral("session.xml"))));
+            QVERIFY(w->config().gui.fileAutoDetection & cdAutoUpdate);
+            QCOMPARE(w->actions()->action(IDM_FILE_SAVEALL)->shortcut(), QKeySequence(QStringLiteral("Ctrl+Alt+S")));
+            QCOMPARE(w->pane(0)->count(), 1);
+            Buffer* b = w->currentBuffer();
+            QCOMPARE(b->lang, L_PYTHON);
+            ScintillaEditBase* e = w->pane(0)->editor();
+            QCOMPARE(e->send(SCI_GETLEXER), sptr_t(2)); // SCLEX_PYTHON
+            QCOMPARE(e->send(SCI_GETCURRENTPOS), sptr_t(5));
+
+            // External modification, auto update mode: reloaded silently
+            writeAll(py, "changed\n");
+            QFile f(py);
+            QVERIFY(f.open(QIODevice::ReadWrite));
+            QVERIFY(f.setFileTime(QDateTime::currentDateTime().addSecs(10), QFileDevice::FileModificationTime));
+            f.close();
+            QTRY_COMPARE_WITH_TIMEOUT(text(e), std::string("changed\n"), 5000);
+            QVERIFY(!b->dirty);
+        }
+        qputenv("NPP_QT_USER_DIR", m_user.path().toUtf8());
+    }
+
+    // Second start forwards its files to the running instance and exits at once
+    void singleInstanceForwarding()
+    {
+        const QString exe = QCoreApplication::applicationDirPath() + QStringLiteral("/notepadpp-qt");
+        const QString key = QStringLiteral("npp-qt-test-%1").arg(QCoreApplication::applicationPid());
+        qputenv("NPP_QT_INSTANCE_KEY", key.toUtf8());
+        QProcess first;
+        first.start(exe, {QStringLiteral("-nosession")});
+        QVERIFY(first.waitForStarted());
+        QLocalSocket probe;
+        QTRY_VERIFY_WITH_TIMEOUT((probe.connectToServer(key), probe.waitForConnected(100)), 15000);
+        probe.disconnectFromServer();
+
+        writeAll(work("fwd.txt"), "fwd");
+        QProcess second;
+        second.start(exe, {work("fwd.txt")});
+        QVERIFY(second.waitForFinished(10000));
+        QCOMPARE(second.exitCode(), 0);
+        QVERIFY(first.state() == QProcess::Running); // the first instance keeps the file
+        first.kill();
+        first.waitForFinished();
+        qunsetenv("NPP_QT_INSTANCE_KEY");
     }
 
     void menuHasHandlersForMvpCommands()

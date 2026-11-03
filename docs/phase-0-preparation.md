@@ -47,7 +47,7 @@
 | P0-14 | **한글 IME 수동 확인** (Windows MS IME, Linux ibus/fcitx5) | 확인 결과 기록 | 미완료 |
 | P0-15 | **도킹 수동 확인**: 패널 플로팅 드래그, 재도킹, 재시작 후 복원 | 확인 결과 기록 | 미완료 |
 | P0-16 | Linux 실제 데스크톱 확인 (X11, Wayland) | 확인 결과 기록 | 미완료 |
-| P0-17 | 기능 체크리스트 작성 (메뉴 기준) | `docs/feature-checklist.md` | 미완료 |
+| P0-17 | 기능 체크리스트 작성 (메뉴 기준) | `docs/feature-checklist.md` (`tools/gen-feature-checklist.py`로 생성) | 완료 |
 | P0-18 | `Parameters.cpp`, `Buffer.cpp`, `Common.cpp` Win32 API 목록 추출 | 1단계 작업 입력 자료 | 1단계 첫 주로 이동 |
 
 ## 4. 남은 작업 상세
@@ -87,7 +87,7 @@
 
 - [x] Windows(MinGW, MSVC)와 Linux에서 빌드·테스트·스모크 실행이 로컬 CI로 통과
 - [ ] 한글 IME와 도킹 수동 확인 표 작성 완료
-- [ ] 기능 체크리스트 작성 완료
+- [x] 기능 체크리스트 작성 완료
 
 ## 6. 0단계에서 얻은 교훈 (다음 단계 반영)
 

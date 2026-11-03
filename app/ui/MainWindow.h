@@ -20,6 +20,7 @@
 #include <array>
 #include <climits>
 #include <deque>
+#include <functional>
 #include <memory>
 #include <optional>
 
@@ -154,12 +155,15 @@ private:
     std::array<EditorPane*, 2>   m_panes{};
     int                          m_activeView = 0;
     QListWidget*                 m_docList = nullptr;
+    std::function<void(const QString&)> m_setWorkspaceRoot; // Folder as Workspace panel
     QMenu*                       m_recentMenu = nullptr;
     std::deque<std::string>      m_lastClosed;
     QFileSystemWatcher*          m_watcher = nullptr;
     QTimer*                      m_backupTimer = nullptr;
     bool                         m_checkingFiles = false;
     bool                         m_exiting = false;
+    bool                         m_distractionFree = false;
+    bool                         m_postIt = false;
     std::array<QLabel*, 6>       m_status{}; // language, length/lines, position, EOL, encoding, INS/OVR
 };
 

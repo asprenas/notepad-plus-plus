@@ -16,6 +16,8 @@ namespace {
 // Single instance (upstream: forwards the command line to the running window via WM_COPYDATA)
 QString instanceKey()
 {
+    if (const QString test = qEnvironmentVariable("NPP_QT_INSTANCE_KEY"); !test.isEmpty())
+        return test; // tests
     return QStringLiteral("notepadpp-qt-") + qEnvironmentVariable("USERNAME", qEnvironmentVariable("USER"));
 }
 

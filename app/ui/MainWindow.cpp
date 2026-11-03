@@ -379,6 +379,11 @@ void MainWindow::createPanels()
     for (int c = 1; c < model->columnCount(); ++c)
         tree->hideColumn(c);
     tree->header()->hide();
+    m_setWorkspaceRoot = [this, model, tree](const QString& dir) {
+        model->setRootPath(dir);
+        tree->setRootIndex(model->index(dir));
+        m_dock->showPanel(kPanelFolder);
+    };
     connect(tree, &QTreeView::doubleClicked, this, [this, model](const QModelIndex& idx) {
         if (!model->isDir(idx))
             openFile(model->filePath(idx));
