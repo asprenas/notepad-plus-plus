@@ -20,7 +20,14 @@
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFileInfo>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QFormLayout>
+#include <QLineEdit>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QEventLoop>
 #include <QProgressDialog>
 #include <QTimer>
@@ -79,6 +86,33 @@ SearchResultsPanel* MainWindow::searchResults(bool showIt)
         m_searchResults->setNativeLanguage(&m_nativeLang);
         m_searchResults->setOneEntryPerLine(m_config.gui.finderShowOnlyOneEntryPerFoundLine);
         m_searchResults->applyStyles(m_langs, m_styles, m_applyOptions);
+        connect(m_searchResults, &SearchResultsPanel::findInResultsRequested, this, [this] {
+            QDialog dlg(this);
+            dlg.setWindowTitle(tr("Find in Search Results"));
+            auto* text = new QLineEdit(findDialog()->options().findWhat.empty() ? QString() : q(findDialog()->options().findWhat));
+            auto* matchCase = new QCheckBox(tr("Match case"));
+            auto* word = new QCheckBox(tr("Match whole word only"));
+            auto* mode = new QComboBox;
+            mode->addItems({tr("Normal"), tr("Extended (\\n, \\r, \\t, \\0, \\x...)"), tr("Regular expression")});
+            auto* form = new QFormLayout(&dlg);
+            form->addRow(tr("Find what :"), text);
+            form->addRow(matchCase);
+            form->addRow(word);
+            form->addRow(tr("Search Mode"), mode);
+            auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+            buttons->button(QDialogButtonBox::Ok)->setText(tr("Find all"));
+            form->addRow(buttons);
+            connect(buttons, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+            connect(buttons, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+            if (dlg.exec() != QDialog::Accepted || text->text().isEmpty())
+                return;
+            SearchOptions o;
+            o.findWhat = text->text().toStdString();
+            o.matchCase = matchCase->isChecked();
+            o.wholeWord = word->isChecked();
+            o.type = static_cast<SearchType>(mode->currentIndex());
+            m_searchResults->findInResults(o);
+        });
         connect(m_searchResults, &SearchResultsPanel::activated, this,
                 [this](const QString& file, intptr_t start, intptr_t end, int line, bool lineRelative) {
                     openSearchResult(file, start, end, line, lineRelative);
@@ -379,7 +413,9 @@ bool MainWindow::runInSlices(size_t count, const std::function<void(size_t)>& wo
 // Returns the hits / replacements, -1 if cancelled.
 int MainWindow::runFindInFiles(const FindInFilesOptions& fo, const SearchOptions& o, bool replacing)
 {
-    QProgressDialog progress(replacing ? tr("Replace in Files progress...") : tr("Find in Files progress..."), tr("Cancel"), 0, 0, this);
+    QProgressDialog progress(replacing ? tr("Replace in Files progress...") : tr("Find in Files progress..."), tr("Cancel"), 0, 1, this);
+    // determinate range from the start: a 0..0 range is a busy indicator, whose animation timer event
+    // the work would then run inside of (posted events, i.e. repaints, are deferred until it returns)
     progress.setWindowModality(Qt::WindowModal);
     progress.setMinimumDuration(500);
     progress.setAutoReset(false);
@@ -402,15 +438,18 @@ int MainWindow::runFindInFiles(const FindInFilesOptions& fo, const SearchOptions
     auto label = [&files](size_t i) { return QDir::toNativeSeparators(q(files[i])); };
 
     if (replacing) {
-        // documents open in the editor are replaced in the editor (unsaved changes kept), others on disk
+        // Notepad_plus::replaceInFiles: an opened file is replaced in its document (unsaved changes
+        // included, unless "ignore unsaved changes") and saved; the others are loaded, replaced, saved
         int total = 0;
         const bool done = runInSlices(files.size(), [&](size_t i) {
             const std::string& f = files[i];
-            if (Buffer* b = m_files->findByPath(f)) {
-                if (!b->isReadOnly()) {
-                    EditorPane* p = paneShowing(b->id);
-                    total += (p && p->current() == b->id) ? replaceAll(p->adapter(), o) : withDocument(b, [&o](const IEditor& x) { return replaceAll(x, o); });
-                }
+            Buffer* b = m_config.gui.fifIgnoreUnsavedChanges ? nullptr : m_files->findByPath(f);
+            if (b) {
+                EditorPane* p = paneShowing(b->id);
+                const int n = (p && p->current() == b->id) ? replaceAll(p->adapter(), o) : withDocument(b, [&o](const IEditor& x) { return replaceAll(x, o); });
+                total += n;
+                if (n)
+                    saveBuffer(b, false);
             } else {
                 watchFile(f, false);
                 total += replaceInFiles(*m_files, {f}, o);

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "core/lang/LangType.h"
+#include "core/search/Search.h"
 
 #include <QWidget>
 
@@ -37,6 +38,8 @@ public:
         size_t      line = 0;                              // 1-based line in the file
         std::vector<std::pair<intptr_t, intptr_t>> ranges; // byte ranges in the document (or in the line)
         bool        lineRelative = false;                  // ranges relative to the line start (Find in Files)
+        intptr_t    lineStartInDoc = -1;                   // document position of the line start (not lineRelative)
+        size_t      prefixLen = 0;                         // length of "	Line  N: " in the panel line
     };
 
     explicit SearchResultsPanel(QWidget* parent = nullptr);
@@ -56,6 +59,9 @@ public:
     void endSearch(int hits, int filesSearched, bool entireNotSelection);
 
     void clear();
+    // FindInFinderDlg: searches the text of the result lines, results as a new search on top.
+    // Returns the number of hits.
+    int findInResults(const core::SearchOptions& o);
     void gotoNextResult(bool next); // F4 / Shift+F4
     ScintillaEditBase* view() const noexcept { return m_view; }
     int searchCount() const noexcept { return m_searches; }
@@ -63,6 +69,7 @@ public:
     const Hit* hitAt(intptr_t line) const;
 
 signals:
+    void findInResultsRequested();
     // Double click / Enter / F4 on a result: open file at the range
     void activated(const QString& file, intptr_t start, intptr_t end, int line, bool lineRelative);
 

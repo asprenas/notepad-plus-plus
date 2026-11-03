@@ -9,6 +9,7 @@
 #include <ScintillaEditBase.h>
 
 #include <QKeyEvent>
+#include <QMenu>
 #include <QVBoxLayout>
 
 #include <cstdio>
@@ -73,6 +74,19 @@ SearchResultsPanel::SearchResultsPanel(QWidget* parent) : QWidget(parent), m_vie
         m_view->send(SCI_MARKERSETBACK, static_cast<uptr_t>(n), 0x808080);
     }
     m_view->installEventFilter(this);
+    m_view->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_view, &QWidget::customContextMenuRequested, this, [this](const QPoint& at) {
+        QMenu menu(this);
+        menu.addAction(tr("Find in these search results..."), this, &SearchResultsPanel::findInResultsRequested);
+        menu.addSeparator();
+        menu.addAction(tr("Copy"), this, [this] { m_view->send(SCI_COPY); });
+        menu.addAction(tr("Select all"), this, [this] { m_view->send(SCI_SELECTALL); });
+        menu.addAction(tr("Clear all"), this, &SearchResultsPanel::clear);
+        menu.addSeparator();
+        menu.addAction(tr("Fold all"), this, [this] { m_view->send(SCI_FOLDALL, SC_FOLDACTION_CONTRACT); });
+        menu.addAction(tr("Unfold all"), this, [this] { m_view->send(SCI_FOLDALL, SC_FOLDACTION_EXPAND); });
+        menu.exec(m_view->mapToGlobal(at));
+    });
     connect(m_view, &ScintillaEditBase::doubleClick, this, [this](Scintilla::Position, Scintilla::Position line) {
         activateLine(line);
     });
@@ -165,7 +179,10 @@ void SearchResultsPanel::addHit(const std::string& file, size_t line, const std:
     }
     SearchResultMarkingLine m;
     m._segmentPostions.emplace_back(segStart, segEnd);
-    addLine(text + "\r\n", {file, line, {docRange}}, std::move(m));
+    Hit hit{file, line, {docRange}, lineRelative};
+    hit.lineStartInDoc = lineRelative ? -1 : docRange.first - static_cast<intptr_t>(start);
+    hit.prefixLen = header.size();
+    addLine(text + "\r\n", std::move(hit), std::move(m));
 }
 
 void SearchResultsPanel::endFile(int hits)
@@ -212,6 +229,54 @@ void SearchResultsPanel::endSearch(int hits, int filesSearched, bool entire)
     m_text.clear();
     m_newHits.clear();
     m_newMarkings.clear();
+}
+
+int SearchResultsPanel::findInResults(const SearchOptions& o)
+{
+    EditorAdapter view(m_view);
+    // the lines to search: every result line of the panel (copy: the panel changes below)
+    struct Source {
+        Hit hit;
+        std::string text; // line text without the "	Line N: " prefix
+        intptr_t viewLineStart;
+    };
+    std::vector<Source> sources;
+    for (size_t i = 0; i < m_hits.size(); ++i) {
+        const Hit& h = m_hits[i];
+        if (h.ranges.empty())
+            continue;
+        const auto ls = m_view->send(SCI_POSITIONFROMLINE, i), le = m_view->send(SCI_GETLINEENDPOSITION, i);
+        sources.push_back({h, view.textRange(ls + static_cast<intptr_t>(h.prefixLen), le), ls + static_cast<intptr_t>(h.prefixLen)});
+    }
+    beginSearch(o.findWhat);
+    int total = 0;
+    std::string currentFile;
+    int fileHits = 0;
+    for (const Source& src : sources) {
+        const auto matches = findAll(view, o, src.viewLineStart, src.viewLineStart + static_cast<intptr_t>(src.text.size()));
+        if (matches.empty())
+            continue;
+        if (src.hit.file != currentFile) {
+            if (!currentFile.empty())
+                endFile(fileHits);
+            currentFile = src.hit.file;
+            fileHits = 0;
+            addFile(src.hit.file);
+        }
+        for (const SearchMatch& m : matches) {
+            const auto s0 = static_cast<size_t>(m.start - src.viewLineStart), s1 = static_cast<size_t>(m.end - src.viewLineStart);
+            const std::pair<intptr_t, intptr_t> range = src.hit.lineRelative
+                ? std::pair<intptr_t, intptr_t>{static_cast<intptr_t>(s0), static_cast<intptr_t>(s1)}
+                : std::pair<intptr_t, intptr_t>{src.hit.lineStartInDoc + static_cast<intptr_t>(s0), src.hit.lineStartInDoc + static_cast<intptr_t>(s1)};
+            addHit(src.hit.file, src.hit.line, src.text, s0, s1, range, src.hit.line, src.hit.lineRelative);
+            ++fileHits;
+            ++total;
+        }
+    }
+    if (!currentFile.empty())
+        endFile(fileHits);
+    endSearch(total, static_cast<int>(sources.size()), true);
+    return total;
 }
 
 void SearchResultsPanel::clear()

@@ -52,7 +52,13 @@ target_link_libraries(test_ui_find PRIVATE npp_ui Qt6::Test)
 add_dependencies(test_ui_find notepadpp-qt)
 target_compile_definitions(test_ui_find PRIVATE NPP_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
 add_test(NAME ui.find COMMAND test_ui_find)
-# "minimal" platform: with "offscreen", the first Find in Files of a run stalls ~4 s inside Qt on
-# Windows (not with the real "windows" platform nor "minimal"), which the responsiveness check catches
-set_tests_properties(ui.find PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=minimal" TIMEOUT 600)
+set_tests_properties(ui.find PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 600)
+if(WIN32)
+    # Find in Files responsiveness on the real platform: with the headless platforms a Qt animation
+    # timer event holds the nested event loop for seconds on Windows (not with the real platform).
+    # Only this test function: the others use the clipboard, which must not be the user's one.
+    add_test(NAME ui.find.responsiveness COMMAND test_ui_find findInFilesLargeFolderIsResponsiveAndCancellable)
+    set_tests_properties(ui.find.responsiveness PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=windows" TIMEOUT 600)
+    npp_test_env(ui.find.responsiveness)
+endif()
 npp_test_env(ui.find)

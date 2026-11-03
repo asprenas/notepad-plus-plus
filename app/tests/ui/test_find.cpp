@@ -22,6 +22,7 @@
 #include <QFontMetrics>
 #include <QElapsedTimer>
 #include <QFile>
+#include <QLineEdit>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMessageBox>
@@ -211,7 +212,7 @@ private slots:
     {
         const QString root = m_work.filePath(QStringLiteral("fif"));
         writeAll(root + QStringLiteral("/a.txt"), "needle 1\nnothing\n");
-        writeAll(root + QStringLiteral("/sub/b.cpp"), "x needle y needle\n");
+        writeAll(root + QStringLiteral("/sub/b.cpp"), "first\nx needle y needle\n");
         writeAll(root + QStringLiteral("/sub/c.log"), "needle\n");
         writeAll(root + QStringLiteral("/utf16.txt"), QByteArray("\xFF\xFE", 2) + QByteArray("n\0e\0e\0d\0l\0e\0", 12));
         dlg()->showTab(FindReplaceDialog::FindInFilesTab);
@@ -228,6 +229,11 @@ private slots:
         QVERIFY(m_w->currentBuffer() && !m_w->currentBuffer()->isUntitled());
         QCOMPARE(QString::fromStdString(m_w->pane(0)->adapter().textRange(ed()->send(SCI_GETSELECTIONSTART), ed()->send(SCI_GETSELECTIONEND))),
                  QStringLiteral("needle"));
+        // results inside a line: b.cpp line 2 "x needle y needle" (positions relative to the line)
+        m_w->actions()->trigger(IDM_SEARCH_GOTONEXTFOUND);
+        QVERIFY(m_w->currentBuffer()->path.find("b.cpp") != std::string::npos);
+        QCOMPARE(ed()->send(SCI_GETSELECTIONSTART), sptr_t(8)); // "first" + EOL (6) + "x " (2)
+        QCOMPARE(ed()->send(SCI_GETSELECTIONEND), sptr_t(14));
 
         // Replace in Files: confirmation box answered automatically
         QTimer::singleShot(200, [] {
@@ -236,7 +242,7 @@ private slots:
         });
         dlg()->setOptions(opts("needle", "pin"));
         run(Action::ReplaceInFiles);
-        QCOMPARE(readAll(root + QStringLiteral("/sub/b.cpp")), QByteArray("x pin y pin\n"));
+        QCOMPARE(readAll(root + QStringLiteral("/sub/b.cpp")), QByteArray("first\nx pin y pin\n"));
         QCOMPARE(readAll(root + QStringLiteral("/sub/c.log")), QByteArray("needle\n")); // filtered out
         QCOMPARE(readAll(root + QStringLiteral("/utf16.txt")), QByteArray("\xFF\xFE", 2) + QByteArray("p\0i\0n\0", 6)); // own encoding kept
     }
@@ -244,6 +250,12 @@ private slots:
     // 10 000 files: the event loop keeps running (timer ticks) and the search can be cancelled
     void findInFilesLargeFolderIsResponsiveAndCancellable()
     {
+#if defined(Q_OS_WIN)
+        // On Windows the headless platforms hold the nested event loop in a Qt animation timer event
+        // for seconds; measured on the real platform by the ui.find.responsiveness test instead
+        if (QGuiApplication::platformName() != QLatin1String("windows"))
+            QSKIP("run by ui.find.responsiveness (QT_QPA_PLATFORM=windows)");
+#endif
         const QString root = m_work.filePath(QStringLiteral("big"));
         QDir().mkpath(root);
         for (int i = 0; i < 10000; ++i)
@@ -382,6 +394,40 @@ private slots:
         ed()->send(SCI_DOCUMENTEND);
         QVERIFY(m_w->actions()->trigger(IDM_EDIT_FUNCCALLTIP));
         QVERIFY(ed()->send(SCI_CALLTIPACTIVE));
+    }
+
+    void goToIncrementalAndFindInResults()
+    {
+        setText("line1\nline2\nline3");
+        m_w->goTo(2, false);
+        QCOMPARE(ed()->send(SCI_LINEFROMPOSITION, static_cast<uptr_t>(ed()->send(SCI_GETCURRENTPOS))), sptr_t(1));
+        m_w->goTo(9, true);
+        QCOMPARE(ed()->send(SCI_GETCURRENTPOS), sptr_t(9));
+
+        // incremental search: the match grows while typing
+        setText("abc abd abe");
+        m_w->showIncrementalSearch();
+        QLineEdit* inc = m_w->incrementalSearchEdit();
+        QTest::keyClicks(inc, "ab");
+        QCOMPARE(ed()->send(SCI_GETSELECTIONSTART), sptr_t(0));
+        QTest::keyClick(inc, Qt::Key_D);
+        QCOMPARE(ed()->send(SCI_GETSELECTIONSTART), sptr_t(4));
+        QTest::keyClick(inc, Qt::Key_Backspace);
+        QTest::keyClick(inc, Qt::Key_Return); // next "ab"
+        QCOMPARE(ed()->send(SCI_GETSELECTIONSTART), sptr_t(8));
+
+        // find in these search results
+        setText("red apple\ngreen apple\nred cherry");
+        dlg()->setOptions(opts("red"));
+        run(Action::FindAllCurrent);
+        SearchResultsPanel* p = m_w->searchResults(false);
+        SearchOptions o;
+        o.findWhat = "apple";
+        QCOMPARE(p->findInResults(o), 1); // only "red apple" is a result line
+        p->view()->send(SCI_GOTOPOS, 0);
+        m_w->actions()->trigger(IDM_SEARCH_GOTONEXTFOUND);
+        QCOMPARE(ed()->send(SCI_GETSELECTIONSTART), sptr_t(4));
+        QCOMPARE(ed()->send(SCI_GETSELECTIONEND), sptr_t(9));
     }
 
     void historyIsSaved()

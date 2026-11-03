@@ -72,6 +72,8 @@ add_library(npp_core STATIC
     editor/AutoCompletion.cpp
     editor/AutoIndent.h
     editor/AutoIndent.cpp
+    editor/ColumnOps.h
+    editor/ColumnOps.cpp
 
     buffer/Buffer.h
     buffer/FileManager.h

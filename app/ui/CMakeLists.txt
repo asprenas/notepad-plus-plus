@@ -9,6 +9,7 @@ qt_add_library(npp_ui STATIC
     MacroCommands.cpp
     Highlighters.cpp
     Completion.cpp
+    ToolDialogs.cpp
     menu/MacroableCommands.inc
     search/FindReplaceDialog.h
     search/FindReplaceDialog.cpp

@@ -26,6 +26,10 @@
 #include <optional>
 
 class QAction;
+class QCheckBox;
+class QDialog;
+class QLineEdit;
+class QToolBar;
 class QFileSystemWatcher;
 class QProgressDialog;
 class QLabel;
@@ -74,6 +78,10 @@ public:
     void ensureDocument();
 
     // Access for tests
+    void showGoToDialog();
+    void goTo(long long n, bool offset);
+    void showIncrementalSearch();
+    QLineEdit* incrementalSearchEdit() const noexcept { return m_incEdit; }
     core::AutoCompletion* autoCompletion(EditorPane* p);
     void playMacro(const std::vector<core::MacroStep>& steps);
     const std::vector<core::MacroStep>& recordedMacro() const noexcept { return m_macro; }
@@ -96,6 +104,7 @@ protected:
     void closeEvent(QCloseEvent* event) override;
     void dragEnterEvent(QDragEnterEvent* event) override;
     void dropEvent(QDropEvent* event) override;
+    bool eventFilter(QObject* o, QEvent* ev) override;
 
 private:
     // --- setup (MainWindow.cpp)
@@ -175,6 +184,13 @@ private:
     void connectAutoCompletion(EditorPane* p);
     void updateAutoCompletionLanguage(EditorPane* p);
     void onCharAdded(EditorPane* p, int ch);
+    // --- small dialogs (ToolDialogs.cpp)
+    void registerToolDialogs();
+    void showFindCharsInRange();
+    void showColumnEditor();
+    void hideIncrementalSearch();
+    enum IncType { IncFirst, IncNext, IncHighlightOnly };
+    void incrementalSearch(IncType type, bool down);
     // --- macros (MacroCommands.cpp)
     void registerMacroCommands();
     void recordFindAction(int action);
@@ -219,6 +235,13 @@ private:
     FindReplaceDialog*           m_findDialog = nullptr;
     bool                         m_recording = false, m_playingMacro = false;
     bool                         m_highlighting = false;
+    bool                         m_goToOffsetMode = false, m_columnEditorNumbers = false;
+    QDialog*                     m_charRangeDialog = nullptr;
+    QToolBar*                    m_incBar = nullptr;
+    QLineEdit*                   m_incEdit = nullptr;
+    QCheckBox*                   m_incHighlight = nullptr;
+    QCheckBox*                   m_incMatchCase = nullptr;
+    QLabel*                      m_incStatus = nullptr;
     std::array<std::unique_ptr<core::AutoCompletion>, 2> m_autoCompletion;
     std::vector<core::MacroStep> m_macro;
     std::vector<QAction*>        m_savedMacroActions;

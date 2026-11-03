@@ -1,5 +1,6 @@
 // Edit menu text operations (core/editor/TextOps): input / output pairs incl. Hangul and emoji.
 #include "core/editor/AutoIndent.h"
+#include "core/editor/ColumnOps.h"
 #include "core/editor/CommentOps.h"
 #include "core/editor/Sorters.h"
 #include "core/editor/TextOps.h"
@@ -295,6 +296,39 @@ private slots:
         m_e->send(SCI_NEWLINE);
         maintainIndentation(e(), L_TEXT, kAutoIndentBasic, '\n');
         QCOMPARE(text(), u8("  abc\n  "));
+    }
+
+    void columnEditor()
+    {
+        QCOMPARE(formatColumnNumber(5, NumBase::Dec, 3, Leading::Zeros), u8("005"));
+        QCOMPARE(formatColumnNumber(5, NumBase::Dec, 3, Leading::Spaces), u8("  5"));
+        QCOMPARE(formatColumnNumber(5, NumBase::Dec, 3, Leading::None), u8("5  "));
+        QCOMPARE(formatColumnNumber(255, NumBase::HexUpper, 2, Leading::None), u8("FF"));
+        QCOMPARE(formatColumnNumber(5, NumBase::Bin, 4, Leading::Zeros), u8("0101"));
+        // no column selection: from the caret column of the caret line to the last line
+        setText("ab\ncd\n\nef");
+        m_e->send(SCI_GOTOPOS, 1);
+        columnInsertText(e(), "|");
+        QCOMPARE(text(), u8("a|b\nc|d\n |\ne|f"));
+        // rectangular selection, numbers 8, 9, 10 (2 digits, leading zeros)
+        setText("x\nx\nx");
+        m_e->send(SCI_SETRECTANGULARSELECTIONANCHOR, 1);
+        m_e->send(SCI_SETRECTANGULARSELECTIONCARET, 5);
+        columnInsertNumbers(e(), 8, 1, 1, NumBase::Dec, Leading::Zeros);
+        QCOMPARE(text(), u8("x08\nx09\nx10"));
+        // repeat 2
+        setText("\n\n\n");
+        m_e->send(SCI_GOTOPOS, 0);
+        columnInsertNumbers(e(), 1, 1, 2, NumBase::Dec, Leading::None);
+        QCOMPARE(text(), u8("1\n1\n2\n2"));
+    }
+
+    void charsInRange()
+    {
+        setText("abc\xC3\xA9 x");
+        QVERIFY(findCharInRange(e(), 128, 255, 0, true, true));
+        QCOMPARE(m_e->send(SCI_GETSELECTIONSTART), intptr_t(3));
+        QVERIFY(!findCharInRange(e(), 0, 0, 0, true, true));
     }
 
     void undoIsOneAction()

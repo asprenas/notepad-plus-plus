@@ -66,6 +66,7 @@ void MainWindow::registerCommands()
     registerSearchMiscCommands();
     registerFindCommands();
     registerCompletionCommands();
+    registerToolDialogs();
 
     const auto menus = m_actions->buildMenuBar(menuBar(), &m_nativeLang, m_config.gui.langMenuCompact);
     m_actions->applyShortcuts(&m_shortcuts);
@@ -361,17 +362,6 @@ void MainWindow::registerEditCommands()
     r->setHandler(IDM_EDIT_FULLPATHTOCLIP, {[copyText] { copyText(0); }});
     r->setHandler(IDM_EDIT_FILENAMETOCLIP, {[copyText] { copyText(1); }});
     r->setHandler(IDM_EDIT_CURRENTDIRTOCLIP, {[copyText] { copyText(2); }});
-    r->setHandler(IDM_SEARCH_GOTOLINE, {[this, sci] {
-        bool ok = false;
-        const int max = static_cast<int>(sci(SCI_GETLINECOUNT));
-        const int line = QInputDialog::getInt(this, tr("Go To..."), tr("Line (1 - %1)").arg(max),
-                                              static_cast<int>(sci(SCI_LINEFROMPOSITION, static_cast<uptr_t>(sci(SCI_GETCURRENTPOS)))) + 1,
-                                              1, max, 1, &ok);
-        if (ok) {
-            sci(SCI_ENSUREVISIBLE, static_cast<uptr_t>(line - 1));
-            sci(SCI_GOTOLINE, static_cast<uptr_t>(line - 1));
-        }
-    }});
     r->setHandler(IDM_SEARCH_TOGGLE_BOOKMARK, {[sci] {
         const auto line = sci(SCI_LINEFROMPOSITION, static_cast<uptr_t>(sci(SCI_GETCURRENTPOS)));
         if (sci(SCI_MARKERGET, static_cast<uptr_t>(line)) & (1 << 20))
