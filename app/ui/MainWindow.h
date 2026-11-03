@@ -27,12 +27,17 @@
 
 class QAction;
 class QFileSystemWatcher;
+class QProgressDialog;
 class QLabel;
 class QListWidget;
 class QMenu;
 class QSplitter;
 class QTimer;
 class ScintillaEditBase;
+
+namespace npp::core {
+class AutoCompletion;
+}
 
 namespace npp::ui {
 
@@ -69,6 +74,7 @@ public:
     void ensureDocument();
 
     // Access for tests
+    core::AutoCompletion* autoCompletion(EditorPane* p);
     void playMacro(const std::vector<core::MacroStep>& steps);
     const std::vector<core::MacroStep>& recordedMacro() const noexcept { return m_macro; }
     const core::ShortcutsFile& shortcuts() const noexcept { return m_shortcuts; }
@@ -153,6 +159,8 @@ private:
     bool findNextInCurrent(const core::SearchOptions& o, bool showStatus);
     int findAllToPanel(const core::SearchOptions& o, const std::vector<core::Buffer*>& buffers, bool inSelection);
     int runFindInFiles(const core::FindInFilesOptions& fo, const core::SearchOptions& o, bool replacing);
+    bool runInSlices(size_t count, const std::function<void(size_t)>& work, QProgressDialog& progress,
+                     const std::function<QString(size_t)>& label);
     void openSearchResult(const QString& file, intptr_t start, intptr_t end, int line, bool lineRelative);
     std::vector<core::Buffer*> openBuffersInTabOrder() const;
     template <class F> auto withDocument(core::Buffer* b, F&& f);
@@ -162,6 +170,11 @@ private:
     void braceMatch(EditorPane* p);
     void smartHighlight(EditorPane* p);
     void addHotSpots(EditorPane* p);
+    // --- auto-completion (Completion.cpp)
+    void registerCompletionCommands();
+    void connectAutoCompletion(EditorPane* p);
+    void updateAutoCompletionLanguage(EditorPane* p);
+    void onCharAdded(EditorPane* p, int ch);
     // --- macros (MacroCommands.cpp)
     void registerMacroCommands();
     void recordFindAction(int action);
@@ -206,6 +219,7 @@ private:
     FindReplaceDialog*           m_findDialog = nullptr;
     bool                         m_recording = false, m_playingMacro = false;
     bool                         m_highlighting = false;
+    std::array<std::unique_ptr<core::AutoCompletion>, 2> m_autoCompletion;
     std::vector<core::MacroStep> m_macro;
     std::vector<QAction*>        m_savedMacroActions;
     SearchResultsPanel*          m_searchResults = nullptr;

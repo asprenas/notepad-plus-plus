@@ -16,7 +16,10 @@
 
 #include <QApplication>
 #include <QClipboard>
+#include <QDateTime>
 #include <QDir>
+#include <QFontDatabase>
+#include <QFontMetrics>
 #include <QElapsedTimer>
 #include <QFile>
 #include <QJsonDocument>
@@ -250,17 +253,31 @@ private slots:
         dlg()->setFilters(QStringLiteral("*.*"));
         dlg()->setOptions(opts("hit"));
 
+        // heartbeat through posted events (the queue that also carries paint / input processing):
+        // measures the longest time the event loop did not run
         int ticks = 0;
-        QTimer ticker;
-        connect(&ticker, &QTimer::timeout, [&ticks] { ++ticks; });
-        ticker.start(20);
-        QElapsedTimer t;
+        qint64 maxGap = 0;
+        bool beating = true;
+        QElapsedTimer sinceTick, t;
+        sinceTick.start();
         t.start();
+        std::function<void()> beat = [&] {
+            ++ticks;
+            const qint64 g = sinceTick.restart();
+            if (g > maxGap) { maxGap = g; qInfo("gap %lld ending at %lld", g, QDateTime::currentMSecsSinceEpoch() % 100000); }
+            if (beating)
+                QMetaObject::invokeMethod(this, beat, Qt::QueuedConnection);
+        };
+        QMetaObject::invokeMethod(this, beat, Qt::QueuedConnection);
+        t.restart();
         run(Action::FindInFiles);
         const qint64 ms = t.elapsed();
+        beating = false;
+        QCoreApplication::processEvents();
         QVERIFY2(dlg()->status() == QStringLiteral("Find in Files: 10 hits"), qPrintable(dlg()->status()));
-        qInfo("10k files searched in %lld ms, %d timer ticks during the search", ms, ticks);
-        QVERIFY2(ticks >= ms / 200, "event loop starved during Find in Files"); // at least 5 ticks per second
+        maxGap = std::max(maxGap, sinceTick.elapsed());
+        qInfo("10k files searched in %lld ms, %d event loop runs, longest pause %lld ms", ms, ticks, maxGap);
+        QVERIFY2(maxGap < 500, "the UI did not process events for more than 0.5 s during Find in Files");
 
         // cancel: press Cancel on the progress window shortly after start
         QTimer canceller; // cancels as soon as the progress window exists (it may stay hidden on fast machines)
@@ -351,6 +368,20 @@ private slots:
         QCOMPARE(ed()->send(SCI_INDICATORVALUEAT, 27, 7), sptr_t(1));  // open tag highlighted
         QCOMPARE(ed()->send(SCI_INDICATORVALUEAT, 27, 21), sptr_t(1)); // close tag </item>
         QCOMPARE(ed()->send(SCI_INDICATORVALUEAT, 26, 13), sptr_t(1)); // attribute a="1"
+    }
+
+    void autoCompletionWithShippedApis()
+    {
+        m_w->actions()->trigger(IDM_LANG_CPP);
+        setText("int x = prin");
+        ed()->send(SCI_DOCUMENTEND);
+        QVERIFY(m_w->actions()->trigger(IDM_EDIT_AUTOCOMPLETE));
+        QVERIFY(ed()->send(SCI_AUTOCACTIVE)); // cpp.xml of installer/APIs
+        ed()->send(SCI_AUTOCCANCEL);
+        setText("printf(");
+        ed()->send(SCI_DOCUMENTEND);
+        QVERIFY(m_w->actions()->trigger(IDM_EDIT_FUNCCALLTIP));
+        QVERIFY(ed()->send(SCI_CALLTIPACTIVE));
     }
 
     void historyIsSaved()

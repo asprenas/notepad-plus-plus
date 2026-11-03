@@ -6,6 +6,8 @@
 #include "menu/CommandIds.h"
 #include "search/FindReplaceDialog.h"
 
+#include "core/editor/AutoCompletion.h"
+
 #include "core/encoding/EncodingMapper.h"
 #include "core/util/PathUtil.h"
 #include "core/util/StringUtil.h"
@@ -223,6 +225,8 @@ MainWindow::MainWindow(const CommandLine& cmd, QWidget* parent) : QMainWindow(pa
 
 MainWindow::~MainWindow()
 {
+    for (auto& ac : m_autoCompletion)
+        ac.reset();
     // Views drop their documents before the FileManager releases them.
     for (EditorPane* p : m_panes)
         delete p;
@@ -671,6 +675,7 @@ void MainWindow::applyLanguageToPane(EditorPane* pane, Buffer* b)
         if (s->fg >= 0) e->send(SCI_SETFOLDMARGINHICOLOUR, 1, Style::scintillaColour(s->fg));
         if (s->bg >= 0) e->send(SCI_SETFOLDMARGINCOLOUR, 1, Style::scintillaColour(s->bg));
     }
+    updateAutoCompletionLanguage(pane);
     const LanguageDef* def = m_langs.find(b->lang);
     if (def && def->tabSettings >= 0) { // per-language tab settings (langs.xml tabSettings)
         e->send(SCI_SETTABWIDTH, static_cast<uptr_t>(def->tabSettings & 0x7F));

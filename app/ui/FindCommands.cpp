@@ -21,7 +21,9 @@
 #include <QElapsedTimer>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QEventLoop>
 #include <QProgressDialog>
+#include <QTimer>
 
 namespace npp::ui {
 
@@ -335,56 +337,96 @@ void MainWindow::runFindAction(int actionValue)
 
 // Find / Replace in Files with a cancellable progress window; the event loop keeps running
 // between files so the UI does not freeze. Returns the hits / replacements, -1 if cancelled.
+// Runs work(0..count-1) in time slices of ~25 ms from a nested event loop: between slices the
+// event loop runs normally (paint, input, Cancel button). A loop of processEvents() calls does not
+// work as well: on Windows, posted events and timers are starved while the loop stays busy.
+// Returns false if cancelled.
+bool MainWindow::runInSlices(size_t count, const std::function<void(size_t)>& work, QProgressDialog& progress,
+                             const std::function<QString(size_t)>& label)
+{
+    progress.setMaximum(static_cast<int>(count));
+    size_t next = 0;
+    bool cancelled = false;
+    QEventLoop loop;
+    QTimer step;
+    step.setSingleShot(true);
+    connect(&step, &QTimer::timeout, &loop, [&] {
+        QElapsedTimer slice;
+        slice.start();
+        while (next < count && slice.elapsed() < 25) {
+            if (progress.wasCanceled()) {
+                cancelled = true;
+                break;
+            }
+            work(next++);
+        }
+        progress.setValue(static_cast<int>(next));
+        if (next < count)
+            progress.setLabelText(label(next));
+        if (cancelled || progress.wasCanceled() || next >= count) {
+            cancelled = cancelled || (next < count && progress.wasCanceled());
+            loop.quit();
+        } else {
+            step.start(0);
+        }
+    });
+    step.start(0);
+    loop.exec();
+    return !cancelled;
+}
+
+// Find / Replace in Files with a cancellable progress window; the UI keeps running.
+// Returns the hits / replacements, -1 if cancelled.
 int MainWindow::runFindInFiles(const FindInFilesOptions& fo, const SearchOptions& o, bool replacing)
 {
     QProgressDialog progress(replacing ? tr("Replace in Files progress...") : tr("Find in Files progress..."), tr("Cancel"), 0, 0, this);
     progress.setWindowModality(Qt::WindowModal);
     progress.setMinimumDuration(500);
-    bool cancelled = false;
+    progress.setAutoReset(false);
+    progress.setAutoClose(false);
+
+    // listing (one call per folder can be slow on 10k files): cancellable, the event loop runs between folders
+    progress.setLabelText(tr("Collecting files..."));
     QElapsedTimer pump;
     pump.start();
-    auto onProgress = [&](size_t index, size_t total, const std::string& file) {
-        if (pump.elapsed() > 50 || index == 0) {
-            progress.setMaximum(static_cast<int>(total));
-            progress.setValue(static_cast<int>(index));
-            progress.setLabelText(QDir::toNativeSeparators(q(file)));
+    const std::vector<std::string> files = listFilesToSearch(fo, [&](size_t found) {
+        if (pump.elapsed() > 50) {
+            progress.setLabelText(tr("Collecting files... %1").arg(found));
             QCoreApplication::processEvents();
             pump.restart();
         }
-        cancelled = progress.wasCanceled();
-        return !cancelled;
-    };
-
-    // listing can be long too (10k files): cancellable through the same dialog
-    progress.setLabelText(tr("Collecting files..."));
-    QCoreApplication::processEvents();
-    const std::vector<std::string> files = listFilesToSearch(fo);
+        return !progress.wasCanceled();
+    });
     if (progress.wasCanceled())
         return -1;
+    auto label = [&files](size_t i) { return QDir::toNativeSeparators(q(files[i])); };
 
     if (replacing) {
         // documents open in the editor are replaced in the editor (unsaved changes kept), others on disk
-        std::vector<std::string> onDisk;
         int total = 0;
-        for (const auto& f : files) {
+        const bool done = runInSlices(files.size(), [&](size_t i) {
+            const std::string& f = files[i];
             if (Buffer* b = m_files->findByPath(f)) {
                 if (!b->isReadOnly()) {
                     EditorPane* p = paneShowing(b->id);
                     total += (p && p->current() == b->id) ? replaceAll(p->adapter(), o) : withDocument(b, [&o](const IEditor& x) { return replaceAll(x, o); });
                 }
             } else {
-                onDisk.push_back(f);
+                watchFile(f, false);
+                total += replaceInFiles(*m_files, {f}, o);
+                watchFile(f, true);
             }
-        }
-        for (const auto& f : onDisk)
-            watchFile(f, false);
-        total += replaceInFiles(*m_files, onDisk, o, onProgress);
-        for (const auto& f : onDisk)
-            watchFile(f, true);
-        return cancelled ? -1 : total;
+        }, progress, label);
+        return done ? total : -1;
     }
 
-    const std::vector<LineHit> hits = findInFiles(*m_files, files, o, onProgress);
+    std::vector<LineHit> hits;
+    const bool done = runInSlices(files.size(), [&](size_t i) {
+        auto h = findInFiles(*m_files, {files[i]}, o);
+        hits.insert(hits.end(), std::make_move_iterator(h.begin()), std::make_move_iterator(h.end()));
+    }, progress, label);
+    progress.close();
+
     SearchResultsPanel* panel = searchResults(true);
     panel->beginSearch(o.findWhat);
     int total = 0;
@@ -407,7 +449,7 @@ int MainWindow::runFindInFiles(const FindInFilesOptions& fo, const SearchOptions
     if (!currentFile.empty())
         panel->endFile(fileHits);
     panel->endSearch(total, static_cast<int>(files.size()), true);
-    return cancelled ? -1 : total;
+    return done ? total : -1;
 }
 
 void MainWindow::registerFindCommands()

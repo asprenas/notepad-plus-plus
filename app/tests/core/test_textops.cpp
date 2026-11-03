@@ -1,4 +1,5 @@
 // Edit menu text operations (core/editor/TextOps): input / output pairs incl. Hangul and emoji.
+#include "core/editor/AutoIndent.h"
 #include "core/editor/CommentOps.h"
 #include "core/editor/Sorters.h"
 #include "core/editor/TextOps.h"
@@ -264,6 +265,36 @@ private slots:
         QCOMPARE(s.line, std::string("#"));
         QCOMPARE(s.start, std::string("{*"));
         QCOMPARE(s.end, std::string("*}"));
+    }
+
+    void autoIndent()
+    {
+        // C-like: newline after "{" indents one level, "}" aligns with the "{" line
+        setText("int f() {");
+        m_e->send(SCI_SETTABWIDTH, 4);
+        m_e->send(SCI_SETUSETABS, 0);
+        m_e->send(SCI_DOCUMENTEND);
+        m_e->send(SCI_NEWLINE);
+        maintainIndentation(e(), L_CPP, kAutoIndentAdvanced, '\n');
+        QCOMPARE(text(), u8("int f() {\n    "));
+        m_e->send(SCI_REPLACESEL, 0, reinterpret_cast<intptr_t>("x;"));
+        m_e->send(SCI_NEWLINE);
+        maintainIndentation(e(), L_CPP, kAutoIndentAdvanced, '\n');
+        m_e->send(SCI_REPLACESEL, 0, reinterpret_cast<intptr_t>("}"));
+        maintainIndentation(e(), L_CPP, kAutoIndentAdvanced, '}');
+        QCOMPARE(text(), u8("int f() {\n    x;\n}"));
+        // if without braces: next line indented, the one after back
+        setText("    if (a)");
+        m_e->send(SCI_DOCUMENTEND);
+        m_e->send(SCI_NEWLINE);
+        maintainIndentation(e(), L_CPP, kAutoIndentAdvanced, '\n');
+        QCOMPARE(text(), u8("    if (a)\n        "));
+        // basic mode keeps the previous indentation
+        setText("  abc");
+        m_e->send(SCI_DOCUMENTEND);
+        m_e->send(SCI_NEWLINE);
+        maintainIndentation(e(), L_TEXT, kAutoIndentBasic, '\n');
+        QCOMPARE(text(), u8("  abc\n  "));
     }
 
     void undoIsOneAction()

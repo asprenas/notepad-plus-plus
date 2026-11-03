@@ -35,6 +35,7 @@ npp_core_add_test(search SOURCES core/test_search.cpp LIBS npp_scintilla Qt6::Wi
 npp_core_add_test(textops SOURCES core/test_textops.cpp LIBS npp_scintilla Qt6::Widgets)
 npp_core_add_test(regexcompat SOURCES core/test_regexcompat.cpp LIBS npp_scintilla Qt6::Widgets)
 npp_core_add_test(urldetect SOURCES core/test_urldetect.cpp)
+npp_core_add_test(autocompletion SOURCES core/test_autocompletion.cpp LIBS npp_scintilla Qt6::Widgets)
 
 # --- UI tests (phase 2): MainWindow against a temporary user directory --------------------
 add_executable(test_ui_mainwindow ui/test_mainwindow.cpp)
@@ -51,5 +52,7 @@ target_link_libraries(test_ui_find PRIVATE npp_ui Qt6::Test)
 add_dependencies(test_ui_find notepadpp-qt)
 target_compile_definitions(test_ui_find PRIVATE NPP_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
 add_test(NAME ui.find COMMAND test_ui_find)
-set_tests_properties(ui.find PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 600)
+# "minimal" platform: with "offscreen", the first Find in Files of a run stalls ~4 s inside Qt on
+# Windows (not with the real "windows" platform nor "minimal"), which the responsiveness check catches
+set_tests_properties(ui.find PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=minimal" TIMEOUT 600)
 npp_test_env(ui.find)

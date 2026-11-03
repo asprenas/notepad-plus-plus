@@ -68,6 +68,10 @@ add_library(npp_core STATIC
     editor/XmlTagMatcher.cpp
     editor/UrlDetector.h
     editor/UrlDetector.cpp
+    editor/AutoCompletion.h
+    editor/AutoCompletion.cpp
+    editor/AutoIndent.h
+    editor/AutoIndent.cpp
 
     buffer/Buffer.h
     buffer/FileManager.h

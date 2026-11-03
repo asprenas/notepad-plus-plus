@@ -184,6 +184,7 @@ void MainWindow::playMacro(const std::vector<MacroStep>& steps)
             }
             break;
         default:
+            // (upstream PlayBack also notifies SCN_CHARADDED, which Notepad++ ignores while playing back)
             playScintillaStep(currentPane()->adapter(), s);
             break;
         }

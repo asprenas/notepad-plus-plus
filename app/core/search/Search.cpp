@@ -240,7 +240,7 @@ int replaceAll(const IEditor& e, const SearchOptions& o, intptr_t start, intptr_
 
 // --- Find in Files -----------------------------------------------------------------------------
 
-std::vector<std::string> listFilesToSearch(const FindInFilesOptions& o)
+std::vector<std::string> listFilesToSearch(const FindInFilesOptions& o, const std::function<bool(size_t)>& keepGoing)
 {
     std::vector<std::string> patterns;
     for (std::string tok : tokenize(replaceAll(o.filters, ";", " "), ' '))
@@ -251,6 +251,8 @@ std::vector<std::string> listFilesToSearch(const FindInFilesOptions& o)
     std::vector<std::string> out;
     std::vector<std::pair<fs::path, size_t>> dirs{{pathFromUtf8(o.directory), 1}};
     while (!dirs.empty()) {
+        if (keepGoing && !keepGoing(out.size()))
+            break;
         auto [dir, level] = dirs.back();
         dirs.pop_back();
         std::error_code ec;

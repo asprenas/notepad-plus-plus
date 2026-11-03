@@ -65,6 +65,7 @@ void MainWindow::registerCommands()
     registerEditOpsCommands();
     registerSearchMiscCommands();
     registerFindCommands();
+    registerCompletionCommands();
 
     const auto menus = m_actions->buildMenuBar(menuBar(), &m_nativeLang, m_config.gui.langMenuCompact);
     m_actions->applyShortcuts(&m_shortcuts);

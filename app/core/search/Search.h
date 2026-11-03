@@ -75,8 +75,9 @@ struct LineHit {
     std::vector<std::pair<size_t, size_t>> ranges; // byte ranges of the matches inside `text`
 };
 
-// Files to search (upstream getMatchedFilenames), sorted.
-std::vector<std::string> listFilesToSearch(const FindInFilesOptions& o);
+// Files to search (upstream getMatchedFilenames), sorted. `keepGoing(filesFoundSoFar)` is called
+// for every folder; returning false cancels the listing (the files found so far are returned).
+std::vector<std::string> listFilesToSearch(const FindInFilesOptions& o, const std::function<bool(size_t)>& keepGoing = {});
 
 // progress(index, total, file) returns false to cancel.
 using SearchProgress = std::function<bool(size_t, size_t, const std::string&)>;
