@@ -7,7 +7,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "fox",
+  "engineReplace": "cat"
  },
  {
   "name": "literal case",
@@ -17,7 +20,10 @@
   "mode": "regex",
   "matchCase": true,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "fox",
+  "engineReplace": "cat"
  },
  {
   "name": "ignore case",
@@ -27,7 +33,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "the",
+  "engineReplace": "a"
  },
  {
   "name": "match case",
@@ -37,7 +46,10 @@
   "mode": "regex",
   "matchCase": true,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "THE",
+  "engineReplace": "a"
  },
  {
   "name": "whole word normal",
@@ -47,7 +59,10 @@
   "mode": "normal",
   "matchCase": false,
   "wholeWord": true,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "foo",
+  "engineReplace": "x"
  },
  {
   "name": "dot",
@@ -57,7 +72,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "q.i",
+  "engineReplace": "_"
  },
  {
   "name": "dot newline off",
@@ -67,7 +85,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "fox.*",
+  "engineReplace": "X"
  },
  {
   "name": "dot newline on",
@@ -77,7 +98,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": true
+  "dotMatchesNewline": true,
+  "windowsCodepageDependent": false,
+  "engineFind": "fox.*?THE",
+  "engineReplace": "X"
  },
  {
   "name": "char class",
@@ -87,7 +111,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "[aeiou]",
+  "engineReplace": "#"
  },
  {
   "name": "negated class",
@@ -97,7 +124,10 @@
   "mode": "regex",
   "matchCase": true,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "[^a-z\\r\\n ]",
+  "engineReplace": "_"
  },
  {
   "name": "range digits",
@@ -107,7 +137,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "[0-9]+",
+  "engineReplace": "<$0>"
  },
  {
   "name": "shorthand d",
@@ -117,7 +150,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\d+",
+  "engineReplace": "N"
  },
  {
   "name": "shorthand w",
@@ -127,7 +163,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\w+",
+  "engineReplace": "W"
  },
  {
   "name": "shorthand s",
@@ -137,7 +176,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\s+",
+  "engineReplace": " "
  },
  {
   "name": "shorthand D",
@@ -147,7 +189,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\D+",
+  "engineReplace": "|"
  },
  {
   "name": "shorthand W",
@@ -157,7 +202,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\W",
+  "engineReplace": "_"
  },
  {
   "name": "shorthand S",
@@ -167,7 +215,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\S+",
+  "engineReplace": "S"
  },
  {
   "name": "h horizontal space",
@@ -177,7 +228,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\h+",
+  "engineReplace": "·"
  },
  {
   "name": "v vertical space",
@@ -187,7 +241,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\v",
+  "engineReplace": "|"
  },
  {
   "name": "R any newline",
@@ -197,7 +254,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\R",
+  "engineReplace": "¶"
  },
  {
   "name": "anchors line start",
@@ -207,7 +267,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "^",
+  "engineReplace": "> "
  },
  {
   "name": "anchors line end",
@@ -217,7 +280,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "$",
+  "engineReplace": " <"
  },
  {
   "name": "anchors both empty line",
@@ -227,7 +293,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "^$",
+  "engineReplace": "EMPTY"
  },
  {
   "name": "buffer start",
@@ -237,7 +306,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\A\\w+",
+  "engineReplace": "START"
  },
  {
   "name": "buffer end",
@@ -247,7 +319,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\w+\\z",
+  "engineReplace": "END"
  },
  {
   "name": "buffer end Z",
@@ -257,7 +332,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\w+\\Z",
+  "engineReplace": "END"
  },
  {
   "name": "word boundary",
@@ -267,7 +345,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\bba",
+  "engineReplace": "BA"
  },
  {
   "name": "non word boundary",
@@ -277,7 +358,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\Ba",
+  "engineReplace": "A"
  },
  {
   "name": "word start <",
@@ -287,7 +371,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\<f",
+  "engineReplace": "F"
  },
  {
   "name": "word end >",
@@ -297,7 +384,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "o\\>",
+  "engineReplace": "0"
  },
  {
   "name": "star greedy",
@@ -307,7 +397,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "o.*o",
+  "engineReplace": "[]"
  },
  {
   "name": "lazy",
@@ -317,7 +410,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "o.*?o",
+  "engineReplace": "[]"
  },
  {
   "name": "plus",
@@ -327,7 +423,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "o+",
+  "engineReplace": "0"
  },
  {
   "name": "optional",
@@ -337,7 +436,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "colou?r",
+  "engineReplace": "hue"
  },
  {
   "name": "interval",
@@ -347,7 +449,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\d{2,3}",
+  "engineReplace": "#"
  },
  {
   "name": "interval exact",
@@ -357,7 +462,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\d{3}",
+  "engineReplace": "#"
  },
  {
   "name": "interval open",
@@ -367,7 +475,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "a{2,}",
+  "engineReplace": "A"
  },
  {
   "name": "possessive",
@@ -377,7 +488,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\d++\\d",
+  "engineReplace": "X"
  },
  {
   "name": "atomic group",
@@ -387,7 +501,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(?>\\d+)\\d",
+  "engineReplace": "X"
  },
  {
   "name": "lazy interval",
@@ -397,7 +514,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "a{2,4}?",
+  "engineReplace": "-"
  },
  {
   "name": "swap words",
@@ -407,7 +527,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(\\w+) (\\w+)",
+  "engineReplace": "$2 $1"
  },
  {
   "name": "backref \\1 replace",
@@ -417,7 +540,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(\\w+)@(\\w+)",
+  "engineReplace": "\\2 at \\1"
  },
  {
   "name": "braced backref",
@@ -427,7 +553,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(\\d)(\\d)",
+  "engineReplace": "${2}0${1}"
  },
  {
   "name": "whole match $0",
@@ -437,7 +566,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\d+",
+  "engineReplace": "[$0]"
  },
  {
   "name": "whole match $&",
@@ -447,7 +579,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\d+",
+  "engineReplace": "($&)"
  },
  {
   "name": "backref in pattern",
@@ -457,7 +592,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\b(\\w+)\\s+\\1\\b",
+  "engineReplace": "$1"
  },
  {
   "name": "named group",
@@ -467,7 +605,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(?<year>\\d{4})-(?<m>\\d\\d)",
+  "engineReplace": "$+{m}/$+{year}"
  },
  {
   "name": "non capturing",
@@ -477,7 +618,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(?:ab)+",
+  "engineReplace": "X"
  },
  {
   "name": "alternation",
@@ -487,7 +631,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "cat|dog|fox",
+  "engineReplace": "pet"
  },
  {
   "name": "alternation grouping",
@@ -497,7 +644,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "gr(a|e)y",
+  "engineReplace": "GR$1Y"
  },
  {
   "name": "nested groups",
@@ -507,7 +657,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "((\\w)\\w*)-\\2",
+  "engineReplace": "<$1>"
  },
  {
   "name": "optional group missing",
@@ -517,7 +670,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(a)?b",
+  "engineReplace": "[$1]"
  },
  {
   "name": "recursion",
@@ -527,7 +683,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\((?:[^()]|(?R))*\\)",
+  "engineReplace": "P"
  },
  {
   "name": "subroutine",
@@ -537,7 +696,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(\\d+)-(?1)",
+  "engineReplace": "N"
  },
  {
   "name": "conditional",
@@ -547,7 +709,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(<)?\\w+(?(1)>)",
+  "engineReplace": "T"
  },
  {
   "name": "branch reset",
@@ -557,7 +722,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(?|(\\d+)|([a-z]+))",
+  "engineReplace": "[$1]"
  },
  {
   "name": "lookahead",
@@ -567,7 +735,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\w+(?=\\.)",
+  "engineReplace": "W"
  },
  {
   "name": "negative lookahead",
@@ -577,7 +748,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\b(?!foo)\\w+\\d",
+  "engineReplace": "X"
  },
  {
   "name": "lookbehind",
@@ -587,7 +761,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(?<=\\$)\\d+",
+  "engineReplace": "N"
  },
  {
   "name": "negative lookbehind",
@@ -597,7 +774,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(?<!\\$)\\b\\d+",
+  "engineReplace": "N"
  },
  {
   "name": "keep out \\K",
@@ -607,7 +787,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "name=\\K\\w+",
+  "engineReplace": "X"
  },
  {
   "name": "lookahead password",
@@ -617,7 +800,10 @@
   "mode": "regex",
   "matchCase": true,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "^(?=.*\\d)(?=.*[A-Z]).{6,}$",
+  "engineReplace": "OK"
  },
  {
   "name": "upper \\U",
@@ -627,7 +813,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\b(\\w)(\\w*)",
+  "engineReplace": "\\U$1\\E$2"
  },
  {
   "name": "lower \\L",
@@ -637,7 +826,10 @@
   "mode": "regex",
   "matchCase": true,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "[A-Z]+",
+  "engineReplace": "\\L$0"
  },
  {
   "name": "upper first \\u",
@@ -647,7 +839,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\b\\w+",
+  "engineReplace": "\\u$0"
  },
  {
   "name": "lower first \\l",
@@ -657,7 +852,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\b\\w+",
+  "engineReplace": "\\l$0"
  },
  {
   "name": "upper range then end",
@@ -667,7 +865,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(\\w+)_(\\w+)",
+  "engineReplace": "\\U$1\\E_$2"
  },
  {
   "name": "upper hangul neutral",
@@ -677,7 +878,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": true,
+  "engineFind": "(\\w+)",
+  "engineReplace": "\\U$1"
  },
  {
   "name": "inline ignore case",
@@ -687,7 +891,10 @@
   "mode": "regex",
   "matchCase": true,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(?i)the",
+  "engineReplace": "X"
  },
  {
   "name": "inline case sensitive",
@@ -697,7 +904,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(?-i)the",
+  "engineReplace": "X"
  },
  {
   "name": "inline dotall",
@@ -707,7 +917,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(?s)fox.THE",
+  "engineReplace": "X"
  },
  {
   "name": "inline multiline off",
@@ -717,7 +930,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(?-m)^\\w+",
+  "engineReplace": "X"
  },
  {
   "name": "inline extended",
@@ -727,7 +943,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(?x) \\d + # digits",
+  "engineReplace": "N"
  },
  {
   "name": "posix alpha",
@@ -737,7 +956,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "[[:alpha:]]+",
+  "engineReplace": "A"
  },
  {
   "name": "posix digit",
@@ -747,7 +969,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "[[:digit:]]+",
+  "engineReplace": "D"
  },
  {
   "name": "posix upper",
@@ -757,7 +982,10 @@
   "mode": "regex",
   "matchCase": true,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "[[:upper:]]",
+  "engineReplace": "U"
  },
  {
   "name": "posix space",
@@ -767,7 +995,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "[[:space:]]+",
+  "engineReplace": "_"
  },
  {
   "name": "posix punct",
@@ -777,7 +1008,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "[[:punct:]]",
+  "engineReplace": ""
  },
  {
   "name": "posix alnum",
@@ -787,7 +1021,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "[[:alnum:]]+",
+  "engineReplace": "X"
  },
  {
   "name": "hangul literal",
@@ -797,7 +1034,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "한글",
+  "engineReplace": "Korean"
  },
  {
   "name": "hangul class",
@@ -807,7 +1047,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "[가-힣]+",
+  "engineReplace": "K"
  },
  {
   "name": "hangul word",
@@ -817,7 +1060,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\w+",
+  "engineReplace": "W"
  },
  {
   "name": "accented ignore case",
@@ -827,7 +1073,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "école",
+  "engineReplace": "school"
  },
  {
   "name": "emoji literal",
@@ -837,7 +1086,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "😀",
+  "engineReplace": ":)"
  },
  {
   "name": "emoji dot",
@@ -847,7 +1099,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "e.",
+  "engineReplace": "[$0]"
  },
  {
   "name": "hex escape",
@@ -857,7 +1112,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\x{D55C}",
+  "engineReplace": "H"
  },
  {
   "name": "hex escape short",
@@ -867,7 +1125,10 @@
   "mode": "regex",
   "matchCase": true,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\x41",
+  "engineReplace": "a"
  },
  {
   "name": "unicode boundary",
@@ -877,7 +1138,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\b\\w",
+  "engineReplace": "|"
  },
  {
   "name": "trim trailing",
@@ -887,7 +1151,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "[ \\t]+$",
+  "engineReplace": ""
  },
  {
   "name": "trim leading",
@@ -897,7 +1164,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "^[ \\t]+",
+  "engineReplace": ""
  },
  {
   "name": "empty lines",
@@ -907,7 +1177,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "^\\R",
+  "engineReplace": ""
  },
  {
   "name": "blank lines",
@@ -917,7 +1190,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "^[ \\t]*\\R",
+  "engineReplace": ""
  },
  {
   "name": "join lines",
@@ -927,7 +1203,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\R(?=\\w)",
+  "engineReplace": " "
  },
  {
   "name": "duplicate consecutive lines",
@@ -937,7 +1216,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "^(.*)(\\R\\1)+$",
+  "engineReplace": "$1"
  },
  {
   "name": "delete lines containing",
@@ -947,7 +1229,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "^.*apple.*\\R?",
+  "engineReplace": ""
  },
  {
   "name": "keep lines containing",
@@ -957,7 +1242,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "^(?!.*apple).*\\R?",
+  "engineReplace": ""
  },
  {
   "name": "add line numbers style",
@@ -967,7 +1255,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "^",
+  "engineReplace": "- "
  },
  {
   "name": "csv column swap",
@@ -977,7 +1268,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "^([^,\\n]*),([^,\\n]*)",
+  "engineReplace": "$2,$1"
  },
  {
   "name": "csv quoted field",
@@ -987,7 +1281,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\"[^\"]*\"",
+  "engineReplace": "Q"
  },
  {
   "name": "log date reformat",
@@ -997,7 +1294,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(\\d{4})-(\\d{2})-(\\d{2})",
+  "engineReplace": "$3.$2.$1"
  },
  {
   "name": "log level",
@@ -1007,7 +1307,10 @@
   "mode": "regex",
   "matchCase": true,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\b(ERROR|WARN)\\b",
+  "engineReplace": "<$1>"
  },
  {
   "name": "log brackets",
@@ -1017,7 +1320,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\[([^\\]]+)\\]",
+  "engineReplace": "{$1}"
  },
  {
   "name": "html tags",
@@ -1027,7 +1333,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "<[^>]+>",
+  "engineReplace": ""
  },
  {
   "name": "html attribute",
@@ -1037,7 +1346,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(\\w+)=\"([^\"]*)\"",
+  "engineReplace": "$1='$2'"
  },
  {
   "name": "url",
@@ -1047,7 +1359,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "https?://[^\\s\"]+",
+  "engineReplace": "URL"
  },
  {
   "name": "email",
@@ -1057,7 +1372,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "[\\w.+-]+@[\\w-]+\\.[\\w.]+",
+  "engineReplace": "<mail>"
  },
  {
   "name": "windows paths",
@@ -1067,7 +1385,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\\\",
+  "engineReplace": "/"
  },
  {
   "name": "c comments line",
@@ -1077,7 +1398,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "//.*$",
+  "engineReplace": ""
  },
  {
   "name": "c comments block",
@@ -1087,7 +1411,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": true
+  "dotMatchesNewline": true,
+  "windowsCodepageDependent": false,
+  "engineFind": "/\\*.*?\\*/",
+  "engineReplace": ""
  },
  {
   "name": "function call",
@@ -1097,7 +1424,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(\\w+)\\(([^)]*)\\)",
+  "engineReplace": "$1[$2]"
  },
  {
   "name": "indent",
@@ -1107,7 +1437,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "^    ",
+  "engineReplace": "\\t"
  },
  {
   "name": "between markers",
@@ -1117,7 +1450,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(?<=\\{)[^}]*(?=\\})",
+  "engineReplace": " ... "
  },
  {
   "name": "number thousands",
@@ -1127,7 +1463,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(?<=\\d)(?=(\\d{3})+\\b)",
+  "engineReplace": ","
  },
  {
   "name": "hex numbers",
@@ -1137,7 +1476,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\b0x[0-9a-fA-F]+\\b",
+  "engineReplace": "HEX"
  },
  {
   "name": "ip address",
@@ -1147,7 +1489,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b",
+  "engineReplace": "IP"
  },
  {
   "name": "repeated chars",
@@ -1157,7 +1502,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(.)\\1+",
+  "engineReplace": "$1"
  },
  {
   "name": "capitalize sentences",
@@ -1167,7 +1515,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(^|[.!?]\\s+)(\\w)",
+  "engineReplace": "$1\\u$2"
  },
  {
   "name": "wrap in quotes",
@@ -1177,7 +1528,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "^(.+)$",
+  "engineReplace": "\"$1\""
  },
  {
   "name": "empty lookahead insert",
@@ -1187,7 +1541,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "(?=b)",
+  "engineReplace": "|"
  },
  {
   "name": "star empty",
@@ -1197,7 +1554,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "x*",
+  "engineReplace": "-"
  },
  {
   "name": "empty alternation",
@@ -1207,7 +1567,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "a|",
+  "engineReplace": "#"
  },
  {
   "name": "literal dollar in replace",
@@ -1217,7 +1580,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "cost",
+  "engineReplace": "\\$5"
  },
  {
   "name": "escaped backslash replace",
@@ -1227,7 +1593,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "/",
+  "engineReplace": "\\\\"
  },
  {
   "name": "newline in replace",
@@ -1237,7 +1606,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": ",",
+  "engineReplace": "\\r\\n"
  },
  {
   "name": "tab in replace",
@@ -1247,7 +1619,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": " ",
+  "engineReplace": "\\t"
  },
  {
   "name": "crlf skip",
@@ -1257,7 +1632,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\n",
+  "engineReplace": "N"
  },
  {
   "name": "dot vs crlf",
@@ -1267,7 +1645,10 @@
   "mode": "regex",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "a.",
+  "engineReplace": "X"
  },
  {
   "name": "extended newline",
@@ -1277,7 +1658,10 @@
   "mode": "extended",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\r\n",
+  "engineReplace": " "
  },
  {
   "name": "extended tab",
@@ -1287,7 +1671,10 @@
   "mode": "extended",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\t",
+  "engineReplace": "->"
  },
  {
   "name": "extended hex",
@@ -1297,7 +1684,10 @@
   "mode": "extended",
   "matchCase": true,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "A",
+  "engineReplace": "a"
  },
  {
   "name": "extended decimal",
@@ -1307,7 +1697,10 @@
   "mode": "extended",
   "matchCase": true,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "A",
+  "engineReplace": "a"
  },
  {
   "name": "extended unicode",
@@ -1317,7 +1710,10 @@
   "mode": "extended",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "é",
+  "engineReplace": "e"
  },
  {
   "name": "extended replace newline",
@@ -1327,7 +1723,10 @@
   "mode": "extended",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": ";",
+  "engineReplace": "\n"
  },
  {
   "name": "normal dot literal",
@@ -1337,7 +1736,10 @@
   "mode": "normal",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": ".",
+  "engineReplace": "!"
  },
  {
   "name": "normal brackets literal",
@@ -1347,7 +1749,10 @@
   "mode": "normal",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "[3]",
+  "engineReplace": "(3)"
  },
  {
   "name": "normal backslash",
@@ -1357,7 +1762,10 @@
   "mode": "normal",
   "matchCase": false,
   "wholeWord": false,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "\\",
+  "engineReplace": "/"
  },
  {
   "name": "normal whole word hangul",
@@ -1367,6 +1775,9 @@
   "mode": "normal",
   "matchCase": false,
   "wholeWord": true,
-  "dotMatchesNewline": false
+  "dotMatchesNewline": false,
+  "windowsCodepageDependent": false,
+  "engineFind": "한글",
+  "engineReplace": "K"
  }
 ]

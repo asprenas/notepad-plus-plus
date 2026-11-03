@@ -1,5 +1,5 @@
 // Line sorters: port of upstream PowerEditor/src/MISC/Common/Sorters.h (v8.9.8.1) on UTF-16
-// strings (std::u16string instead of std::wstring, same algorithms). Generated once by a
+// strings (std::u16string instead of the wide string type, same algorithms). Generated once by a
 // mechanical conversion; differences: case-insensitive compare and number parsing are
 // portable helpers (upstream: _wcsicmp, _wcstod_l with the en-US locale).
 #pragma once

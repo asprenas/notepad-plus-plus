@@ -31,6 +31,7 @@ target_compile_definitions(npp_scintilla
     PRIVATE
         SCI_OWNREGEX                # use boostregex instead of built-in RESearch
         BOOST_REGEX_STANDALONE
+        $<$<AND:$<BOOL:${WIN32}>,$<NOT:$<CXX_COMPILER_ID:MSVC>>>:NPP_BOOST_REGEX_GCC_WIN32_LOCALE> # MinGW: Win32 locale traits like upstream (MSVC)
         $<$<CONFIG:Release,RelWithDebInfo,MinSizeRel>:NDEBUG=1>
 )
 set_target_properties(npp_scintilla PROPERTIES AUTOMOC ON)

@@ -1,0 +1,2710 @@
+{
+    "source":  "Notepad++ 8.8.8 (Windows), extracted by tools/regex-compat/extract-from-npp.ps1",
+    "results":  [
+                    {
+                        "name":  "literal",
+                        "matches":  [
+                                        [
+                                            16,
+                                            19
+                                        ],
+                                        [
+                                            62,
+                                            65
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "The quick brown cat jumps over the lazy dog.\r\nTHE QUICK BROWN cat\r\nfoo123 bar_45 baz-6\r\n\r\nend"
+                    },
+                    {
+                        "name":  "literal case",
+                        "matches":  [
+                                        [
+                                            16,
+                                            19
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "The quick brown cat jumps over the lazy dog.\r\nTHE QUICK BROWN FOX\r\nfoo123 bar_45 baz-6\r\n\r\nend"
+                    },
+                    {
+                        "name":  "ignore case",
+                        "matches":  [
+                                        [
+                                            0,
+                                            3
+                                        ],
+                                        [
+                                            31,
+                                            34
+                                        ],
+                                        [
+                                            46,
+                                            49
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "a quick brown fox jumps over a lazy dog.\r\na QUICK BROWN FOX\r\nfoo123 bar_45 baz-6\r\n\r\nend"
+                    },
+                    {
+                        "name":  "match case",
+                        "matches":  [
+                                        [
+                                            46,
+                                            49
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "The quick brown fox jumps over the lazy dog.\r\na QUICK BROWN FOX\r\nfoo123 bar_45 baz-6\r\n\r\nend"
+                    },
+                    {
+                        "name":  "whole word normal",
+                        "matches":  [
+                                        [
+                                            0,
+                                            3
+                                        ],
+                                        [
+                                            23,
+                                            26
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "x foobar barfoo foo_ x."
+                    },
+                    {
+                        "name":  "dot",
+                        "matches":  [
+                                        [
+                                            4,
+                                            7
+                                        ],
+                                        [
+                                            50,
+                                            53
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "The _ck brown fox jumps over the lazy dog.\r\nTHE _CK BROWN FOX\r\nfoo123 bar_45 baz-6\r\n\r\nend"
+                    },
+                    {
+                        "name":  "dot newline off",
+                        "matches":  [
+                                        [
+                                            16,
+                                            44
+                                        ],
+                                        [
+                                            62,
+                                            65
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "The quick brown X\r\nTHE QUICK BROWN X\r\nfoo123 bar_45 baz-6\r\n\r\nend"
+                    },
+                    {
+                        "name":  "dot newline on",
+                        "matches":  [
+                                        [
+                                            16,
+                                            34
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "The quick brown X lazy dog.\r\nTHE QUICK BROWN FOX\r\nfoo123 bar_45 baz-6\r\n\r\nend"
+                    },
+                    {
+                        "name":  "char class",
+                        "matches":  [
+                                        [
+                                            2,
+                                            3
+                                        ],
+                                        [
+                                            5,
+                                            6
+                                        ],
+                                        [
+                                            6,
+                                            7
+                                        ],
+                                        [
+                                            12,
+                                            13
+                                        ],
+                                        [
+                                            17,
+                                            18
+                                        ],
+                                        [
+                                            21,
+                                            22
+                                        ],
+                                        [
+                                            26,
+                                            27
+                                        ],
+                                        [
+                                            28,
+                                            29
+                                        ],
+                                        [
+                                            33,
+                                            34
+                                        ],
+                                        [
+                                            36,
+                                            37
+                                        ],
+                                        [
+                                            41,
+                                            42
+                                        ],
+                                        [
+                                            48,
+                                            49
+                                        ],
+                                        [
+                                            51,
+                                            52
+                                        ],
+                                        [
+                                            52,
+                                            53
+                                        ],
+                                        [
+                                            58,
+                                            59
+                                        ],
+                                        [
+                                            63,
+                                            64
+                                        ],
+                                        [
+                                            68,
+                                            69
+                                        ],
+                                        [
+                                            69,
+                                            70
+                                        ],
+                                        [
+                                            75,
+                                            76
+                                        ],
+                                        [
+                                            82,
+                                            83
+                                        ],
+                                        [
+                                            90,
+                                            91
+                                        ]
+                                    ],
+                        "replaceCount":  21,
+                        "replaced":  "Th# q##ck br#wn f#x j#mps #v#r th# l#zy d#g.\r\nTH# Q##CK BR#WN F#X\r\nf##123 b#r_45 b#z-6\r\n\r\n#nd"
+                    },
+                    {
+                        "name":  "negated class",
+                        "matches":  [
+                                        [
+                                            0,
+                                            1
+                                        ],
+                                        [
+                                            43,
+                                            44
+                                        ],
+                                        [
+                                            46,
+                                            47
+                                        ],
+                                        [
+                                            47,
+                                            48
+                                        ],
+                                        [
+                                            48,
+                                            49
+                                        ],
+                                        [
+                                            50,
+                                            51
+                                        ],
+                                        [
+                                            51,
+                                            52
+                                        ],
+                                        [
+                                            52,
+                                            53
+                                        ],
+                                        [
+                                            53,
+                                            54
+                                        ],
+                                        [
+                                            54,
+                                            55
+                                        ],
+                                        [
+                                            56,
+                                            57
+                                        ],
+                                        [
+                                            57,
+                                            58
+                                        ],
+                                        [
+                                            58,
+                                            59
+                                        ],
+                                        [
+                                            59,
+                                            60
+                                        ],
+                                        [
+                                            60,
+                                            61
+                                        ],
+                                        [
+                                            62,
+                                            63
+                                        ],
+                                        [
+                                            63,
+                                            64
+                                        ],
+                                        [
+                                            64,
+                                            65
+                                        ],
+                                        [
+                                            70,
+                                            71
+                                        ],
+                                        [
+                                            71,
+                                            72
+                                        ],
+                                        [
+                                            72,
+                                            73
+                                        ],
+                                        [
+                                            77,
+                                            78
+                                        ],
+                                        [
+                                            78,
+                                            79
+                                        ],
+                                        [
+                                            79,
+                                            80
+                                        ],
+                                        [
+                                            84,
+                                            85
+                                        ],
+                                        [
+                                            85,
+                                            86
+                                        ]
+                                    ],
+                        "replaceCount":  26,
+                        "replaced":  "_he quick brown fox jumps over the lazy dog_\r\n___ _____ _____ ___\r\nfoo___ bar___ baz__\r\n\r\nend"
+                    },
+                    {
+                        "name":  "range digits",
+                        "matches":  [
+                                        [
+                                            70,
+                                            73
+                                        ],
+                                        [
+                                            78,
+                                            80
+                                        ],
+                                        [
+                                            85,
+                                            86
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "The quick brown fox jumps over the lazy dog.\r\nTHE QUICK BROWN FOX\r\nfoo\u003c123\u003e bar_\u003c45\u003e baz-\u003c6\u003e\r\n\r\nend"
+                    },
+                    {
+                        "name":  "shorthand d",
+                        "matches":  [
+                                        [
+                                            70,
+                                            73
+                                        ],
+                                        [
+                                            78,
+                                            80
+                                        ],
+                                        [
+                                            85,
+                                            86
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "The quick brown fox jumps over the lazy dog.\r\nTHE QUICK BROWN FOX\r\nfooN bar_N baz-N\r\n\r\nend"
+                    },
+                    {
+                        "name":  "shorthand w",
+                        "matches":  [
+                                        [
+                                            0,
+                                            3
+                                        ],
+                                        [
+                                            4,
+                                            9
+                                        ],
+                                        [
+                                            10,
+                                            15
+                                        ],
+                                        [
+                                            16,
+                                            19
+                                        ],
+                                        [
+                                            20,
+                                            25
+                                        ],
+                                        [
+                                            26,
+                                            30
+                                        ],
+                                        [
+                                            31,
+                                            34
+                                        ],
+                                        [
+                                            35,
+                                            39
+                                        ],
+                                        [
+                                            40,
+                                            43
+                                        ],
+                                        [
+                                            46,
+                                            49
+                                        ],
+                                        [
+                                            50,
+                                            55
+                                        ],
+                                        [
+                                            56,
+                                            61
+                                        ],
+                                        [
+                                            62,
+                                            65
+                                        ],
+                                        [
+                                            67,
+                                            73
+                                        ],
+                                        [
+                                            74,
+                                            80
+                                        ],
+                                        [
+                                            81,
+                                            84
+                                        ],
+                                        [
+                                            85,
+                                            86
+                                        ],
+                                        [
+                                            90,
+                                            93
+                                        ]
+                                    ],
+                        "replaceCount":  18,
+                        "replaced":  "W W W W W W W W W.\r\nW W W W\r\nW W W-W\r\n\r\nW"
+                    },
+                    {
+                        "name":  "shorthand s",
+                        "matches":  [
+                                        [
+                                            0,
+                                            2
+                                        ],
+                                        [
+                                            9,
+                                            10
+                                        ],
+                                        [
+                                            18,
+                                            24
+                                        ],
+                                        [
+                                            27,
+                                            28
+                                        ],
+                                        [
+                                            33,
+                                            41
+                                        ]
+                                    ],
+                        "replaceCount":  5,
+                        "replaced":  " leading trailing tab mixed last"
+                    },
+                    {
+                        "name":  "shorthand D",
+                        "matches":  [
+                                        [
+                                            0,
+                                            1
+                                        ],
+                                        [
+                                            2,
+                                            3
+                                        ],
+                                        [
+                                            5,
+                                            6
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "|1|22|333"
+                    },
+                    {
+                        "name":  "shorthand W",
+                        "matches":  [
+                                        [
+                                            1,
+                                            2
+                                        ],
+                                        [
+                                            3,
+                                            4
+                                        ],
+                                        [
+                                            5,
+                                            6
+                                        ],
+                                        [
+                                            7,
+                                            8
+                                        ]
+                                    ],
+                        "replaceCount":  4,
+                        "replaced":  "a_b_c_d_e"
+                    },
+                    {
+                        "name":  "shorthand S",
+                        "matches":  [
+                                        [
+                                            2,
+                                            9
+                                        ],
+                                        [
+                                            10,
+                                            18
+                                        ],
+                                        [
+                                            24,
+                                            27
+                                        ],
+                                        [
+                                            28,
+                                            33
+                                        ],
+                                        [
+                                            41,
+                                            45
+                                        ]
+                                    ],
+                        "replaceCount":  5,
+                        "replaced":  "  S\nS   \n\t S S \t\n\n   \nS"
+                    },
+                    {
+                        "name":  "h horizontal space",
+                        "matches":  [
+                                        [
+                                            0,
+                                            2
+                                        ],
+                                        [
+                                            18,
+                                            21
+                                        ],
+                                        [
+                                            22,
+                                            24
+                                        ],
+                                        [
+                                            27,
+                                            28
+                                        ],
+                                        [
+                                            33,
+                                            35
+                                        ],
+                                        [
+                                            37,
+                                            40
+                                        ]
+                                    ],
+                        "replaceCount":  6,
+                        "replaced":  "·leading\ntrailing·\n·tab·mixed·\n\n·\nlast"
+                    },
+                    {
+                        "name":  "v vertical space",
+                        "matches":  [
+                                        [
+                                            9,
+                                            10
+                                        ],
+                                        [
+                                            21,
+                                            22
+                                        ],
+                                        [
+                                            35,
+                                            36
+                                        ],
+                                        [
+                                            36,
+                                            37
+                                        ],
+                                        [
+                                            40,
+                                            41
+                                        ]
+                                    ],
+                        "replaceCount":  5,
+                        "replaced":  "  leading|trailing   |\t tab mixed \t||   |last"
+                    },
+                    {
+                        "name":  "R any newline",
+                        "matches":  [
+                                        [
+                                            1,
+                                            3
+                                        ],
+                                        [
+                                            4,
+                                            5
+                                        ],
+                                        [
+                                            6,
+                                            7
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "a¶b¶c¶d"
+                    },
+                    {
+                        "name":  "anchors line start",
+                        "matches":  [
+                                        [
+                                            0,
+                                            0
+                                        ],
+                                        [
+                                            46,
+                                            46
+                                        ],
+                                        [
+                                            67,
+                                            67
+                                        ],
+                                        [
+                                            88,
+                                            88
+                                        ],
+                                        [
+                                            90,
+                                            90
+                                        ]
+                                    ],
+                        "replaceCount":  5,
+                        "replaced":  "\u003e The quick brown fox jumps over the lazy dog.\r\n\u003e THE QUICK BROWN FOX\r\n\u003e foo123 bar_45 baz-6\r\n\u003e \r\n\u003e end"
+                    },
+                    {
+                        "name":  "anchors line end",
+                        "matches":  [
+                                        [
+                                            44,
+                                            44
+                                        ],
+                                        [
+                                            65,
+                                            65
+                                        ],
+                                        [
+                                            86,
+                                            86
+                                        ],
+                                        [
+                                            88,
+                                            88
+                                        ],
+                                        [
+                                            93,
+                                            93
+                                        ]
+                                    ],
+                        "replaceCount":  5,
+                        "replaced":  "The quick brown fox jumps over the lazy dog. \u003c\r\nTHE QUICK BROWN FOX \u003c\r\nfoo123 bar_45 baz-6 \u003c\r\n \u003c\r\nend \u003c"
+                    },
+                    {
+                        "name":  "anchors both empty line",
+                        "matches":  [
+                                        [
+                                            36,
+                                            36
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "  leading\ntrailing   \n\t tab mixed \t\nEMPTY\n   \nlast"
+                    },
+                    {
+                        "name":  "buffer start",
+                        "matches":  [
+                                        [
+                                            0,
+                                            3
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "START quick brown fox jumps over the lazy dog.\r\nTHE QUICK BROWN FOX\r\nfoo123 bar_45 baz-6\r\n\r\nend"
+                    },
+                    {
+                        "name":  "buffer end",
+                        "matches":  [
+                                        [
+                                            90,
+                                            93
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "The quick brown fox jumps over the lazy dog.\r\nTHE QUICK BROWN FOX\r\nfoo123 bar_45 baz-6\r\n\r\nEND"
+                    },
+                    {
+                        "name":  "buffer end Z",
+                        "matches":  [
+                                        [
+                                            4,
+                                            7
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "abc END\n"
+                    },
+                    {
+                        "name":  "word boundary",
+                        "matches":  [
+                                        [
+                                            0,
+                                            2
+                                        ],
+                                        [
+                                            4,
+                                            6
+                                        ],
+                                        [
+                                            13,
+                                            15
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "BAr BAz abba BA"
+                    },
+                    {
+                        "name":  "non word boundary",
+                        "matches":  [
+                                        [
+                                            1,
+                                            2
+                                        ],
+                                        [
+                                            5,
+                                            6
+                                        ],
+                                        [
+                                            11,
+                                            12
+                                        ],
+                                        [
+                                            14,
+                                            15
+                                        ]
+                                    ],
+                        "replaceCount":  4,
+                        "replaced":  "bAr bAz abbA bA"
+                    },
+                    {
+                        "name":  "word start \u003c",
+                        "matches":  [
+                                        [
+                                            0,
+                                            1
+                                        ],
+                                        [
+                                            8,
+                                            9
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "Foo off Fluff"
+                    },
+                    {
+                        "name":  "word end \u003e",
+                        "matches":  [
+                                        [
+                                            2,
+                                            3
+                                        ],
+                                        [
+                                            10,
+                                            11
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "fo0 off tw0"
+                    },
+                    {
+                        "name":  "star greedy",
+                        "matches":  [
+                                        [
+                                            12,
+                                            42
+                                        ],
+                                        [
+                                            58,
+                                            64
+                                        ],
+                                        [
+                                            68,
+                                            70
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "The quick br[]g.\r\nTHE QUICK BR[]X\r\nf[]123 bar_45 baz-6\r\n\r\nend"
+                    },
+                    {
+                        "name":  "lazy",
+                        "matches":  [
+                                        [
+                                            12,
+                                            18
+                                        ],
+                                        [
+                                            26,
+                                            42
+                                        ],
+                                        [
+                                            58,
+                                            64
+                                        ],
+                                        [
+                                            68,
+                                            70
+                                        ]
+                                    ],
+                        "replaceCount":  4,
+                        "replaced":  "The quick br[]x jumps []g.\r\nTHE QUICK BR[]X\r\nf[]123 bar_45 baz-6\r\n\r\nend"
+                    },
+                    {
+                        "name":  "plus",
+                        "matches":  [
+                                        [
+                                            1,
+                                            3
+                                        ],
+                                        [
+                                            5,
+                                            7
+                                        ],
+                                        [
+                                            8,
+                                            9
+                                        ],
+                                        [
+                                            10,
+                                            14
+                                        ]
+                                    ],
+                        "replaceCount":  4,
+                        "replaced":  "f0 b0 0 0"
+                    },
+                    {
+                        "name":  "optional",
+                        "matches":  [
+                                        [
+                                            0,
+                                            5
+                                        ],
+                                        [
+                                            6,
+                                            12
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "hue hue colouur"
+                    },
+                    {
+                        "name":  "interval",
+                        "matches":  [
+                                        [
+                                            2,
+                                            4
+                                        ],
+                                        [
+                                            5,
+                                            8
+                                        ],
+                                        [
+                                            9,
+                                            12
+                                        ],
+                                        [
+                                            14,
+                                            17
+                                        ],
+                                        [
+                                            17,
+                                            19
+                                        ]
+                                    ],
+                        "replaceCount":  5,
+                        "replaced":  "1 # # #4 ##"
+                    },
+                    {
+                        "name":  "interval exact",
+                        "matches":  [
+                                        [
+                                            5,
+                                            8
+                                        ],
+                                        [
+                                            9,
+                                            12
+                                        ],
+                                        [
+                                            14,
+                                            17
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "1 12 # #4 #45"
+                    },
+                    {
+                        "name":  "interval open",
+                        "matches":  [
+                                        [
+                                            2,
+                                            4
+                                        ],
+                                        [
+                                            5,
+                                            8
+                                        ],
+                                        [
+                                            9,
+                                            13
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "a A A A"
+                    },
+                    {
+                        "name":  "possessive",
+                        "matches":  [
+
+                                    ],
+                        "replaceCount":  0,
+                        "replaced":  "12345"
+                    },
+                    {
+                        "name":  "atomic group",
+                        "matches":  [
+
+                                    ],
+                        "replaceCount":  0,
+                        "replaced":  "12345 678"
+                    },
+                    {
+                        "name":  "lazy interval",
+                        "matches":  [
+                                        [
+                                            0,
+                                            2
+                                        ],
+                                        [
+                                            2,
+                                            4
+                                        ],
+                                        [
+                                            4,
+                                            6
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "---a"
+                    },
+                    {
+                        "name":  "swap words",
+                        "matches":  [
+                                        [
+                                            0,
+                                            11
+                                        ],
+                                        [
+                                            12,
+                                            19
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "world hello bar foo"
+                    },
+                    {
+                        "name":  "backref \\1 replace",
+                        "matches":  [
+                                        [
+                                            0,
+                                            7
+                                        ],
+                                        [
+                                            8,
+                                            16
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "home at me work at you"
+                    },
+                    {
+                        "name":  "braced backref",
+                        "matches":  [
+                                        [
+                                            0,
+                                            2
+                                        ],
+                                        [
+                                            3,
+                                            5
+                                        ],
+                                        [
+                                            6,
+                                            8
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "201 403 605"
+                    },
+                    {
+                        "name":  "whole match $0",
+                        "matches":  [
+                                        [
+                                            1,
+                                            2
+                                        ],
+                                        [
+                                            4,
+                                            6
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "a[1] b[22]"
+                    },
+                    {
+                        "name":  "whole match $\u0026",
+                        "matches":  [
+                                        [
+                                            1,
+                                            2
+                                        ],
+                                        [
+                                            4,
+                                            6
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "a1 b22"
+                    },
+                    {
+                        "name":  "backref in pattern",
+                        "matches":  [
+                                        [
+                                            0,
+                                            7
+                                        ],
+                                        [
+                                            12,
+                                            19
+                                        ],
+                                        [
+                                            20,
+                                            25
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "the cat sat on the mat"
+                    },
+                    {
+                        "name":  "named group",
+                        "matches":  [
+                                        [
+                                            0,
+                                            7
+                                        ],
+                                        [
+                                            40,
+                                            47
+                                        ],
+                                        [
+                                            80,
+                                            87
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "01/2024-15 10:23:45 ERROR [main] Failed\n01/2024-15 10:24:00 INFO  [worker-1] Ok\n02/2024-01 08:00:00 WARN  [main] Slow\n"
+                    },
+                    {
+                        "name":  "non capturing",
+                        "matches":  [
+                                        [
+                                            0,
+                                            6
+                                        ],
+                                        [
+                                            7,
+                                            9
+                                        ],
+                                        [
+                                            11,
+                                            13
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "X Xc X"
+                    },
+                    {
+                        "name":  "alternation",
+                        "matches":  [
+                                        [
+                                            0,
+                                            3
+                                        ],
+                                        [
+                                            4,
+                                            7
+                                        ],
+                                        [
+                                            8,
+                                            11
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "pet pet pet cow"
+                    },
+                    {
+                        "name":  "alternation grouping",
+                        "matches":  [
+                                        [
+                                            0,
+                                            4
+                                        ],
+                                        [
+                                            5,
+                                            9
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "GRaY GReY griy"
+                    },
+                    {
+                        "name":  "nested groups",
+                        "matches":  [
+                                        [
+                                            0,
+                                            5
+                                        ],
+                                        [
+                                            7,
+                                            11
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "\u003cabc\u003e x\u003cyz\u003e def-x"
+                    },
+                    {
+                        "name":  "optional group missing",
+                        "matches":  [
+                                        [
+                                            0,
+                                            1
+                                        ],
+                                        [
+                                            2,
+                                            4
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "[] [a]"
+                    },
+                    {
+                        "name":  "recursion",
+                        "matches":  [
+                                        [
+                                            1,
+                                            8
+                                        ],
+                                        [
+                                            10,
+                                            15
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "fP gP (unbalanced"
+                    },
+                    {
+                        "name":  "subroutine",
+                        "matches":  [
+                                        [
+                                            0,
+                                            5
+                                        ],
+                                        [
+                                            6,
+                                            9
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "N N x-1"
+                    },
+                    {
+                        "name":  "conditional",
+                        "matches":  [
+                                        [
+                                            0,
+                                            5
+                                        ],
+                                        [
+                                            6,
+                                            9
+                                        ],
+                                        [
+                                            11,
+                                            13
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "T T \u003cT"
+                    },
+                    {
+                        "name":  "branch reset",
+                        "matches":  [
+                                        [
+                                            0,
+                                            2
+                                        ],
+                                        [
+                                            3,
+                                            5
+                                        ],
+                                        [
+                                            6,
+                                            7
+                                        ],
+                                        [
+                                            7,
+                                            8
+                                        ]
+                                    ],
+                        "replaceCount":  4,
+                        "replaced":  "[12] [ab] [3][c]"
+                    },
+                    {
+                        "name":  "lookahead",
+                        "matches":  [
+                                        [
+                                            40,
+                                            43
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "The quick brown fox jumps over the lazy W.\r\nTHE QUICK BROWN FOX\r\nfoo123 bar_45 baz-6\r\n\r\nend"
+                    },
+                    {
+                        "name":  "negative lookahead",
+                        "matches":  [
+                                        [
+                                            74,
+                                            80
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "The quick brown fox jumps over the lazy dog.\r\nTHE QUICK BROWN FOX\r\nfoo123 X baz-6\r\n\r\nend"
+                    },
+                    {
+                        "name":  "lookbehind",
+                        "matches":  [
+                                        [
+                                            6,
+                                            9
+                                        ],
+                                        [
+                                            15,
+                                            17
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "cost $N and $N, not 30"
+                    },
+                    {
+                        "name":  "negative lookbehind",
+                        "matches":  [
+                                        [
+                                            23,
+                                            25
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "cost $100 and $25, not N"
+                    },
+                    {
+                        "name":  "keep out \\K",
+                        "matches":  [
+                                        [
+                                            5,
+                                            8
+                                        ],
+                                        [
+                                            20,
+                                            23
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "name=X other name=X"
+                    },
+                    {
+                        "name":  "lookahead password",
+                        "matches":  [
+                                        [
+                                            4,
+                                            10
+                                        ],
+                                        [
+                                            19,
+                                            25
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "abc\nOK\nabcdef1\nOK\n"
+                    },
+                    {
+                        "name":  "upper \\U",
+                        "matches":  [
+                                        [
+                                            0,
+                                            5
+                                        ],
+                                        [
+                                            6,
+                                            9
+                                        ],
+                                        [
+                                            10,
+                                            15
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "Hello Big World"
+                    },
+                    {
+                        "name":  "lower \\L",
+                        "matches":  [
+                                        [
+                                            0,
+                                            3
+                                        ],
+                                        [
+                                            4,
+                                            9
+                                        ],
+                                        [
+                                            10,
+                                            11
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "the quick brown"
+                    },
+                    {
+                        "name":  "upper first \\u",
+                        "matches":  [
+                                        [
+                                            0,
+                                            5
+                                        ],
+                                        [
+                                            6,
+                                            10
+                                        ],
+                                        [
+                                            11,
+                                            16
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "Alpha Beta Gamma"
+                    },
+                    {
+                        "name":  "lower first \\l",
+                        "matches":  [
+                                        [
+                                            0,
+                                            5
+                                        ],
+                                        [
+                                            6,
+                                            10
+                                        ],
+                                        [
+                                            11,
+                                            16
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "alpha bETA gamma"
+                    },
+                    {
+                        "name":  "upper range then end",
+                        "matches":  [
+                                        [
+                                            0,
+                                            7
+                                        ],
+                                        [
+                                            8,
+                                            15
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "FOO_bar BAZ_qux"
+                    },
+                    {
+                        "name":  "upper hangul neutral",
+                        "matches":  [
+                                        [
+                                            0,
+                                            3
+                                        ],
+                                        [
+                                            4,
+                                            10
+                                        ],
+                                        [
+                                            11,
+                                            14
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "ABC 한글 éA"
+                    },
+                    {
+                        "name":  "inline ignore case",
+                        "matches":  [
+                                        [
+                                            0,
+                                            3
+                                        ],
+                                        [
+                                            31,
+                                            34
+                                        ],
+                                        [
+                                            46,
+                                            49
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "X quick brown fox jumps over X lazy dog.\r\nX QUICK BROWN FOX\r\nfoo123 bar_45 baz-6\r\n\r\nend"
+                    },
+                    {
+                        "name":  "inline case sensitive",
+                        "matches":  [
+                                        [
+                                            31,
+                                            34
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "The quick brown fox jumps over X lazy dog.\r\nTHE QUICK BROWN FOX\r\nfoo123 bar_45 baz-6\r\n\r\nend"
+                    },
+                    {
+                        "name":  "inline dotall",
+                        "matches":  [
+                                        [
+                                            0,
+                                            7
+                                        ],
+                                        [
+                                            8,
+                                            15
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "X X"
+                    },
+                    {
+                        "name":  "inline multiline off",
+                        "matches":  [
+                                        [
+                                            0,
+                                            3
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "X quick brown fox jumps over the lazy dog.\r\nTHE QUICK BROWN FOX\r\nfoo123 bar_45 baz-6\r\n\r\nend"
+                    },
+                    {
+                        "name":  "inline extended",
+                        "matches":  [
+                                        [
+                                            1,
+                                            2
+                                        ],
+                                        [
+                                            4,
+                                            6
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "aN bN"
+                    },
+                    {
+                        "name":  "posix alpha",
+                        "matches":  [
+                                        [
+                                            0,
+                                            6
+                                        ],
+                                        [
+                                            7,
+                                            16
+                                        ],
+                                        [
+                                            17,
+                                            26
+                                        ],
+                                        [
+                                            28,
+                                            37
+                                        ],
+                                        [
+                                            38,
+                                            41
+                                        ],
+                                        [
+                                            47,
+                                            53
+                                        ],
+                                        [
+                                            54,
+                                            59
+                                        ],
+                                        [
+                                            60,
+                                            66
+                                        ],
+                                        [
+                                            73,
+                                            78
+                                        ],
+                                        [
+                                            84,
+                                            87
+                                        ]
+                                    ],
+                        "replaceCount":  10,
+                        "replaced":  "A A A\r\nA A 123\r\nA A A\r\n😀 A 👍 A"
+                    },
+                    {
+                        "name":  "posix digit",
+                        "matches":  [
+                                        [
+                                            42,
+                                            45
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "한글 텍스트 테스트\r\n가나다 abc D\r\nÉcole café naïve\r\n😀 emoji 👍 end"
+                    },
+                    {
+                        "name":  "posix upper",
+                        "matches":  [
+                                        [
+                                            1,
+                                            2
+                                        ],
+                                        [
+                                            3,
+                                            4
+                                        ],
+                                        [
+                                            4,
+                                            6
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "aUcUUé"
+                    },
+                    {
+                        "name":  "posix space",
+                        "matches":  [
+                                        [
+                                            0,
+                                            2
+                                        ],
+                                        [
+                                            9,
+                                            10
+                                        ],
+                                        [
+                                            18,
+                                            24
+                                        ],
+                                        [
+                                            27,
+                                            28
+                                        ],
+                                        [
+                                            33,
+                                            41
+                                        ]
+                                    ],
+                        "replaceCount":  5,
+                        "replaced":  "_leading_trailing_tab_mixed_last"
+                    },
+                    {
+                        "name":  "posix punct",
+                        "matches":  [
+                                        [
+                                            1,
+                                            2
+                                        ],
+                                        [
+                                            3,
+                                            4
+                                        ],
+                                        [
+                                            5,
+                                            6
+                                        ],
+                                        [
+                                            7,
+                                            8
+                                        ]
+                                    ],
+                        "replaceCount":  4,
+                        "replaced":  "abcde"
+                    },
+                    {
+                        "name":  "posix alnum",
+                        "matches":  [
+                                        [
+                                            0,
+                                            4
+                                        ],
+                                        [
+                                            8,
+                                            10
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "X -- X"
+                    },
+                    {
+                        "name":  "hangul literal",
+                        "matches":  [
+                                        [
+                                            0,
+                                            6
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "Korean 텍스트 테스트\r\n가나다 abc 123\r\nÉcole café naïve\r\n😀 emoji 👍 end"
+                    },
+                    {
+                        "name":  "hangul class",
+                        "matches":  [
+                                        [
+                                            0,
+                                            6
+                                        ],
+                                        [
+                                            7,
+                                            16
+                                        ],
+                                        [
+                                            17,
+                                            26
+                                        ],
+                                        [
+                                            28,
+                                            37
+                                        ]
+                                    ],
+                        "replaceCount":  4,
+                        "replaced":  "K K K\r\nK abc 123\r\nÉcole café naïve\r\n😀 emoji 👍 end"
+                    },
+                    {
+                        "name":  "hangul word",
+                        "matches":  [
+                                        [
+                                            0,
+                                            6
+                                        ],
+                                        [
+                                            7,
+                                            16
+                                        ],
+                                        [
+                                            17,
+                                            26
+                                        ],
+                                        [
+                                            28,
+                                            37
+                                        ],
+                                        [
+                                            38,
+                                            41
+                                        ],
+                                        [
+                                            42,
+                                            45
+                                        ],
+                                        [
+                                            47,
+                                            53
+                                        ],
+                                        [
+                                            54,
+                                            59
+                                        ],
+                                        [
+                                            60,
+                                            66
+                                        ],
+                                        [
+                                            73,
+                                            78
+                                        ],
+                                        [
+                                            84,
+                                            87
+                                        ]
+                                    ],
+                        "replaceCount":  11,
+                        "replaced":  "W W W\r\nW W W\r\nW W W\r\n😀 W 👍 W"
+                    },
+                    {
+                        "name":  "accented ignore case",
+                        "matches":  [
+                                        [
+                                            47,
+                                            53
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "한글 텍스트 테스트\r\n가나다 abc 123\r\nschool café naïve\r\n😀 emoji 👍 end"
+                    },
+                    {
+                        "name":  "emoji literal",
+                        "matches":  [
+                                        [
+                                            68,
+                                            72
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "한글 텍스트 테스트\r\n가나다 abc 123\r\nÉcole café naïve\r\n: emoji 👍 end"
+                    },
+                    {
+                        "name":  "emoji dot",
+                        "matches":  [
+                                        [
+                                            0,
+                                            1
+                                        ],
+                                        [
+                                            6,
+                                            9
+                                        ],
+                                        [
+                                            10,
+                                            12
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "[e]😀 [eé] [ea]"
+                    },
+                    {
+                        "name":  "hex escape",
+                        "matches":  [
+                                        [
+                                            0,
+                                            3
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "H글 텍스트 테스트\r\n가나다 abc 123\r\nÉcole café naïve\r\n😀 emoji 👍 end"
+                    },
+                    {
+                        "name":  "hex escape short",
+                        "matches":  [
+                                        [
+                                            0,
+                                            1
+                                        ],
+                                        [
+                                            3,
+                                            4
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "aBCa"
+                    },
+                    {
+                        "name":  "unicode boundary",
+                        "matches":  [
+                                        [
+                                            0,
+                                            3
+                                        ],
+                                        [
+                                            7,
+                                            10
+                                        ],
+                                        [
+                                            17,
+                                            20
+                                        ],
+                                        [
+                                            28,
+                                            31
+                                        ],
+                                        [
+                                            38,
+                                            39
+                                        ],
+                                        [
+                                            42,
+                                            43
+                                        ],
+                                        [
+                                            47,
+                                            49
+                                        ],
+                                        [
+                                            54,
+                                            55
+                                        ],
+                                        [
+                                            60,
+                                            61
+                                        ],
+                                        [
+                                            73,
+                                            74
+                                        ],
+                                        [
+                                            84,
+                                            85
+                                        ]
+                                    ],
+                        "replaceCount":  39,
+                        "replaced":  "|| ||| |||\r\n||| ||| |||\r\n||||| |||| |||||\r\n😀 ||||| 👍 |||"
+                    },
+                    {
+                        "name":  "trim trailing",
+                        "matches":  [
+                                        [
+                                            18,
+                                            21
+                                        ],
+                                        [
+                                            33,
+                                            35
+                                        ],
+                                        [
+                                            37,
+                                            40
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "  leading\ntrailing\n\t tab mixed\n\n\nlast"
+                    },
+                    {
+                        "name":  "trim leading",
+                        "matches":  [
+                                        [
+                                            0,
+                                            2
+                                        ],
+                                        [
+                                            22,
+                                            24
+                                        ],
+                                        [
+                                            37,
+                                            40
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "leading\ntrailing   \ntab mixed \t\n\n\nlast"
+                    },
+                    {
+                        "name":  "empty lines",
+                        "matches":  [
+                                        [
+                                            36,
+                                            37
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "  leading\ntrailing   \n\t tab mixed \t\n   \nlast"
+                    },
+                    {
+                        "name":  "blank lines",
+                        "matches":  [
+                                        [
+                                            36,
+                                            37
+                                        ],
+                                        [
+                                            37,
+                                            41
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "  leading\ntrailing   \n\t tab mixed \t\nlast"
+                    },
+                    {
+                        "name":  "join lines",
+                        "matches":  [
+                                        [
+                                            1,
+                                            2
+                                        ],
+                                        [
+                                            4,
+                                            5
+                                        ],
+                                        [
+                                            6,
+                                            7
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "a b\n c d"
+                    },
+                    {
+                        "name":  "duplicate consecutive lines",
+                        "matches":  [
+                                        [
+                                            0,
+                                            11
+                                        ],
+                                        [
+                                            25,
+                                            38
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "apple\nbanana\napple\ncherry\n"
+                    },
+                    {
+                        "name":  "delete lines containing",
+                        "matches":  [
+                                        [
+                                            0,
+                                            6
+                                        ],
+                                        [
+                                            6,
+                                            12
+                                        ],
+                                        [
+                                            19,
+                                            25
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "banana\ncherry\ncherry\n"
+                    },
+                    {
+                        "name":  "keep lines containing",
+                        "matches":  [
+                                        [
+                                            12,
+                                            19
+                                        ],
+                                        [
+                                            25,
+                                            32
+                                        ],
+                                        [
+                                            32,
+                                            39
+                                        ],
+                                        [
+                                            39,
+                                            39
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "apple\napple\napple\n"
+                    },
+                    {
+                        "name":  "add line numbers style",
+                        "matches":  [
+                                        [
+                                            0,
+                                            0
+                                        ],
+                                        [
+                                            6,
+                                            6
+                                        ],
+                                        [
+                                            12,
+                                            12
+                                        ],
+                                        [
+                                            19,
+                                            19
+                                        ],
+                                        [
+                                            25,
+                                            25
+                                        ],
+                                        [
+                                            32,
+                                            32
+                                        ],
+                                        [
+                                            39,
+                                            39
+                                        ]
+                                    ],
+                        "replaceCount":  7,
+                        "replaced":  "- apple\n- apple\n- banana\n- apple\n- cherry\n- cherry\n- "
+                    },
+                    {
+                        "name":  "csv column swap",
+                        "matches":  [
+                                        [
+                                            0,
+                                            7
+                                        ],
+                                        [
+                                            12,
+                                            19
+                                        ],
+                                        [
+                                            23,
+                                            28
+                                        ],
+                                        [
+                                            32,
+                                            40
+                                        ]
+                                    ],
+                        "replaceCount":  4,
+                        "replaced":  "name,id,age\nAlice,1,30\nBob,2,25\n\"Smith,3, J\",40\n"
+                    },
+                    {
+                        "name":  "csv quoted field",
+                        "matches":  [
+                                        [
+                                            34,
+                                            44
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "id,name,age\n1,Alice,30\n2,Bob,25\n3,Q,40\n"
+                    },
+                    {
+                        "name":  "log date reformat",
+                        "matches":  [
+                                        [
+                                            0,
+                                            10
+                                        ],
+                                        [
+                                            40,
+                                            50
+                                        ],
+                                        [
+                                            80,
+                                            90
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "15.01.2024 10:23:45 ERROR [main] Failed\n15.01.2024 10:24:00 INFO  [worker-1] Ok\n01.02.2024 08:00:00 WARN  [main] Slow\n"
+                    },
+                    {
+                        "name":  "log level",
+                        "matches":  [
+                                        [
+                                            20,
+                                            25
+                                        ],
+                                        [
+                                            100,
+                                            104
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "2024-01-15 10:23:45 \u003cERROR\u003e [main] Failed\n2024-01-15 10:24:00 INFO  [worker-1] Ok\n2024-02-01 08:00:00 \u003cWARN\u003e  [main] Slow\n"
+                    },
+                    {
+                        "name":  "log brackets",
+                        "matches":  [
+                                        [
+                                            26,
+                                            32
+                                        ],
+                                        [
+                                            66,
+                                            76
+                                        ],
+                                        [
+                                            106,
+                                            112
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "2024-01-15 10:23:45 ERROR {main} Failed\n2024-01-15 10:24:00 INFO  {worker-1} Ok\n2024-02-01 08:00:00 WARN  {main} Slow\n"
+                    },
+                    {
+                        "name":  "html tags",
+                        "matches":  [
+                                        [
+                                            0,
+                                            15
+                                        ],
+                                        [
+                                            15,
+                                            26
+                                        ],
+                                        [
+                                            30,
+                                            37
+                                        ],
+                                        [
+                                            37,
+                                            42
+                                        ],
+                                        [
+                                            42,
+                                            75
+                                        ],
+                                        [
+                                            79,
+                                            83
+                                        ],
+                                        [
+                                            83,
+                                            89
+                                        ]
+                                    ],
+                        "replaceCount":  7,
+                        "replaced":  "Textlink"
+                    },
+                    {
+                        "name":  "html attribute",
+                        "matches":  [
+                                        [
+                                            5,
+                                            14
+                                        ],
+                                        [
+                                            45,
+                                            74
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "\u003cdiv class=\u0027a\u0027\u003e\u003cspan id=x\u003eText\u003c/span\u003e\u003cbr/\u003e\u003ca href=\u0027http://x.org/a?b=1\u0026c=2\u0027\u003elink\u003c/a\u003e\u003c/div\u003e"
+                    },
+                    {
+                        "name":  "url",
+                        "matches":  [
+                                        [
+                                            51,
+                                            73
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "\u003cdiv class=\"a\"\u003e\u003cspan id=x\u003eText\u003c/span\u003e\u003cbr/\u003e\u003ca href=\"URL\"\u003elink\u003c/a\u003e\u003c/div\u003e"
+                    },
+                    {
+                        "name":  "email",
+                        "matches":  [
+                                        [
+                                            0,
+                                            9
+                                        ],
+                                        [
+                                            11,
+                                            22
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "\u003cmail\u003e, \u003cmail\u003e; bad@x"
+                    },
+                    {
+                        "name":  "windows paths",
+                        "matches":  [
+                                        [
+                                            2,
+                                            3
+                                        ],
+                                        [
+                                            8,
+                                            9
+                                        ],
+                                        [
+                                            11,
+                                            12
+                                        ],
+                                        [
+                                            39,
+                                            40
+                                        ],
+                                        [
+                                            40,
+                                            41
+                                        ],
+                                        [
+                                            47,
+                                            48
+                                        ],
+                                        [
+                                            53,
+                                            54
+                                        ]
+                                    ],
+                        "replaceCount":  7,
+                        "replaced":  "C:/Users/me/file.txt\n/home/me/file.txt\n//server/share/x\n"
+                    },
+                    {
+                        "name":  "c comments line",
+                        "matches":  [
+                                        [
+                                            46,
+                                            61
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "int main() {\n    return foo(1, 2) + bar[3];\n}\n\n/* block\n   comment */\n"
+                    },
+                    {
+                        "name":  "c comments block",
+                        "matches":  [
+                                        [
+                                            62,
+                                            84
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "int main() {\n    return foo(1, 2) + bar[3];\n}\n// comment here\n\n"
+                    },
+                    {
+                        "name":  "function call",
+                        "matches":  [
+                                        [
+                                            4,
+                                            10
+                                        ],
+                                        [
+                                            24,
+                                            33
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "int main[] {\n    return foo[1, 2] + bar[3];\n}\n// comment here\n/* block\n   comment */\n"
+                    },
+                    {
+                        "name":  "indent",
+                        "matches":  [
+                                        [
+                                            13,
+                                            17
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "int main() {\n\treturn foo(1, 2) + bar[3];\n}\n// comment here\n/* block\n   comment */\n"
+                    },
+                    {
+                        "name":  "between markers",
+                        "matches":  [
+                                        [
+                                            12,
+                                            44
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "int main() { ... }\n// comment here\n/* block\n   comment */\n"
+                    },
+                    {
+                        "name":  "number thousands",
+                        "matches":  [
+                                        [
+                                            1,
+                                            1
+                                        ],
+                                        [
+                                            4,
+                                            4
+                                        ],
+                                        [
+                                            12,
+                                            12
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "1,234,567 89 1,000"
+                    },
+                    {
+                        "name":  "hex numbers",
+                        "matches":  [
+                                        [
+                                            0,
+                                            4
+                                        ],
+                                        [
+                                            13,
+                                            21
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "HEX 0xGG x0 HEX"
+                    },
+                    {
+                        "name":  "ip address",
+                        "matches":  [
+                                        [
+                                            0,
+                                            8
+                                        ],
+                                        [
+                                            17,
+                                            30
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "IP 256.1.1 IP"
+                    },
+                    {
+                        "name":  "repeated chars",
+                        "matches":  [
+                                        [
+                                            0,
+                                            3
+                                        ],
+                                        [
+                                            3,
+                                            6
+                                        ],
+                                        [
+                                            8,
+                                            10
+                                        ],
+                                        [
+                                            10,
+                                            13
+                                        ]
+                                    ],
+                        "replaceCount":  4,
+                        "replaced":  "abcd e"
+                    },
+                    {
+                        "name":  "capitalize sentences",
+                        "matches":  [
+                                        [
+                                            0,
+                                            1
+                                        ],
+                                        [
+                                            3,
+                                            6
+                                        ],
+                                        [
+                                            8,
+                                            11
+                                        ],
+                                        [
+                                            15,
+                                            18
+                                        ]
+                                    ],
+                        "replaceCount":  4,
+                        "replaced":  "One. Two! Three? Four"
+                    },
+                    {
+                        "name":  "wrap in quotes",
+                        "matches":  [
+                                        [
+                                            0,
+                                            5
+                                        ],
+                                        [
+                                            6,
+                                            11
+                                        ],
+                                        [
+                                            12,
+                                            18
+                                        ],
+                                        [
+                                            19,
+                                            24
+                                        ],
+                                        [
+                                            25,
+                                            31
+                                        ],
+                                        [
+                                            32,
+                                            38
+                                        ]
+                                    ],
+                        "replaceCount":  6,
+                        "replaced":  "\"apple\"\n\"apple\"\n\"banana\"\n\"apple\"\n\"cherry\"\n\"cherry\"\n"
+                    },
+                    {
+                        "name":  "empty lookahead insert",
+                        "matches":  [
+                                        [
+                                            1,
+                                            1
+                                        ],
+                                        [
+                                            4,
+                                            4
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "a|bca|bc"
+                    },
+                    {
+                        "name":  "star empty",
+                        "matches":  [
+                                        [
+                                            0,
+                                            0
+                                        ],
+                                        [
+                                            1,
+                                            3
+                                        ],
+                                        [
+                                            3,
+                                            3
+                                        ],
+                                        [
+                                            4,
+                                            4
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "-a-b-"
+                    },
+                    {
+                        "name":  "empty alternation",
+                        "matches":  [
+                                        [
+                                            0,
+                                            0
+                                        ],
+                                        [
+                                            1,
+                                            2
+                                        ],
+                                        [
+                                            2,
+                                            2
+                                        ],
+                                        [
+                                            3,
+                                            3
+                                        ]
+                                    ],
+                        "replaceCount":  3,
+                        "replaced":  "#b#b#"
+                    },
+                    {
+                        "name":  "literal dollar in replace",
+                        "matches":  [
+                                        [
+                                            0,
+                                            4
+                                        ],
+                                        [
+                                            5,
+                                            9
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "$5 $5"
+                    },
+                    {
+                        "name":  "escaped backslash replace",
+                        "matches":  [
+                                        [
+                                            1,
+                                            2
+                                        ],
+                                        [
+                                            3,
+                                            4
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "a\\b\\c"
+                    },
+                    {
+                        "name":  "newline in replace",
+                        "matches":  [
+                                        [
+                                            1,
+                                            2
+                                        ],
+                                        [
+                                            3,
+                                            4
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "a\r\nb\r\nc"
+                    },
+                    {
+                        "name":  "tab in replace",
+                        "matches":  [
+                                        [
+                                            1,
+                                            2
+                                        ],
+                                        [
+                                            3,
+                                            4
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "a\tb\tc"
+                    },
+                    {
+                        "name":  "crlf skip",
+                        "matches":  [
+                                        [
+                                            2,
+                                            3
+                                        ],
+                                        [
+                                            4,
+                                            5
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "a\rNbNc"
+                    },
+                    {
+                        "name":  "dot vs crlf",
+                        "matches":  [
+                                        [
+                                            5,
+                                            7
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "a\r\na\nX"
+                    },
+                    {
+                        "name":  "extended newline",
+                        "matches":  [
+                                        [
+                                            44,
+                                            46
+                                        ],
+                                        [
+                                            65,
+                                            67
+                                        ],
+                                        [
+                                            86,
+                                            88
+                                        ],
+                                        [
+                                            88,
+                                            90
+                                        ]
+                                    ],
+                        "replaceCount":  4,
+                        "replaced":  "The quick brown fox jumps over the lazy dog. THE QUICK BROWN FOX foo123 bar_45 baz-6  end"
+                    },
+                    {
+                        "name":  "extended tab",
+                        "matches":  [
+                                        [
+                                            22,
+                                            23
+                                        ],
+                                        [
+                                            34,
+                                            35
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "  leading\ntrailing   \n-\u003e tab mixed -\u003e\n\n   \nlast"
+                    },
+                    {
+                        "name":  "extended hex",
+                        "matches":  [
+                                        [
+                                            0,
+                                            1
+                                        ],
+                                        [
+                                            2,
+                                            3
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "aBa"
+                    },
+                    {
+                        "name":  "extended decimal",
+                        "matches":  [
+                                        [
+                                            0,
+                                            1
+                                        ],
+                                        [
+                                            2,
+                                            3
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "aBa"
+                    },
+                    {
+                        "name":  "extended unicode",
+                        "matches":  [
+                                        [
+                                            3,
+                                            5
+                                        ],
+                                        [
+                                            6,
+                                            8
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "cafe ecole"
+                    },
+                    {
+                        "name":  "extended replace newline",
+                        "matches":  [
+                                        [
+                                            1,
+                                            2
+                                        ],
+                                        [
+                                            3,
+                                            4
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "a\nb\nc"
+                    },
+                    {
+                        "name":  "normal dot literal",
+                        "matches":  [
+                                        [
+                                            43,
+                                            44
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "The quick brown fox jumps over the lazy dog!\r\nTHE QUICK BROWN FOX\r\nfoo123 bar_45 baz-6\r\n\r\nend"
+                    },
+                    {
+                        "name":  "normal brackets literal",
+                        "matches":  [
+                                        [
+                                            39,
+                                            42
+                                        ]
+                                    ],
+                        "replaceCount":  1,
+                        "replaced":  "int main() {\n    return foo(1, 2) + bar(3);\n}\n// comment here\n/* block\n   comment */\n"
+                    },
+                    {
+                        "name":  "normal backslash",
+                        "matches":  [
+                                        [
+                                            2,
+                                            3
+                                        ],
+                                        [
+                                            8,
+                                            9
+                                        ],
+                                        [
+                                            11,
+                                            12
+                                        ],
+                                        [
+                                            39,
+                                            40
+                                        ],
+                                        [
+                                            40,
+                                            41
+                                        ],
+                                        [
+                                            47,
+                                            48
+                                        ],
+                                        [
+                                            53,
+                                            54
+                                        ]
+                                    ],
+                        "replaceCount":  7,
+                        "replaced":  "C:/Users/me/file.txt\n/home/me/file.txt\n//server/share/x\n"
+                    },
+                    {
+                        "name":  "normal whole word hangul",
+                        "matches":  [
+                                        [
+                                            0,
+                                            6
+                                        ],
+                                        [
+                                            17,
+                                            23
+                                        ]
+                                    ],
+                        "replaceCount":  2,
+                        "replaced":  "K 한글말 K"
+                    }
+                ]
+}

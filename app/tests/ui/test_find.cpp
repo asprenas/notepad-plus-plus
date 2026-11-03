@@ -260,11 +260,15 @@ private slots:
         QVERIFY2(ticks >= ms / 200, "event loop starved during Find in Files"); // at least 5 ticks per second
 
         // cancel: press Cancel on the progress window shortly after start
-        QTimer::singleShot(800, [] {
+        QTimer canceller; // cancels as soon as the progress window exists (it may stay hidden on fast machines)
+        connect(&canceller, &QTimer::timeout, [&canceller] {
             for (QWidget* w : QApplication::topLevelWidgets())
-                if (auto* p = qobject_cast<QProgressDialog*>(w))
+                if (auto* p = qobject_cast<QProgressDialog*>(w)) {
                     p->cancel();
+                    canceller.stop();
+                }
         });
+        canceller.start(5);
         dlg()->setOptions(opts("nothing")); // 9990 hits: long enough to be cancelled
         run(Action::FindInFiles);
         QVERIFY2(dlg()->status() == QStringLiteral("The search was cancelled."), qPrintable(dlg()->status()));
@@ -282,7 +286,8 @@ private slots:
 
     void editMenuCommands()
     {
-        setText("b\r\na\r\nc"); // lines are split on the document EOL (CR LF for a new document)
+        ed()->send(SCI_SETEOLMODE, SC_EOL_CRLF); // lines are split on the document EOL
+        setText("b\r\na\r\nc");
         QVERIFY(m_w->actions()->trigger(IDM_EDIT_SORTLINES_LEXICOGRAPHIC_DESCENDING));
         QCOMPARE(text(ed()), std::string("c\r\nb\r\na"));
         ed()->send(SCI_SETSEL, 0, 1);

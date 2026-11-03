@@ -25,9 +25,12 @@ DUP = "apple\napple\nbanana\napple\ncherry\ncherry\n"
 cases = []
 
 
-def add(name, find, replace="", text=LOREM, mode="regex", case=False, word=False, dotnl=False):
+def add(name, find, replace="", text=LOREM, mode="regex", case=False, word=False, dotnl=False, windowsCodepage=False):
+    # windowsCodepage: upstream maps the case of non-ASCII letters with the Win32 locale traits of
+    # the system ANSI code page (\U on "é" depends on it); compared on Windows only
     cases.append({"name": name, "find": find, "replace": replace, "text": text, "mode": mode,
-                  "matchCase": case, "wholeWord": word, "dotMatchesNewline": dotnl})
+                  "matchCase": case, "wholeWord": word, "dotMatchesNewline": dotnl,
+                  "windowsCodepageDependent": windowsCodepage})
 
 
 # --- basics -------------------------------------------------------------------------------------
@@ -102,7 +105,7 @@ add("lower \\L", "[A-Z]+", "\\L$0", text="THE QUICK Brown", case=True)
 add("upper first \\u", "\\b\\w+", "\\u$0", text="alpha beta gamma")
 add("lower first \\l", "\\b\\w+", "\\l$0", text="Alpha BETA Gamma")
 add("upper range then end", "(\\w+)_(\\w+)", "\\U$1\\E_$2", text="foo_bar baz_qux")
-add("upper hangul neutral", "(\\w+)", "\\U$1", text="abc 한글 éa")
+add("upper hangul neutral", "(\\w+)", "\\U$1", text="abc 한글 éa", windowsCodepage=True)
 # --- inline modifiers ------------------------------------------------------------------------------
 add("inline ignore case", "(?i)the", "X", case=True)
 add("inline case sensitive", "(?-i)the", "X")
@@ -179,6 +182,62 @@ add("normal dot literal", ".", "!", mode="normal")
 add("normal brackets literal", "[3]", "(3)", text=CODE, mode="normal")
 add("normal backslash", "\\", "/", text=PATHS, mode="normal")
 add("normal whole word hangul", "한글", "K", text="한글 한글말 한글", mode="normal", word=True)
+
+
+
+def read_base(s, base, size):
+    temp = 0
+    mx = ord('0') + base - 1
+    for ch in s[:size]:
+        c = ord(ch)
+        if c >= ord('A'):
+            c &= 0xDF
+            c -= ord('A') - ord('0') - 10
+        elif c > ord('9'):
+            return None
+        if ord('0') <= c <= mx:
+            temp = temp * base + (c - ord('0'))
+        else:
+            return None
+    return temp
+
+
+BS = chr(92)
+
+
+def convert_extended(q):
+    """Port of upstream Searching::convertExtendedToString (works on UTF-16 units like upstream)."""
+    out, i, n = [], 0, len(q)
+    while i < n:
+        cur = q[i]
+        left = n - i - 1
+        if cur == BS and left:
+            i += 1
+            left -= 1
+            cur = q[i]
+            simple = {'r': chr(13), 'n': chr(10), '0': chr(0), 't': chr(9), BS: BS}
+            if cur in simple:
+                out.append(simple[cur])
+            elif cur in 'bdoxu':
+                size, base = {'b': (8, 2), 'o': (3, 8), 'd': (3, 10), 'x': (2, 16), 'u': (4, 16)}[cur]
+                v = read_base(q[i + 1:i + 1 + size], base, size) if left >= size else None
+                if v is not None:
+                    out.append(chr(v))
+                    i += size
+                else:
+                    out.append(BS + cur)
+            else:
+                out.append(BS + cur)
+        else:
+            out.append(cur)
+        i += 1
+    return ''.join(out)
+
+
+for c in cases:
+    ext = c["mode"] == "extended"
+    c["engineFind"] = convert_extended(c["find"]) if ext else c["find"]
+    c["engineReplace"] = convert_extended(c["replace"]) if ext else c["replace"]
 
 out.parent.mkdir(parents=True, exist_ok=True)
 out.write_text(json.dumps(cases, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
