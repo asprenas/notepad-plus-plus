@@ -12,6 +12,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QCoreApplication>
 #include <QTest>
 
 #include <thread>
@@ -32,7 +33,9 @@ const std::string kEnc = NPP_TEST_DATA_DIR "/encodings/";
 
 std::string tempDir()
 {
-    const std::string d = utf8FromPath(fs::temp_directory_path()) + "/npp-core-buffer-테스트";
+    // per process: test runs of several build directories may overlap (local CI)
+    const std::string d = utf8FromPath(fs::temp_directory_path()) + "/npp-core-buffer-테스트-"
+                          + std::to_string(QCoreApplication::applicationPid());
     fs::create_directories(pathFromUtf8(d));
     return d;
 }

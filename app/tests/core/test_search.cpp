@@ -7,6 +7,7 @@
 #include <ScintillaEditBase.h>
 
 #include <QApplication>
+#include <QCoreApplication>
 #include <QTest>
 
 using namespace npp::core;
@@ -216,7 +217,7 @@ private slots:
 
     void findAndReplaceInFiles()
     {
-        const std::string dir = utf8FromPath(fs::temp_directory_path()) + "/npp-core-fif";
+        const std::string dir = utf8FromPath(fs::temp_directory_path()) + "/npp-core-fif-" + std::to_string(QCoreApplication::applicationPid());
         { std::error_code ec_; fs::remove_all(pathFromUtf8(dir), ec_); }
         fs::create_directories(pathFromUtf8(dir + "/sub"));
         fs::create_directories(pathFromUtf8(dir + "/node_modules"));

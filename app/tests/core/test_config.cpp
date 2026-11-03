@@ -7,6 +7,7 @@
 
 #include <pugixml.hpp>
 
+#include <QCoreApplication>
 #include <QTest>
 
 using namespace npp::core;
@@ -132,7 +133,7 @@ private slots:
     void configModifyAndNewFile()
     {
         ConfigFile cfg;
-        const std::string path = utf8FromPath(fs::temp_directory_path()) + "/npp-core-config-test.xml";
+        const std::string path = utf8FromPath(fs::temp_directory_path()) + "/npp-core-config-test-" + std::to_string(QCoreApplication::applicationPid()) + ".xml";
         fs::remove(pathFromUtf8(path));
         QVERIFY(cfg.load(path));
         QVERIFY(cfg.isNew());
@@ -268,7 +269,7 @@ private slots:
 
     void appPaths()
     {
-        const std::string base = utf8FromPath(fs::temp_directory_path()) + "/npp-core-paths";
+        const std::string base = utf8FromPath(fs::temp_directory_path()) + "/npp-core-paths-" + std::to_string(QCoreApplication::applicationPid());
         { std::error_code ec_; fs::remove_all(pathFromUtf8(base), ec_); }
         const std::string appDir = base + "/app", userDir = base + "/user", cloudDir = base + "/cloud",
                           settingsDir = base + "/settings";

@@ -515,6 +515,29 @@ private slots:
         QCOMPARE(QFileInfo(m_w->currentThemePath().c_str()).fileName(), QFileInfo(original).fileName());
     }
 
+    void systemModeFollowsColorScheme()
+    {
+        // "follow system": a platform colour scheme change switches palette and editor theme at once
+        GuiConfig& g = m_w->mutableConfig().gui;
+        g.darkModeEnabled = false;
+        g.darkFollowSystem = true;
+        QStyleHints* hints = QGuiApplication::styleHints();
+        hints->setColorScheme(Qt::ColorScheme::Dark);
+        QCoreApplication::processEvents();
+        if (hints->colorScheme() != Qt::ColorScheme::Dark)
+            QSKIP("this platform plugin cannot change the colour scheme");
+        QVERIFY(m_w->isDarkMode());
+        QVERIFY(qApp->palette().color(QPalette::Window).lightness() < 80);
+        QVERIFY(QString::fromStdString(m_w->currentThemePath()).endsWith(QStringLiteral("DarkModeDefault.xml")));
+        hints->setColorScheme(Qt::ColorScheme::Light);
+        QCoreApplication::processEvents();
+        QVERIFY(!m_w->isDarkMode());
+        QVERIFY(qApp->palette().color(QPalette::Window).lightness() > 160);
+        QVERIFY(!QString::fromStdString(m_w->currentThemePath()).contains(QStringLiteral("DarkModeDefault")));
+        hints->unsetColorScheme();
+        g.darkFollowSystem = false;
+    }
+
     void screenshots()
     {
         const QString out = qEnvironmentVariable("NPP_SCREENSHOT_DIR");

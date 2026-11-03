@@ -1,6 +1,7 @@
 #include "core/util/PathUtil.h"
 #include "core/util/StringUtil.h"
 
+#include <QCoreApplication>
 #include <QTest>
 
 using namespace npp::core;
@@ -110,7 +111,7 @@ private slots:
 
     void fileContentAndExistence()
     {
-        const std::string dir = utf8FromPath(fs::temp_directory_path()) + "/npp-core-test-한글";
+        const std::string dir = utf8FromPath(fs::temp_directory_path()) + "/npp-core-test-한글-" + std::to_string(QCoreApplication::applicationPid());
         fs::create_directories(pathFromUtf8(dir));
         const std::string file = dir + "/내용.txt";
         QVERIFY(writeFileContent(file, std::string("a\0b", 3)));
