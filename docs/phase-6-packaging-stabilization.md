@@ -6,7 +6,7 @@
 - 다음 단계: [7단계 플러그인 API](phase-7-plugin-api.md)
 
 
-> 개발 범위: 현재 대상 플랫폼은 **Windows·Linux**. macOS는 차후 개발 예정이므로 macOS 관련 작업·테스트는 완료 기준에서 제외하고 `차후 구현 항목` 절에 둔다.
+> 개발 범위: 현재 대상 플랫폼은 **Windows·Linux**. macOS는 차후 개발 예정이므로 macOS 관련 작업·테스트는 완료 기준에서 제외하고 별도 문서 [macOS 지원 세부 계획](phase-macos.md)에서 관리한다.
 
 ---
 
@@ -112,11 +112,3 @@ GitHub은 저장소로만 쓰므로 빌드·서명·업로드는 로컬에서 �
 | AppImage가 일부 배포판에서 실행 안 됨 (glibc, FUSE) | 대상 배포판 목록 명시, `--appimage-extract-and-run` 안내 |
 | 서명 없는 배포본의 보안 경고 | 개인 사용 단계에서는 허용, 외부 배포 전 서명 계획 수립 |
 | Wayland에서 권한 상승 도우미 UI | `pkexec` 표준 대화상자 사용 |
-
----
-
-## 차후 구현 항목 (macOS)
-
-- 3.3절 macOS 패키징 (`macdeployqt`, Universal 2, Info.plist, dmg, 서명·공증)
-- macOS 크래시 리포트(시그널 핸들러) 확인
-- macOS 깨끗한 환경 설치 테스트

@@ -6,13 +6,13 @@
 - 다음 단계: [1단계 코어 추출](phase-1-core-extraction.md)
 
 
-> 개발 범위: 현재 대상 플랫폼은 **Windows·Linux**. macOS는 차후 개발 예정이므로 macOS 관련 작업·테스트는 완료 기준에서 제외하고 `차후 구현 항목` 절에 둔다.
+> 개발 범위: 현재 대상 플랫폼은 **Windows·Linux**. macOS는 차후 개발 예정이므로 macOS 관련 작업·테스트는 완료 기준에서 제외하고 별도 문서 [macOS 지원 세부 계획](phase-macos.md)에서 관리한다.
 
 ---
 
 ## 1. 목표
 
-1. 3개 플랫폼(Windows, Linux, macOS)에서 같은 CMake로 빌드되는 골격을 만든다.
+1. Windows·Linux에서 같은 CMake로 빌드되는 골격을 만든다 (macOS는 [별도 문서](phase-macos.md)).
 2. 기존 소스 중 그대로 재사용할 부품(Scintilla Qt 레이어, Lexilla, boostregex, pugixml)이 Qt 환경에서 동작함을 증명한다.
 3. 확정된 결정(UTF-8 문자열, `DockManager` + ADS)을 코드로 검증한다.
 4. 이후 단계가 매일 쓰게 될 개발 환경(로컬 CI, IDE, 문서)을 갖춘다.
@@ -99,11 +99,3 @@
 | ADS `DockManager.h`와 프로젝트 헤더 이름 충돌 | ADS는 `<...>`, 프로젝트는 `"..."` include 규칙 |
 | CLion 기본 MinGW(GCC 16)와 Qt kit MinGW(13.1)는 런타임 다름 | CLion은 MSVC + LLDB 사용 |
 | `include(CTest)`가 IDE 실행 구성을 28개 추가 | `enable_testing()` 사용 |
-
----
-
-## 차후 구현 항목 (macOS)
-
-- macOS 빌드 환경 (Xcode CLT, Qt 6 Universal + Qt 5 Compatibility, `macos-release` 프리셋 검증) — 4.1절 절차
-- `ci/local-ci.sh`에 macOS 대상 추가
-- macOS 한글 IME, 도킹, HiDPI 수동 확인 (4.2절 표의 macOS 열)

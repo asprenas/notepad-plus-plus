@@ -6,7 +6,7 @@
 - 다음 단계: [2단계 MVP](phase-2-mvp.md)
 
 
-> 개발 범위: 현재 대상 플랫폼은 **Windows·Linux**. macOS는 차후 개발 예정이므로 macOS 관련 작업·테스트는 완료 기준에서 제외하고 `차후 구현 항목` 절에 둔다.
+> 개발 범위: 현재 대상 플랫폼은 **Windows·Linux**. macOS는 차후 개발 예정이므로 macOS 관련 작업·테스트는 완료 기준에서 제외하고 별도 문서 [macOS 지원 세부 계획](phase-macos.md)에서 관리한다.
 
 ---
 
@@ -262,10 +262,3 @@ struct LexerSpec {
 ### 9.4 안전 규칙 (샘플 앱)
 
 샘플 앱은 원본 Notepad++와 설정 폴더를 공유하므로 **설정 파일을 쓰지 않는다**. 세션에서 복원한 백업 파일은 연결을 끊어 삭제·덮어쓰기를 막는다.
-
----
-
-## 차후 구현 항목 (macOS)
-
-- macOS에서 코어 단위 테스트 실행 (`bash ci/local-ci.sh`; iconv는 macOS libiconv 이름 차이 확인)
-- macOS 설정 경로(`~/Library/Application Support/Notepad++`) 동작 확인

@@ -5,7 +5,7 @@
 - 선행: [6단계 패키징/안정화](phase-6-packaging-stabilization.md) 완료 (베타 배포 후)
 
 
-> 개발 범위: 현재 대상 플랫폼은 **Windows·Linux**. macOS는 차후 개발 예정이므로 macOS 관련 작업·테스트는 완료 기준에서 제외하고 `차후 구현 항목` 절에 둔다.
+> 개발 범위: 현재 대상 플랫폼은 **Windows·Linux**. macOS는 차후 개발 예정이므로 macOS 관련 작업·테스트는 완료 기준에서 제외하고 별도 문서 [macOS 지원 세부 계획](phase-macos.md)에서 관리한다.
 
 ---
 
@@ -147,9 +147,3 @@ intptr_t npp_compat_send(unsigned nppmMessage, uintptr_t w, intptr_t l);
 | 플러그인과 앱의 Qt 버전 일치 요구 | UI 없는 플러그인은 Qt 비의존, UI 플러그인은 앱 Qt 버전 명시 |
 | `NPPM_*` 의미 중 Win32 특화(창 핸들 반환 등) | 대응 불가 목록으로 문서화, 대체 함수 제공 |
 | 플러그인 생태계가 생기지 않음 | 핵심 기능은 내장 기능화, 스크립팅으로 진입 장벽 낮춤 |
-
----
-
-## 차후 구현 항목 (macOS)
-
-- macOS `.dylib` 플러그인 로드 (3.3절 경로) 및 샘플 플러그인 확인

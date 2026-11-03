@@ -270,7 +270,8 @@
 [4 설정/테마](phase-4-settings-theme.md) ·
 [5 패널/부가 기능](phase-5-panels-extras.md) ·
 [6 패키징/안정화](phase-6-packaging-stabilization.md) ·
-[7 플러그인 API](phase-7-plugin-api.md)
+[7 플러그인 API](phase-7-plugin-api.md) ·
+[macOS 지원 (기타)](phase-macos.md)
 
 | 단계 | 기간 | 산출물 | 완료 기준 |
 |---|---|---|---|
