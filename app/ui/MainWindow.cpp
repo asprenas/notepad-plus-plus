@@ -281,6 +281,7 @@ void MainWindow::loadSettings()
             if (l.name == m_nativeLang.languageName())
                 m_currentLanguageFile = l.fileName;
     m_shortcuts.load(m_paths.shortcutsXml());
+    loadQtTranslation();
     ensureContextMenuFile();
 
     const GuiConfig& g = m_config.gui;

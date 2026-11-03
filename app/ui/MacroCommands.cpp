@@ -4,6 +4,8 @@
 // in the original Notepad++ replay here.
 #include "MainWindow.h"
 
+#include "DialogTranslator.h"
+
 #include "editor/EditorPane.h"
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
@@ -19,6 +21,8 @@
 #include <QButtonGroup>
 #include <QComboBox>
 #include <QDialog>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QDialogButtonBox>
 #include <QFormLayout>
 #include <QKeySequenceEdit>
@@ -267,10 +271,16 @@ void MainWindow::registerMacroCommands()
         auto* name = new QLineEdit;
         auto* key = new QKeySequenceEdit;
         auto* form = new QFormLayout(&dlg);
-        form->addRow(tr("Name :"), name);
+        auto* nameLabel = new QLabel(tr("Name :"));
+        nameLabel->setBuddy(name);
+        form->addRow(nameLabel, name);
         form->addRow(tr("Shortcut :"), key);
         auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
         form->addRow(buttons);
+        setControlId(nameLabel, 5006);
+        setControlId(buttons->button(QDialogButtonBox::Ok), 1);
+        setControlId(buttons->button(QDialogButtonBox::Cancel), 2);
+        translateDialog(&dlg, dialogLanguage(), "ShortcutMapperSubDialg");
         connect(buttons, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
         connect(buttons, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
         if (dlg.exec() != QDialog::Accepted || name->text().trimmed().isEmpty())
@@ -297,12 +307,23 @@ void MainWindow::registerMacroCommands()
         auto* count = new QSpinBox;
         count->setRange(1, 1000000);
         auto* form = new QFormLayout(&dlg);
-        form->addRow(tr("Macro to run"), which);
-        form->addRow(times, count);
+        auto* whichLabel = new QLabel(tr("Macro to run"));
+        whichLabel->setBuddy(which);
+        form->addRow(whichLabel, which);
+        auto* timesRow = new QHBoxLayout;
+        auto* timesLabel = new QLabel(tr("times"));
+        timesRow->addWidget(count);
+        timesRow->addWidget(timesLabel);
+        form->addRow(times, timesRow);
         form->addRow(toEof);
         auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
         buttons->button(QDialogButtonBox::Ok)->setText(tr("Run"));
         form->addRow(buttons);
+        for (auto [w, id] : std::initializer_list<std::pair<QWidget*, int>>{
+                 {buttons->button(QDialogButtonBox::Ok), 1}, {buttons->button(QDialogButtonBox::Cancel), 2}, {whichLabel, 8006},
+                 {times, 8001}, {timesLabel, 8005}, {toEof, 8002}})
+            setControlId(w, id);
+        translateDialog(&dlg, dialogLanguage(), "MultiMacro");
         connect(buttons, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
         connect(buttons, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
         if (which->count() == 0 || dlg.exec() != QDialog::Accepted)

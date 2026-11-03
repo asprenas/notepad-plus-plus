@@ -203,6 +203,8 @@ void PreferencesDialog::buildPages()
                 ctrl->resize(std::max(ctrl->width(), ctrl->sizeHint().width()), std::max(ctrl->height(), ctrl->sizeHint().height()));
             if (c.flags & kPrefDisabled)
                 ctrl->setEnabled(false);
+            if (c.id <= 0)
+                ctrl->setObjectName(QStringLiteral("static")); // IDC_STATIC: fixed text, not translated upstream either
             if (c.id > 0) {
                 ctrl->setObjectName(QString::number(c.id));
                 page.controls[c.id] = ctrl;

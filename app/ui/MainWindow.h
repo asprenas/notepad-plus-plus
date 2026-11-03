@@ -30,6 +30,7 @@
 
 class QAction;
 class QMenu;
+class QTranslator;
 class QCheckBox;
 class QDialog;
 class QLineEdit;
@@ -39,6 +40,7 @@ class QProgressDialog;
 class QLabel;
 class QListWidget;
 class QMenu;
+class QTranslator;
 class QSplitter;
 class QTimer;
 class ScintillaEditBase;
@@ -230,6 +232,9 @@ private:
     void showEditorContextMenu(EditorPane* p, const QPoint& globalPos);
     void showTabContextMenu(EditorPane* p, int index, const QPoint& globalPos);
     void ensureContextMenuFile();
+    // nativeLang.xml, or english.xml when none (to restore dialog texts after a switch to English)
+    const core::NativeLanguage* dialogLanguage();
+    void loadQtTranslation();
     // --- toolbar (Toolbar.cpp)
     void buildToolbar();
     void buildMenus();
@@ -285,6 +290,8 @@ private:
     QString                      m_defaultStyleName;
     bool                         m_themeIsDark = false, m_themeApplied = false;
     std::string                  m_currentThemePath;
+    core::NativeLanguage         m_englishLang;
+    QTranslator*                 m_qtTranslator = nullptr;
     QPointer<QDialog>            m_styleConfigurator;
     bool                         m_goToOffsetMode = false, m_columnEditorNumbers = false;
     QDialog*                     m_charRangeDialog = nullptr;

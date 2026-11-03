@@ -55,6 +55,7 @@ private:
     QTableWidget* m_tables[5] = {};
     QLineEdit* m_filter = nullptr;
     QLabel* m_info = nullptr;
+    QString m_noConflictText;
 };
 
 } // namespace npp::ui

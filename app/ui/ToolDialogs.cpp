@@ -3,6 +3,8 @@
 // bar (FindIncrementDlg) and "Find in these search results" (FindInFinderDlg).
 #include "MainWindow.h"
 
+#include "DialogTranslator.h"
+
 #include "editor/EditorPane.h"
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
@@ -88,12 +90,19 @@ void MainWindow::showGoToDialog()
     modes->addWidget(lineMode);
     modes->addWidget(offsetMode);
     form->addRow(modes);
-    form->addRow(tr("You are here :"), here);
-    form->addRow(tr("You want to go to :"), value);
-    form->addRow(tr("You can't go further than :"), max);
+    auto* hereLabel = new QLabel(tr("You are here :")), *goLabel = new QLabel(tr("You want to go to :")),
+         *maxLabel = new QLabel(tr("You can't go further than :"));
+    form->addRow(hereLabel, here);
+    form->addRow(goLabel, value);
+    form->addRow(maxLabel, max);
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     buttons->button(QDialogButtonBox::Ok)->setText(tr("Go"));
     form->addRow(buttons);
+    for (auto [w, id] : std::initializer_list<std::pair<QWidget*, int>>{
+             {lineMode, 2007}, {offsetMode, 2008}, {buttons->button(QDialogButtonBox::Ok), 1},
+             {buttons->button(QDialogButtonBox::Cancel), 2}, {hereLabel, 2004}, {goLabel, 2005}, {maxLabel, 2006}})
+        setControlId(w, id);
+    translateDialog(&dlg, dialogLanguage(), "GoToLine");
     connect(buttons, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
     connect(buttons, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
     if (dlg.exec() != QDialog::Accepted)
@@ -160,6 +169,10 @@ void MainWindow::showFindCharsInRange()
         grid->addWidget(wrap, 3, 2);
         grid->addWidget(findBtn, 0, 3);
         grid->addWidget(close, 1, 3);
+        for (auto [w, id] : std::initializer_list<std::pair<QWidget*, int>>{
+                 {nonAscii, 2901}, {ascii, 2902}, {custom, 2903}, {up, 2906}, {down, 2907}, {dirBox, 2908},
+                 {wrap, 2909}, {findBtn, 2910}, {close, 2}})
+            setControlId(w, id);
         connect(close, &QPushButton::clicked, dlg, &QDialog::hide);
         connect(findBtn, &QPushButton::clicked, this, [this, nonAscii, ascii, from, to, down, wrap] {
             unsigned char b = 128, en = 255;
@@ -176,6 +189,7 @@ void MainWindow::showFindCharsInRange()
                 QApplication::beep();
         });
     }
+    translateDialog(m_charRangeDialog, dialogLanguage(), "FindCharsInRange");
     m_charRangeDialog->show();
     m_charRangeDialog->raise();
     m_charRangeDialog->activateWindow();
@@ -203,18 +217,32 @@ void MainWindow::showColumnEditor()
     form->addRow(textMode);
     form->addRow(text);
     form->addRow(numMode);
-    form->addRow(tr("Initial number :"), initial);
-    form->addRow(tr("Increase by :"), increase);
-    form->addRow(tr("Repeat :"), repeat);
-    form->addRow(tr("Leading :"), leading);
-    auto* formats = new QHBoxLayout;
+    auto* initialLabel = new QLabel(tr("Initial number :")), *increaseLabel = new QLabel(tr("Increase by :")),
+         *repeatLabel = new QLabel(tr("Repeat :")), *leadingLabel = new QLabel(tr("Leading :"));
+    form->addRow(initialLabel, initial);
+    form->addRow(increaseLabel, increase);
+    form->addRow(repeatLabel, repeat);
+    form->addRow(leadingLabel, leading);
+    for (auto [l, w] : {std::pair<QLabel*, QWidget*>{initialLabel, initial}, {increaseLabel, increase}, {repeatLabel, repeat}, {leadingLabel, leading}})
+        l->setBuddy(w);
+    auto* formatBox = new QGroupBox(tr("Format"));
+    auto* formats = new QHBoxLayout(formatBox);
     for (QWidget* w : std::initializer_list<QWidget*>{dec, hex, oct, bin, upper})
         formats->addWidget(w);
-    form->addRow(tr("Format"), formats);
+    form->addRow(formatBox);
     auto* status = new QLabel;
     form->addRow(status);
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     form->addRow(buttons);
+    for (auto [w, id] : std::initializer_list<std::pair<QWidget*, int>>{
+             {textMode, 2023}, {numMode, 2033}, {initialLabel, 2030}, {increaseLabel, 2031}, {leadingLabel, 2038},
+             {repeatLabel, 2036}, {formatBox, 2032}, {dec, 2024}, {oct, 2025}, {hex, 2026}, {bin, 2027},
+             {buttons->button(QDialogButtonBox::Ok), 1}, {buttons->button(QDialogButtonBox::Cancel), 2}})
+        setControlId(w, id);
+    if (translateDialog(&dlg, dialogLanguage(), "ColumnEditor"))
+        if (const auto d = dialogLanguage()->dialog("ColumnEditor"); d && d->comboBoxes.count(2039))
+            for (int i = 0; i < leading->count() && i < static_cast<int>(d->comboBoxes.at(2039).size()); ++i)
+                leading->setItemText(i, QString::fromStdString(d->comboBoxes.at(2039)[static_cast<size_t>(i)]));
     connect(buttons, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
     connect(buttons, &QDialogButtonBox::accepted, &dlg, [&] {
         const IEditor& e = currentPane()->adapter();
@@ -252,7 +280,9 @@ void MainWindow::showIncrementalSearch()
         auto* close = new QToolButton;
         close->setText(QStringLiteral("✕"));
         m_incBar->addWidget(close);
-        m_incBar->addWidget(new QLabel(tr("Find :")));
+        auto* findLabel = new QLabel(tr("Find :"));
+        setControlId(findLabel, 1681);
+        m_incBar->addWidget(findLabel);
         m_incEdit = new QLineEdit;
         m_incEdit->setMinimumWidth(240);
         m_incBar->addWidget(m_incEdit);
@@ -263,6 +293,8 @@ void MainWindow::showIncrementalSearch()
         m_incBar->addWidget(next);
         m_incHighlight = new QCheckBox(tr("Highlight all"));
         m_incMatchCase = new QCheckBox(tr("Match case"));
+        setControlId(m_incHighlight, 1690);
+        setControlId(m_incMatchCase, 1685);
         m_incBar->addWidget(m_incHighlight);
         m_incBar->addWidget(m_incMatchCase);
         m_incStatus = new QLabel;
@@ -275,6 +307,7 @@ void MainWindow::showIncrementalSearch()
         connect(m_incMatchCase, &QCheckBox::toggled, this, [this] { incrementalSearch(IncFirst, true); });
         m_incEdit->installEventFilter(this);
     }
+    translateDialog(m_incBar, dialogLanguage(), "IncrementalFind");
     m_incBar->show();
     m_incEdit->setFocus();
     m_incEdit->selectAll();

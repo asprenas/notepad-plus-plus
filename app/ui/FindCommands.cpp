@@ -3,6 +3,8 @@
 // core search engine, results in the Search results panel.
 #include "MainWindow.h"
 
+#include "DialogTranslator.h"
+
 #include "docking/DockManager.h"
 #include "editor/EditorPane.h"
 #include "menu/ActionRegistry.h"
@@ -23,6 +25,10 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialog>
+#include <QLabel>
+#include <QVBoxLayout>
+#include <QRadioButton>
+#include <QGroupBox>
 #include <QDialogButtonBox>
 #include <QFormLayout>
 #include <QLineEdit>
@@ -74,6 +80,7 @@ FindReplaceDialog* MainWindow::findDialog()
     if (!m_findDialog) {
         m_findDialog = new FindReplaceDialog(this);
         m_findDialog->loadHistory(m_config.findHistory);
+        m_findDialog->translate(dialogLanguage());
         connect(m_findDialog, &FindReplaceDialog::actionRequested, this, [this](FindReplaceDialog::Action a) { runFindAction(static_cast<int>(a)); });
     }
     return m_findDialog;
@@ -92,16 +99,28 @@ SearchResultsPanel* MainWindow::searchResults(bool showIt)
             auto* text = new QLineEdit(findDialog()->options().findWhat.empty() ? QString() : q(findDialog()->options().findWhat));
             auto* matchCase = new QCheckBox(tr("Match case"));
             auto* word = new QCheckBox(tr("Match whole word only"));
-            auto* mode = new QComboBox;
-            mode->addItems({tr("Normal"), tr("Extended (\\n, \\r, \\t, \\0, \\x...)"), tr("Regular expression")});
+            auto* modeBox = new QGroupBox(tr("Search Mode"));
+            auto* normal = new QRadioButton(tr("Normal")), *extended = new QRadioButton(tr("Extended (\\n, \\r, \\t, \\0, \\x...)")),
+                 *regex = new QRadioButton(tr("Regular expression"));
+            normal->setChecked(true);
+            auto* modeLayout = new QVBoxLayout(modeBox);
+            for (QRadioButton* r : {normal, extended, regex})
+                modeLayout->addWidget(r);
             auto* form = new QFormLayout(&dlg);
-            form->addRow(tr("Find what :"), text);
+            auto* findLabel = new QLabel(tr("Find what :"));
+            findLabel->setBuddy(text);
+            form->addRow(findLabel, text);
             form->addRow(matchCase);
             form->addRow(word);
-            form->addRow(tr("Search Mode"), mode);
+            form->addRow(modeBox);
             auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
             buttons->button(QDialogButtonBox::Ok)->setText(tr("Find all"));
             form->addRow(buttons);
+            for (auto [w, id] : std::initializer_list<std::pair<QWidget*, int>>{
+                     {buttons->button(QDialogButtonBox::Ok), 1}, {buttons->button(QDialogButtonBox::Cancel), 2}, {findLabel, 1711},
+                     {word, 1714}, {matchCase, 1715}, {modeBox, 1716}, {normal, 1717}, {extended, 1718}, {regex, 1719}})
+                setControlId(w, id);
+            translateDialog(&dlg, dialogLanguage(), "FindInFinder");
             connect(buttons, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
             connect(buttons, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
             if (dlg.exec() != QDialog::Accepted || text->text().isEmpty())
@@ -110,7 +129,7 @@ SearchResultsPanel* MainWindow::searchResults(bool showIt)
             o.findWhat = text->text().toStdString();
             o.matchCase = matchCase->isChecked();
             o.wholeWord = word->isChecked();
-            o.type = static_cast<SearchType>(mode->currentIndex());
+            o.type = regex->isChecked() ? SearchType::Regex : extended->isChecked() ? SearchType::Extended : SearchType::Normal;
             m_searchResults->findInResults(o);
         });
         connect(m_searchResults, &SearchResultsPanel::activated, this,

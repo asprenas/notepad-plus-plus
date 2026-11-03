@@ -1,5 +1,7 @@
 #include "FindReplaceDialog.h"
 
+#include "DialogTranslator.h"
+
 #include "core/config/ConfigFile.h"
 #include "core/i18n/NativeLanguage.h"
 
@@ -102,12 +104,16 @@ FindReplaceDialog::FindReplaceDialog(QWidget* parent) : QDialog(parent)
     m_followDoc = new QCheckBox(tr("Follow current doc."));
     m_bookmarkLine = new QCheckBox(tr("Bookmark line"));
     m_purge = new QCheckBox(tr("Purge for each search"));
+    for (auto [w, id] : std::initializer_list<std::pair<QWidget*, int>>{
+             {m_findLabel, 1620}, {m_replaceLabel, 1611}, {m_filtersLabel, 1654}, {m_dirLabel, 1655}, {m_backward, 1722}, {m_wholeWord, 1603}, {m_matchCase, 1604}, {m_wrap, 1606}, {m_inSelection, 1632}, {m_recursive, 1658}, {m_hidden, 1659}, {m_bookmarkLine, 1616}, {m_purge, 1618}})
+        setControlId(w, id);
     auto* checks = new QVBoxLayout;
     for (QCheckBox* c : {m_bookmarkLine, m_purge, m_backward, m_wholeWord, m_matchCase, m_wrap, m_inSelection, m_followDoc, m_recursive, m_hidden})
         checks->addWidget(c);
     checks->addStretch();
 
     auto* modeBox = new QGroupBox(tr("Search Mode"));
+    setControlId(modeBox, 1624);
     m_normal = new QRadioButton(tr("Normal"));
     m_extended = new QRadioButton(tr("Extended (\\n, \\r, \\t, \\0, \\x...)"));
     m_regex = new QRadioButton(tr("Regular expression"));
@@ -123,18 +129,24 @@ FindReplaceDialog::FindReplaceDialog(QWidget* parent) : QDialog(parent)
         updateForTab();
     });
     m_dotNewline->setEnabled(false);
+    for (auto [w, id] : std::initializer_list<std::pair<QWidget*, int>>{{m_normal, 1625}, {m_extended, 1626}, {m_regex, 1605}, {m_dotNewline, 1703}})
+        setControlId(w, id);
 
     auto* buttons = new QVBoxLayout;
-    const std::pair<const char*, Action> defs[] = {
-        {"Find Next", Action::FindNext}, {"Count", Action::Count},
-        {"Find All in Current Document", Action::FindAllCurrent}, {"Find All in All Opened Documents", Action::FindAllOpen},
-        {"Replace", Action::Replace}, {"Replace All", Action::ReplaceAll}, {"Replace All in All Opened Documents", Action::ReplaceAllOpen},
-        {"Find All", Action::FindInFiles}, {"Replace in Files", Action::ReplaceInFiles},
-        {"Mark All", Action::MarkAll}, {"Clear all marks", Action::ClearMarks}, {"Copy Marked Text", Action::CopyMarked},
+    const std::tuple<const char*, Action, int> defs[] = {
+        {"Find Next", Action::FindNext, 1}, {"Count", Action::Count, 1614},
+        {"Find All in Current Document", Action::FindAllCurrent, 1641}, {"Find All in All Opened Documents", Action::FindAllOpen, 1636},
+        {"Replace", Action::Replace, 1608}, {"Replace All", Action::ReplaceAll, 1609}, {"Replace All in All Opened Documents", Action::ReplaceAllOpen, 1635},
+        {"Find All", Action::FindInFiles, 1656}, {"Replace in Files", Action::ReplaceInFiles, 1660},
+        {"Mark All", Action::MarkAll, 1615}, {"Clear all marks", Action::ClearMarks, 1633}, {"Copy Marked Text", Action::CopyMarked, 1725},
     };
-    for (auto [text, a] : defs)
-        buttons->addWidget(button(tr(text), a));
+    for (auto [text, a, id] : defs) {
+        QPushButton* b = button(tr(text), a);
+        setControlId(b, id);
+        buttons->addWidget(b);
+    }
     auto* close = new QPushButton(tr("Close"));
+    setControlId(close, 2);
     connect(close, &QPushButton::clicked, this, &QDialog::hide);
     buttons->addWidget(close);
     buttons->addStretch();
@@ -340,7 +352,13 @@ QString FindReplaceDialog::status() const { return m_status->text(); }
 
 void FindReplaceDialog::translate(const NativeLanguage* nl)
 {
-    Q_UNUSED(nl); // the <Dialog><Find> translation block is applied with the other dialogs (phase 4)
+    // upstream FindReplaceDlg: <Dialog><Find> items by control id, tab titles from the title* attributes
+    translateDialog(this, nl, "Find");
+    static const char* attrs[] = {"titleFind", "titleReplace", "titleFindInFiles", "titleFindInProjects", "titleMark"};
+    static const char* english[] = {"Find", "Replace", "Find in Files", "Find in Projects", "Mark"};
+    for (int i = 0; i < 5; ++i)
+        m_tabs->setTabText(i, nl ? QString::fromStdString(nl->dialogAttribute("Find", attrs[i], english[i])) : tr(english[i]));
+    updateForTab();
 }
 
 } // namespace npp::ui

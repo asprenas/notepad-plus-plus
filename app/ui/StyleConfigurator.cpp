@@ -142,6 +142,7 @@ StyleConfigurator::StyleConfigurator(const Context& ctx, QWidget* parent) : QDia
         styleChanged();
     });
     m_desc = new QLabel;
+    m_desc->setObjectName(QStringLiteral("npp-data")); // style name
     m_desc->setWordWrap(true);
 
     // layout (upstream WordStyleDlg: theme on top, language / style lists left, settings right)
@@ -171,7 +172,7 @@ StyleConfigurator::StyleConfigurator(const Context& ctx, QWidget* parent) : QDia
     m_bold->setObjectName(QStringLiteral("2204"));
     m_italic->setObjectName(QStringLiteral("2205"));
     m_underline->setObjectName(QStringLiteral("2218"));
-    auto* overrides = new QGroupBox(QStringLiteral("Global override"));
+    auto* overrides = new QGroupBox;
     auto* ol = new QVBoxLayout(overrides);
     bool GuiConfig::*fields[7] = {&GuiConfig::globalOverrideFg, &GuiConfig::globalOverrideBg, &GuiConfig::globalOverrideFont,
                                   &GuiConfig::globalOverrideFontSize, &GuiConfig::globalOverrideBold, &GuiConfig::globalOverrideItalic,

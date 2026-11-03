@@ -12,6 +12,8 @@ qt_add_library(npp_ui STATIC
     ToolDialogs.cpp
     SettingsCommands.cpp
     ContextMenus.cpp
+    DialogTranslator.h
+    DialogTranslator.cpp
     Toolbar.cpp
     menu/ToolbarButtons.inc
     Theme.cpp

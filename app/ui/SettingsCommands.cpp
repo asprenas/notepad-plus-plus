@@ -25,6 +25,9 @@
 #include <QStatusBar>
 #include <QTimer>
 #include <QToolBar>
+#include <map>
+#include <QLibraryInfo>
+#include <QTranslator>
 
 namespace npp::ui {
 
@@ -52,11 +55,55 @@ void MainWindow::setUiLanguage(const std::string& fileName)
         m_nativeLang.loadFile(m_paths.nativeLangXml());
     }
     m_currentLanguageFile = fileName;
+    loadQtTranslation();
     QApplication::setLayoutDirection(m_nativeLang.isRTL() ? Qt::RightToLeft : Qt::LeftToRight);
     rebuildMenus();
     if (m_findDialog)
-        m_findDialog->translate(&m_nativeLang);
+        m_findDialog->translate(dialogLanguage());
+    if (m_prefs)
+        m_prefs->translate();
     updateTitleAndStatus();
+}
+
+// Qt's own strings (standard buttons, file dialogs, message boxes) in the UI language:
+// qtbase_<code>.qm from <app>/translations or the Qt installation.
+void MainWindow::loadQtTranslation()
+{
+    static const std::map<std::string, const char*> kCodes = {
+        {"arabic.xml", "ar"}, {"bulgarian.xml", "bg"}, {"catalan.xml", "ca"}, {"czech.xml", "cs"}, {"danish.xml", "da"},
+        {"german.xml", "de"}, {"spanish.xml", "es"}, {"spanish_ar.xml", "es"}, {"farsi.xml", "fa"}, {"finnish.xml", "fi"},
+        {"french.xml", "fr"}, {"hebrew.xml", "he"}, {"croatian.xml", "hr"}, {"hungarian.xml", "hu"}, {"italian.xml", "it"},
+        {"japanese.xml", "ja"}, {"georgian.xml", "ka"}, {"kazakh.xml", "kk"}, {"korean.xml", "ko"}, {"latvian.xml", "lv"},
+        {"dutch.xml", "nl"}, {"nynorsk.xml", "nn"}, {"polish.xml", "pl"}, {"brazilian_portuguese.xml", "pt_BR"},
+        {"russian.xml", "ru"}, {"slovak.xml", "sk"}, {"swedish.xml", "sv"}, {"turkish.xml", "tr"}, {"ukrainian.xml", "uk"},
+        {"chineseSimplified.xml", "zh_CN"}, {"taiwaneseMandarin.xml", "zh_TW"}, {"hongKongCantonese.xml", "zh_TW"},
+    };
+    if (m_qtTranslator) {
+        QCoreApplication::removeTranslator(m_qtTranslator);
+        delete m_qtTranslator;
+        m_qtTranslator = nullptr;
+    }
+    const auto it = m_nativeLang.isLoaded() ? kCodes.find(m_currentLanguageFile) : kCodes.end();
+    if (it == kCodes.end())
+        return;
+    auto* t = new QTranslator(this);
+    const QString file = QStringLiteral("qtbase_") + QLatin1String(it->second);
+    if (t->load(file, QCoreApplication::applicationDirPath() + QStringLiteral("/translations"))
+        || t->load(file, QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
+        QCoreApplication::installTranslator(t);
+        m_qtTranslator = t;
+    } else {
+        delete t;
+    }
+}
+
+const NativeLanguage* MainWindow::dialogLanguage()
+{
+    if (m_nativeLang.isLoaded())
+        return &m_nativeLang;
+    if (!m_englishLang.isLoaded())
+        m_englishLang.loadFile(pathAppend(localizationDir(), "english.xml"), true);
+    return &m_englishLang;
 }
 
 // Re-applies config.xml settings to the running UI (upstream applies each preference change at once)
@@ -167,7 +214,7 @@ void MainWindow::registerSettingsCommands()
         ctx.currentThemePath = &m_currentThemePath;
         ctx.gui = &m_config.gui;
         ctx.langs = &m_langs;
-        ctx.nativeLang = &m_nativeLang;
+        ctx.nativeLang = dialogLanguage();
         ctx.userThemesDir = pathAppend(m_paths.userDir(), "themes");
         ctx.dataThemesDir = pathAppend(m_dataDir, "themes");
         ctx.userStylersXml = m_paths.stylersXml();
@@ -188,7 +235,7 @@ void MainWindow::registerSettingsCommands()
         dlg->show();
     }});
     r->setHandler(IDM_SETTING_SHORTCUT_MAPPER, {[this] {
-        ShortcutMapper dlg(m_shortcuts, m_actions, &m_nativeLang, this);
+        ShortcutMapper dlg(m_shortcuts, m_actions, dialogLanguage(), this);
         if (dlg.exec() == QDialog::Accepted)
             setShortcuts(dlg.result());
     }});

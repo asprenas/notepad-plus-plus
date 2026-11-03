@@ -5,6 +5,8 @@
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
 #include "prefs/PreferencesDialog.h"
+#include "search/FindReplaceDialog.h"
+#include "search/SearchResultsPanel.h"
 #include "ShortcutMapper.h"
 #include "StyleConfigurator.h"
 
@@ -14,6 +16,11 @@
 #include <ScintillaEditBase.h>
 
 #include <QApplication>
+#include <functional>
+#include <QAbstractButton>
+#include <QTabBar>
+#include <QRegularExpression>
+#include <QTimer>
 #include <QPalette>
 #include <QStyleHints>
 #include <QFile>
@@ -46,6 +53,65 @@ class TestSettings : public QObject {
         CommandLine c;
         c.noSession = true;
         m_w = std::make_unique<MainWindow>(c);
+    }
+
+
+    // Texts of a dialog that are not translated: controls without an upstream id (not translatable
+    // from nativeLang) or with an id whose <Dialog><tag> text was not applied.
+    QStringList untranslated(QWidget* dlg, const char* tag, const QStringList& allowed = {})
+    {
+        QStringList out;
+        const auto d = m_w->nativeLanguage().dialog(tag);
+        if (!d)
+            return {QStringLiteral("no <%1> block").arg(QLatin1String(tag))};
+        for (QWidget* w : dlg->findChildren<QWidget*>()) {
+            QString text;
+            if (auto* b = qobject_cast<QAbstractButton*>(w))
+                text = b->text();
+            else if (auto* g = qobject_cast<QGroupBox*>(w))
+                text = g->title();
+            else if (auto* l = qobject_cast<QLabel*>(w))
+                text = l->text();
+            else
+                continue;
+            if (text.isEmpty() || !text.contains(QRegularExpression(QStringLiteral("[A-Za-z]"))) || allowed.contains(text))
+                continue;
+            if (w->objectName() == QLatin1String("static") || w->objectName() == QLatin1String("npp-data"))
+                continue;
+            bool ok = false;
+            const int id = w->objectName().toInt(&ok);
+            if (!ok) {
+                out << QStringLiteral("no id: ") + text;
+                continue;
+            }
+            if (d->items.count(id)) {
+                QString want = QString::fromStdString(d->items.at(id));
+                QString plain = want;
+                plain.remove(QLatin1Char('&'));
+                if (text != want && text != plain)
+                    out << QStringLiteral("%1: %2").arg(id).arg(text);
+            }
+        }
+        return out;
+    }
+
+    // Runs `open` and inspects the modal dialog it shows.
+    QStringList checkModal(const std::function<void()>& open, const char* tag, const QStringList& allowed = {})
+    {
+        QStringList issues;
+        bool seen = false;
+        QTimer::singleShot(0, this, [&] {
+            if (QWidget* dlg = QApplication::activeModalWidget()) {
+                seen = true;
+                issues = untranslated(dlg, tag, allowed);
+                if (auto* d = qobject_cast<QDialog*>(dlg))
+                    d->reject();
+            }
+        });
+        open();
+        if (!seen)
+            issues << QStringLiteral("dialog <%1> not shown").arg(QLatin1String(tag));
+        return issues;
     }
 
 private slots:
@@ -361,6 +427,51 @@ private slots:
         QFile::remove(conf.fileName());
         m_w->applySettings();
         QCOMPARE(buttons().size(), 32);
+    }
+
+    void koreanDialogs()
+    {
+        m_w->setUiLanguage("korean.xml");
+        QStringList issues;
+        auto add = [&issues](const char* what, const QStringList& l) {
+            for (const QString& x : l)
+                issues << QStringLiteral("%1 | %2").arg(QLatin1String(what), x);
+        };
+        // Find / Replace / Find in Files / Mark
+        FindReplaceDialog* f = m_w->findDialog();
+        add("Find", untranslated(f, "Find", {QStringLiteral("..."), QStringLiteral("Follow current doc.")}));
+        QCOMPARE(f->findChild<QTabBar*>()->tabText(1), QStringLiteral("바꾸기"));
+        add("GoToLine", checkModal([&] { m_w->actions()->trigger(IDM_SEARCH_GOTOLINE); }, "GoToLine"));
+        add("ColumnEditor", checkModal([&] { m_w->actions()->trigger(IDM_EDIT_COLUMNMODE); }, "ColumnEditor", {QStringLiteral("Uppercase hex")}));
+        m_w->actions()->trigger(IDM_SEARCH_FINDCHARINRANGE);
+        for (QDialog* w : m_w->findChildren<QDialog*>())
+            if (w->findChild<QWidget*>(QStringLiteral("2901")))
+                add("FindCharsInRange", untranslated(w, "FindCharsInRange"));
+        m_w->actions()->trigger(IDM_SEARCH_FINDINCREMENT);
+        add("IncrementalFind", untranslated(m_w->findChild<QToolBar*>(QStringLiteral("incrementalSearch")), "IncrementalFind"));
+        add("FindInFinder", checkModal([&] { emit m_w->searchResults(false)->findInResultsRequested(); }, "FindInFinder"));
+        add("ShortcutMapper", checkModal([&] { m_w->actions()->trigger(IDM_SETTING_SHORTCUT_MAPPER); }, "ShortcutMapper", {QStringLiteral("Reset")}));
+        // a recorded macro enables the macro dialogs
+        ScintillaEditBase* e = m_w->currentPane()->editor();
+        m_w->actions()->trigger(IDM_MACRO_STARTRECORDINGMACRO);
+        QTest::keyClicks(e, QStringLiteral("ab"));
+        m_w->actions()->trigger(IDM_MACRO_STOPRECORDINGMACRO);
+        QVERIFY(!m_w->recordedMacro().empty());
+        add("ShortcutMapperSubDialg", checkModal([&] { m_w->actions()->trigger(IDM_MACRO_SAVECURRENTMACRO); }, "ShortcutMapperSubDialg", {QStringLiteral("Shortcut :")}));
+        add("MultiMacro", checkModal([&] { m_w->actions()->trigger(IDM_MACRO_RUNMULTIMACRODLG); }, "MultiMacro"));
+        // Preferences / Style Configurator
+        PreferencesDialog* prefs = m_w->preferencesDialog();
+        for (const QString& tag : prefs->pageTags())
+            add(qPrintable(tag), untranslated(prefs->findChild<QWidget*>(tag), qPrintable(tag)));
+        QVERIFY(m_w->actions()->trigger(IDM_LANGSTYLE_CONFIG_DLG));
+        add("StyleConfig", untranslated(m_w->styleConfigurator(), "StyleConfig"));
+        m_w->styleConfigurator()->reject();
+        QVERIFY2(issues.isEmpty(), qPrintable(issues.join(QLatin1Char('\n'))));
+
+        // back to English: texts restored from english.xml
+        m_w->setUiLanguage("english.xml");
+        QCOMPARE(f->findChild<QTabBar*>()->tabText(1), QStringLiteral("Replace"));
+        QCOMPARE(f->findChild<QAbstractButton*>(QStringLiteral("1609"))->text(), QStringLiteral("Replace &All"));
     }
 
     void screenshots()

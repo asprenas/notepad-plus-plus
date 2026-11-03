@@ -1,5 +1,7 @@
 #include "ShortcutMapper.h"
 
+#include "DialogTranslator.h"
+
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
 
@@ -146,11 +148,17 @@ ShortcutMapper::ShortcutMapper(const ShortcutsFile& current, ActionRegistry* act
         m_rows.push_back(r);
     }
 
+    // upstream getShortcutMapperLangStr: <Dialog><ShortcutMapper><Node name=""/>
+    auto smStr = [nl](const char* node, const char* fallback) {
+        return nl ? QString::fromStdString(nl->attribute({"Dialog", "ShortcutMapper", node}, "name", fallback)) : QString::fromUtf8(fallback);
+    };
     m_tabs = new QTabWidget;
     const char* tabNames[5] = {"Main menu", "Macros", "Run commands", "Plugin commands", "Scintilla commands"};
+    const char* tabNodes[5] = {"MainMenuTab", "MacrosTab", "RunCommandsTab", "PluginCommandsTab", "ScintillaCommandsTab"};
     for (int t = 0; t < 5; ++t) {
         auto* table = new QTableWidget(0, t == 0 ? 3 : 2);
-        table->setHorizontalHeaderLabels(t == 0 ? QStringList{tr("Name"), tr("Shortcut"), tr("Category")} : QStringList{tr("Name"), tr("Shortcut")});
+        const QString cName = smStr("ColumnName", "Name"), cKey = smStr("ColumnShortcut", "Shortcut");
+        table->setHorizontalHeaderLabels(t == 0 ? QStringList{cName, cKey, smStr("ColumnCategory", "Category")} : QStringList{cName, cKey});
         table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
         table->setSelectionBehavior(QAbstractItemView::SelectRows);
         table->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -158,12 +166,17 @@ ShortcutMapper::ShortcutMapper(const ShortcutsFile& current, ActionRegistry* act
         table->verticalHeader()->setDefaultSectionSize(table->fontMetrics().height() + 6);
         connect(table, &QTableWidget::cellDoubleClicked, this, [this, t](int row) { modify(t, row); });
         m_tables[t] = table;
-        m_tabs->addTab(table, tr(tabNames[t]));
+        m_tabs->addTab(table, smStr(tabNodes[t], tabNames[t]));
     }
     m_filter = new QLineEdit;
     m_filter->setPlaceholderText(tr("Filter"));
+    if (nl)
+        if (const auto d = nl->dialog("ShortcutMapper"); d && d->items.count(2607))
+            m_filter->setPlaceholderText(controlText(d->items.at(2607), false).trimmed());
     connect(m_filter, &QLineEdit::textChanged, this, &ShortcutMapper::fill);
     m_info = new QLabel;
+    m_info->setObjectName(QStringLiteral("npp-data"));
+    m_noConflictText = smStr("ConflictInfoOk", "No shortcut conflicts for this item.");
     m_info->setWordWrap(true);
     auto* modifyBtn = new QPushButton(tr("Modify"));
     auto* clearBtn = new QPushButton(tr("Clear"));
@@ -199,6 +212,16 @@ ShortcutMapper::ShortcutMapper(const ShortcutsFile& current, ActionRegistry* act
     root->addWidget(m_info);
     root->addLayout(row);
     root->addWidget(buttons);
+    setControlId(modifyBtn, 2602);
+    setControlId(clearBtn, 2606);
+    translateDialog(this, nl, "ShortcutMapper");
+    if (nl)
+        if (const auto d = nl->dialog("ShortcutMapperSubDialg")) { // OK / Cancel
+            if (d->items.count(1))
+                buttons->button(QDialogButtonBox::Ok)->setText(controlText(d->items.at(1), true));
+            if (d->items.count(2))
+                buttons->button(QDialogButtonBox::Cancel)->setText(controlText(d->items.at(2), true));
+        }
     resize(760, 600);
     fill();
 }
@@ -259,7 +282,7 @@ void ShortcutMapper::fill()
         }
     }
     const QStringList c = conflicts();
-    m_info->setText(c.isEmpty() ? tr("No shortcut conflicts.") : tr("Conflicts: %1").arg(c.join(QStringLiteral("; "))));
+    m_info->setText(c.isEmpty() ? m_noConflictText : c.join(QLatin1Char('\n')));
 }
 
 void ShortcutMapper::modify(int tab, int row)
