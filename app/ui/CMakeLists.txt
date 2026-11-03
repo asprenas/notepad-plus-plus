@@ -1,32 +1,42 @@
-qt_add_executable(notepadpp-qt
-    main.cpp
+# UI code as a static library: the executable and the UI tests link it.
+qt_add_library(npp_ui STATIC
     MainWindow.h
     MainWindow.cpp
+    MainCommands.cpp
+    menu/ActionRegistry.h
+    menu/ActionRegistry.cpp
+    menu/CommandIds.h
     editor/EditorAdapter.h
+    editor/EditorPane.h
+    editor/EditorPane.cpp
     docking/DockManager.h
     docking/DockManager.cpp
 )
 
 # --- docking backend: selected here and in DockManager.cpp only ---------------
 if(NPP_DOCKING_BACKEND STREQUAL "ADS")
-    target_sources(notepadpp-qt PRIVATE
+    target_sources(npp_ui PRIVATE
         docking/ads/AdsDockManager.h
         docking/ads/AdsDockManager.cpp)
-    target_compile_definitions(notepadpp-qt PRIVATE NPP_DOCKING_BACKEND_ADS)
-    target_link_libraries(notepadpp-qt PRIVATE ads::qtadvanceddocking)
+    target_compile_definitions(npp_ui PRIVATE NPP_DOCKING_BACKEND_ADS)
+    target_link_libraries(npp_ui PRIVATE ads::qtadvanceddocking)
 else()
-    target_sources(notepadpp-qt PRIVATE
+    target_sources(npp_ui PRIVATE
         docking/qt/QtDockManager.h
         docking/qt/QtDockManager.cpp)
-    target_compile_definitions(notepadpp-qt PRIVATE NPP_DOCKING_BACKEND_QT)
+    target_compile_definitions(npp_ui PRIVATE NPP_DOCKING_BACKEND_QT)
 endif()
 
-target_include_directories(notepadpp-qt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_definitions(notepadpp-qt PRIVATE NPP_QT_VERSION="${PROJECT_VERSION}")
-target_link_libraries(notepadpp-qt PRIVATE
+target_include_directories(npp_ui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(npp_ui PUBLIC NPP_QT_VERSION="${PROJECT_VERSION}")
+target_link_libraries(npp_ui PUBLIC
     npp_scintilla
     npp_core
-    Qt6::Widgets)
+    Qt6::Widgets
+    Qt6::Network)
+
+qt_add_executable(notepadpp-qt main.cpp)
+target_link_libraries(notepadpp-qt PRIVATE npp_ui)
 
 set_target_properties(notepadpp-qt PROPERTIES
     WIN32_EXECUTABLE ON

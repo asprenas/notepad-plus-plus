@@ -38,6 +38,7 @@ enum class SaveStatus { Ok, OpenFailed, WriteFailed, ReadOnlyForbidden };
 
 struct LoadOptions {
     int encodingOverride = -1;              // forced code page (Encoding > Character sets), -1 = detect
+    std::optional<UniMode> uniModeOverride;  // forced Unicode mode (Encoding > Encode in ...), no detection
     std::optional<LangType> langOverride;
     std::string userLangOverride;           // UDL name
 };
@@ -64,7 +65,7 @@ public:
     // Restores an untitled / dirty document from its snapshot backup (session restore).
     Buffer* loadBackup(std::string_view backupPath, std::string_view originalPath, std::string_view untitledName,
                        int encoding, LoadError* error = nullptr);
-    bool reload(Buffer& buffer, int encodingOverride = -1);
+    bool reload(Buffer& buffer, int encodingOverride = -1, std::optional<UniMode> uniModeOverride = {});
     void close(Buffer& buffer);
 
     Buffer* find(BufferId id) const;

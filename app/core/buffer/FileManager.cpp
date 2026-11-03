@@ -166,13 +166,20 @@ bool FileManager::fillDocument(Buffer& b, const std::string& bytes, const LoadOp
     UniMode mode = UniMode::Utf8;
     std::string utf8;
     const UniMode bom = detectBom(bytes);
-    if (bom != UniMode::Ansi) {
+    if (o.uniModeOverride) {
+        // "Encode in ..." : reinterpret the bytes in the given mode, no detection
+        mode = *o.uniModeOverride;
+        utf8 = mode == UniMode::Ansi ? codePageToUtf8(bytes, systemAnsiCodePage()).value_or(bytes)
+             : (mode == UniMode::Utf8 || mode == UniMode::Ascii7) ? bytes
+                                                                   : decodeToUtf8(bytes, mode);
+        encoding = -1;
+    } else if (bom != UniMode::Ansi) {
         encoding = -1;
     } else if (encoding == -1 && m_settings.detectEncoding) {
         encoding = detectCodePage(std::string_view(bytes).substr(0, kDetectionBlock));
     }
 
-    if (encoding != -1) {
+    if (!o.uniModeOverride && encoding != -1) {
         if (encoding == kCodePageUtf8) {
             utf8 = bytes;
         } else if (auto u = codePageToUtf8(bytes, encoding)) {
@@ -181,7 +188,9 @@ bool FileManager::fillDocument(Buffer& b, const std::string& bytes, const LoadOp
             encoding = -1; // unsupported code page on this platform: fall back to detection below
         }
     }
-    if (encoding != -1) {
+    if (o.uniModeOverride) {
+        // decided above
+    } else if (encoding != -1) {
         mode = UniMode::Utf8;
         if (encoding == kCodePageUtf8)
             encoding = -1;
@@ -296,7 +305,7 @@ Buffer* FileManager::loadBackup(std::string_view backupPath, std::string_view or
     return b;
 }
 
-bool FileManager::reload(Buffer& b, int encodingOverride)
+bool FileManager::reload(Buffer& b, int encodingOverride, std::optional<UniMode> uniModeOverride)
 {
     if (b.isUntitled())
         return false;
@@ -305,6 +314,7 @@ bool FileManager::reload(Buffer& b, int encodingOverride)
         return false;
     LoadOptions o;
     o.encodingOverride = encodingOverride;
+    o.uniModeOverride = uniModeOverride;
     if (!fillDocument(b, *bytes, o))
         return false;
     b.dirty = false;

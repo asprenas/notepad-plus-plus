@@ -32,3 +32,12 @@ npp_core_add_test(config SOURCES core/test_config.cpp)
 npp_core_add_test(lang SOURCES core/test_lang.cpp LIBS npp_scintilla Qt6::Widgets)
 npp_core_add_test(buffer SOURCES core/test_buffer.cpp LIBS npp_scintilla Qt6::Widgets)
 npp_core_add_test(search SOURCES core/test_search.cpp LIBS npp_scintilla Qt6::Widgets)
+
+# --- UI tests (phase 2): MainWindow against a temporary user directory --------------------
+add_executable(test_ui_mainwindow ui/test_mainwindow.cpp)
+set_target_properties(test_ui_mainwindow PROPERTIES AUTOMOC ON)
+target_link_libraries(test_ui_mainwindow PRIVATE npp_ui Qt6::Test)
+add_dependencies(test_ui_mainwindow notepadpp-qt) # data/ is copied next to the executable
+add_test(NAME ui.mainwindow COMMAND test_ui_mainwindow)
+set_tests_properties(ui.mainwindow PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+npp_test_env(ui.mainwindow)
