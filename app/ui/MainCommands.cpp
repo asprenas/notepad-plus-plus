@@ -101,28 +101,7 @@ void MainWindow::registerCommands()
     registerTabCommands();
     buildMenus();
 
-    // Toolbar (upstream standard icons subset)
-    QToolBar* tb = addToolBar(tr("Toolbar"));
-    tb->setObjectName(QStringLiteral("mainToolbar"));
-    const std::pair<int, QStyle::StandardPixmap> tools[] = {
-        {IDM_FILE_NEW, QStyle::SP_FileIcon},          {IDM_FILE_OPEN, QStyle::SP_DialogOpenButton},
-        {IDM_FILE_SAVE, QStyle::SP_DialogSaveButton}, {IDM_FILE_CLOSE, QStyle::SP_DialogCloseButton},
-        {0, {}},
-        {IDM_EDIT_UNDO, QStyle::SP_ArrowBack},        {IDM_EDIT_REDO, QStyle::SP_ArrowForward},
-        {0, {}},
-        {IDM_VIEW_WRAP, QStyle::SP_BrowserReload},
-    };
-    for (auto [id, icon] : tools) {
-        if (!id) {
-            tb->addSeparator();
-            continue;
-        }
-        QAction* a = m_actions->action(id);
-        if (a->icon().isNull())
-            a->setIcon(style()->standardIcon(icon));
-        tb->addAction(a);
-    }
-    tb->setVisible(m_config.gui.toolbarShow);
+    buildToolbar();
     m_actions->updateStates();
 }
 

@@ -32,6 +32,8 @@ add_library(npp_core STATIC
     config/AppPaths.cpp
     config/ContextMenuConfig.h
     config/ContextMenuConfig.cpp
+    config/ToolbarButtonsConfig.h
+    config/ToolbarButtonsConfig.cpp
 
     session/Session.h
     session/Session.cpp

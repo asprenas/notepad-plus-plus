@@ -19,6 +19,8 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QMenu>
+#include <QImage>
+#include <QToolBar>
 #include <QCheckBox>
 #include <QDir>
 #include <QGroupBox>
@@ -297,6 +299,68 @@ private slots:
         QVERIFY2(subs.contains(QStringLiteral("모든 토큰에 형식 지정")), qPrintable(subs.join('|')));
         delete m;
         m_w->setUiLanguage("english.xml");
+    }
+
+    void toolbarIconSetsAndConf()
+    {
+        QToolBar* tb = m_w->mainToolbar();
+        auto buttons = [tb] {
+            QList<QAction*> out;
+            for (QAction* a : tb->actions())
+                if (!a->isSeparator())
+                    out << a;
+            return out;
+        };
+        QCOMPARE(buttons().size(), 32); // upstream toolBarIcons: 41 entries, 9 separators
+        for (QAction* a : buttons())
+            QVERIFY2(!a->icon().pixmap(16).isNull(), qPrintable(a->text()));
+        GuiConfig& g = m_w->mutableConfig().gui;
+        for (const char* set : {"small", "large", "small2", "large2", "standard"}) {
+            g.toolbarIconSet = set;
+            g.toolbarFluentColor = 1; // red
+            m_w->applySettings();
+            QCOMPARE(m_w->mainToolbar()->iconSize().width(), std::string_view(set).starts_with("large") ? 32 : 16);
+            for (QAction* a : buttons())
+                QVERIFY2(!a->icon().pixmap(16).isNull(), set);
+            const QString out = qEnvironmentVariable("NPP_SCREENSHOT_DIR");
+            if (!out.isEmpty())
+                m_w->mainToolbar()->grab().save(QDir(out).filePath(QStringLiteral("toolbar-%1.png").arg(QLatin1String(set))));
+        }
+        g.toolbarFluentColor = 0;
+        // dark / light keep their own icon set
+        g.toolbarIconSet = "standard";
+        g.darkModeEnabled = false;
+        m_w->applyTheme();
+        g.darkToolBarIconSet = 1;
+        g.darkModeEnabled = true;
+        m_w->applyTheme();
+        QCOMPARE(QString::fromStdString(g.toolbarIconSet), QStringLiteral("large"));
+        g.darkModeEnabled = false;
+        m_w->applyTheme();
+        QCOMPARE(QString::fromStdString(g.toolbarIconSet), QStringLiteral("standard"));
+
+        // toolbarButtonsConf.xml: hidden buttons and custom icons
+        const QString userDir = QString::fromStdString(m_w->paths().userDir());
+        QDir(userDir).mkpath(QStringLiteral("toolbarIcons/mine"));
+        QImage red(16, 16, QImage::Format_ARGB32);
+        red.fill(Qt::red);
+        QVERIFY(red.save(userDir + QStringLiteral("/toolbarIcons/mine/new.ico"), "ICO"));
+        QFile conf(userDir + QStringLiteral("/toolbarButtonsConf.xml"));
+        QVERIFY(conf.open(QIODevice::WriteOnly));
+        conf.write(R"(<?xml version="1.0" encoding="UTF-8" ?>
+<NotepadPlus><ToolbarButtons><Standard hideAll="no">
+<Button hide="yes" index="6" id="41010" name="Print..." />
+<Button hide="yes" index="8" id="99999" name="wrong id: ignored" />
+</Standard></ToolbarButtons><ToolBarIcons icoFolderName="mine" /></NotepadPlus>)");
+        conf.close();
+        m_w->applySettings();
+        QCOMPARE(buttons().size(), 31);
+        QVERIFY(!buttons().contains(m_w->actions()->action(IDM_FILE_PRINT)));
+        const QImage newIcon = m_w->actions()->action(IDM_FILE_NEW)->icon().pixmap(16).toImage();
+        QCOMPARE(QColor(newIcon.pixel(8, 8)), QColor(Qt::red));
+        QFile::remove(conf.fileName());
+        m_w->applySettings();
+        QCOMPARE(buttons().size(), 32);
     }
 
     void screenshots()

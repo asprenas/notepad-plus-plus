@@ -93,7 +93,9 @@ public:
     const std::string& currentThemePath() const noexcept { return m_currentThemePath; }
     bool isDarkMode() const;
     core::ConfigFile& mutableConfig() noexcept { return m_config; }
-    QMenu* tabContextMenu();                         // for the current tab (tests)
+    QMenu* tabContextMenu();
+    QToolBar* mainToolbar() const noexcept { return m_toolbar; }
+    QString toolbarIconSet() const;                         // for the current tab (tests)
     QMenu* editorContextMenu() { return buildContextMenu(contextMenuEntries(true), this); }
     const core::StyleRegistry& styles() const noexcept { return m_styles; }
     const core::NativeLanguage& nativeLanguage() const noexcept { return m_nativeLang; }
@@ -228,6 +230,8 @@ private:
     void showEditorContextMenu(EditorPane* p, const QPoint& globalPos);
     void showTabContextMenu(EditorPane* p, int index, const QPoint& globalPos);
     void ensureContextMenuFile();
+    // --- toolbar (Toolbar.cpp)
+    void buildToolbar();
     void buildMenus();
     void rebuildMenus();
     std::string localizationDir() const;
@@ -285,6 +289,7 @@ private:
     bool                         m_goToOffsetMode = false, m_columnEditorNumbers = false;
     QDialog*                     m_charRangeDialog = nullptr;
     QToolBar*                    m_incBar = nullptr;
+    QToolBar*                    m_toolbar = nullptr;
     QLineEdit*                   m_incEdit = nullptr;
     QCheckBox*                   m_incHighlight = nullptr;
     QCheckBox*                   m_incMatchCase = nullptr;

@@ -9,6 +9,8 @@
 
 #include "core/util/PathUtil.h"
 
+#include <algorithm>
+
 #include <QApplication>
 #include <QPalette>
 #include <QStyle>
@@ -132,9 +134,25 @@ void MainWindow::applyTheme()
                 if (Buffer* b = buffer(p->current()))
                     applyLanguageToPane(p, b);
         }
+        if (m_themeApplied) { // upstream: each mode keeps its own toolbar icon set
+            static constexpr const char* kSets[] = {"small", "large", "small2", "large2", "standard"};
+            GuiConfig& mg = m_config.gui;
+            int cur = 4;
+            for (int i = 0; i < 5; ++i)
+                if (mg.toolbarIconSet == kSets[i])
+                    cur = i;
+            (m_themeIsDark ? mg.darkToolBarIconSet : mg.lightToolBarIconSet) = cur;
+            mg.toolbarIconSet = kSets[std::clamp(dark ? mg.darkToolBarIconSet : mg.lightToolBarIconSet, 0, 4)];
+        }
         m_themeIsDark = dark;
         m_themeApplied = true;
     }
+    if (m_toolbar)
+        buildToolbar(); // icons follow the mode
+    for (EditorPane* p : m_panes)
+        for (BufferId id : p->buffers())
+            if (const Buffer* b = buffer(id))
+                refreshTabDecorations(*b);
 }
 
 void MainWindow::connectSystemTheme()
