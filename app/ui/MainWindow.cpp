@@ -4,6 +4,7 @@
 #include "editor/EditorPane.h"
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
+#include "search/FindReplaceDialog.h"
 
 #include "core/encoding/EncodingMapper.h"
 #include "core/util/PathUtil.h"
@@ -295,8 +296,8 @@ void MainWindow::loadSettings()
 // shortcuts, UDLs and translation (session/backups are not copied: they point to Notepad++ data).
 void MainWindow::importNotepadPlusPlusSettings()
 {
-    if (m_paths.isPortable() || pathExists(m_paths.configXml(), PathKind::File))
-        return;
+    if (m_paths.isPortable() || pathExists(m_paths.configXml(), PathKind::File) || qEnvironmentVariableIsSet("NPP_QT_USER_DIR"))
+        return; // tests use their own user directory
 #if defined(Q_OS_WIN)
     const char* appData = std::getenv("APPDATA");
     if (!appData)
@@ -558,6 +559,8 @@ void MainWindow::saveSettings()
     g.zoom2 = static_cast<int>(m_panes[1]->editor()->send(SCI_GETZOOM));
     g.statusBarShow = statusBar()->isVisible();
     g.menuBarShow = menuBar()->isVisible();
+    if (m_findDialog)
+        m_findDialog->saveHistory(m_config.findHistory);
     std::error_code ec;
     fs::create_directories(pathFromUtf8(m_paths.userDir()), ec);
     m_config.save(m_paths.configXml());

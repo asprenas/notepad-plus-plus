@@ -5,6 +5,11 @@ qt_add_library(npp_ui STATIC
     MainCommands.cpp
     EditCommands.cpp
     SearchCommands.cpp
+    FindCommands.cpp
+    search/FindReplaceDialog.h
+    search/FindReplaceDialog.cpp
+    search/SearchResultsPanel.h
+    search/SearchResultsPanel.cpp
     menu/ActionRegistry.h
     menu/ActionRegistry.cpp
     menu/CommandIds.h

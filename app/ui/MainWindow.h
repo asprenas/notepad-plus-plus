@@ -6,6 +6,7 @@
 #include "core/config/AppPaths.h"
 #include "core/config/ConfigFile.h"
 #include "core/editor/EditorLanguage.h"
+#include "core/search/Search.h"
 #include "core/i18n/NativeLanguage.h"
 #include "core/lang/LanguageRegistry.h"
 #include "core/lang/StyleRegistry.h"
@@ -37,6 +38,8 @@ namespace npp::ui {
 class ActionRegistry;
 class DockManager;
 class EditorPane;
+class FindReplaceDialog;
+class SearchResultsPanel;
 
 // Command line options of upstream CmdLineParams handled by the MVP
 struct CommandLine {
@@ -65,6 +68,8 @@ public:
     void ensureDocument();
 
     // Access for tests
+    FindReplaceDialog* findDialog();
+    SearchResultsPanel* searchResults(bool show = true);
     ActionRegistry* actions() const noexcept { return m_actions; }
     core::FileManager& files() { return *m_files; }
     EditorPane* pane(int view) const { return m_panes[static_cast<size_t>(view)]; }
@@ -138,6 +143,15 @@ private:
     // --- commands (SearchCommands.cpp)
     void registerSearchMiscCommands();
     void applyIndicatorStyles(ScintillaEditBase* e);
+    // --- find / replace (FindCommands.cpp)
+    void registerFindCommands();
+    void runFindAction(int action);
+    bool findNextInCurrent(const core::SearchOptions& o, bool showStatus);
+    int findAllToPanel(const core::SearchOptions& o, const std::vector<core::Buffer*>& buffers, bool inSelection);
+    int runFindInFiles(const core::FindInFilesOptions& fo, const core::SearchOptions& o, bool replacing);
+    void openSearchResult(const QString& file, intptr_t start, intptr_t end, int line, bool lineRelative);
+    std::vector<core::Buffer*> openBuffersInTabOrder() const;
+    template <class F> auto withDocument(core::Buffer* b, F&& f);
 
     CommandLine                 m_cmd;
     core::AppPaths              m_paths;
@@ -172,6 +186,8 @@ private:
     intptr_t                     m_beginSelectPos = -1; // Begin/End Select
     bool                         m_beginSelectColumn = false;
     int                          m_multiSelectFlag = 0;  // last Multi-select search flags
+    FindReplaceDialog*           m_findDialog = nullptr;
+    SearchResultsPanel*          m_searchResults = nullptr;
     bool                         m_syncScrollV = false, m_syncScrollH = false, m_syncing = false;
     intptr_t                     m_syncLineOffset = 0, m_syncXOffset = 0;
     std::array<QLabel*, 6>       m_status{}; // language, length/lines, position, EOL, encoding, INS/OVR

@@ -42,3 +42,11 @@ add_dependencies(test_ui_mainwindow notepadpp-qt) # data/ is copied next to the 
 add_test(NAME ui.mainwindow COMMAND test_ui_mainwindow)
 set_tests_properties(ui.mainwindow PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 npp_test_env(ui.mainwindow)
+
+add_executable(test_ui_find ui/test_find.cpp)
+set_target_properties(test_ui_find PROPERTIES AUTOMOC ON)
+target_link_libraries(test_ui_find PRIVATE npp_ui Qt6::Test)
+add_dependencies(test_ui_find notepadpp-qt)
+add_test(NAME ui.find COMMAND test_ui_find)
+set_tests_properties(ui.find PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 600)
+npp_test_env(ui.find)
