@@ -331,6 +331,28 @@ private slots:
         }
     }
 
+    void highlighters()
+    {
+        m_w->show(); // visible range is needed for the smart / URL highlighting
+        setText("foo bar foo\nvisit https://example.org/x?a=1 now\nfoobar");
+        ed()->send(SCI_SETSEL, 0, 3); // selects the word "foo"
+        QCoreApplication::processEvents();
+        QCOMPARE(ed()->send(SCI_INDICATORVALUEAT, 29, 9), sptr_t(1));  // smart highlighting: 2nd "foo"
+        QCOMPARE(ed()->send(SCI_INDICATORVALUEAT, 29, 46), sptr_t(0)); // not inside "foobar" (whole word)
+        const auto urlStart = ed()->send(SCI_POSITIONFROMLINE, 1) + 6;
+        QCOMPARE(ed()->send(SCI_INDICATORVALUEAT, 8, static_cast<uptr_t>(urlStart + 3)) != 0, true); // URL indicator
+        QCOMPARE(ed()->send(SCI_INDICATORVALUEAT, 8, static_cast<uptr_t>(urlStart - 2)), sptr_t(0));
+
+        m_w->actions()->trigger(IDM_LANG_XML);
+        setText("<root><item a=\"1\">x</item></root>");
+        ed()->send(SCI_COLOURISE, 0, -1);
+        ed()->send(SCI_GOTOPOS, 8); // inside <item ...>
+        QCoreApplication::processEvents();
+        QCOMPARE(ed()->send(SCI_INDICATORVALUEAT, 27, 7), sptr_t(1));  // open tag highlighted
+        QCOMPARE(ed()->send(SCI_INDICATORVALUEAT, 27, 21), sptr_t(1)); // close tag </item>
+        QCOMPARE(ed()->send(SCI_INDICATORVALUEAT, 26, 13), sptr_t(1)); // attribute a="1"
+    }
+
     void historyIsSaved()
     {
         dlg()->setOptions(opts("remember me"));

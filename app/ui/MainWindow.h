@@ -156,6 +156,12 @@ private:
     void openSearchResult(const QString& file, intptr_t start, intptr_t end, int line, bool lineRelative);
     std::vector<core::Buffer*> openBuffersInTabOrder() const;
     template <class F> auto withDocument(core::Buffer* b, F&& f);
+    // --- highlighting (Highlighters.cpp)
+    void connectHighlighters(EditorPane* p);
+    void updateHighlights(EditorPane* p);
+    void braceMatch(EditorPane* p);
+    void smartHighlight(EditorPane* p);
+    void addHotSpots(EditorPane* p);
     // --- macros (MacroCommands.cpp)
     void registerMacroCommands();
     void recordFindAction(int action);
@@ -199,6 +205,7 @@ private:
     int                          m_multiSelectFlag = 0;  // last Multi-select search flags
     FindReplaceDialog*           m_findDialog = nullptr;
     bool                         m_recording = false, m_playingMacro = false;
+    bool                         m_highlighting = false;
     std::vector<core::MacroStep> m_macro;
     std::vector<QAction*>        m_savedMacroActions;
     SearchResultsPanel*          m_searchResults = nullptr;

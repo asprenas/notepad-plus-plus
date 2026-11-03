@@ -64,6 +64,10 @@ add_library(npp_core STATIC
     editor/TextOps.cpp
     editor/CommentOps.h
     editor/CommentOps.cpp
+    editor/XmlTagMatcher.h
+    editor/XmlTagMatcher.cpp
+    editor/UrlDetector.h
+    editor/UrlDetector.cpp
 
     buffer/Buffer.h
     buffer/FileManager.h

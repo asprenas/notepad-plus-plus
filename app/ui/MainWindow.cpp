@@ -340,6 +340,7 @@ void MainWindow::createUi()
             }
         });
         connect(e, &ScintillaEditBase::updateUi, this, [this](Scintilla::Update) { updateTitleAndStatus(); });
+        connectHighlighters(p);
         connect(e, &ScintillaEditBase::modifyAttemptReadOnly, this, [this] {
             statusBar()->showMessage(tr("The document is read-only."), 2000);
         });
