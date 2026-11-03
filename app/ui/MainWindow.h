@@ -15,6 +15,7 @@
 #include "core/shortcut/Shortcuts.h"
 #include "editor/EditorAdapter.h"
 
+#include <QColor>
 #include <QDialog>
 #include <QMainWindow>
 #include <QPointer>
@@ -28,6 +29,7 @@
 #include <optional>
 
 class QAction;
+class QMenu;
 class QCheckBox;
 class QDialog;
 class QLineEdit;
@@ -91,6 +93,8 @@ public:
     const std::string& currentThemePath() const noexcept { return m_currentThemePath; }
     bool isDarkMode() const;
     core::ConfigFile& mutableConfig() noexcept { return m_config; }
+    QMenu* tabContextMenu();                         // for the current tab (tests)
+    QMenu* editorContextMenu() { return buildContextMenu(contextMenuEntries(true), this); }
     const core::StyleRegistry& styles() const noexcept { return m_styles; }
     const core::NativeLanguage& nativeLanguage() const noexcept { return m_nativeLang; }
     void showGoToDialog();
@@ -209,6 +213,21 @@ private:
     void incrementalSearch(IncType type, bool down);
     // --- settings (SettingsCommands.cpp, Theme.cpp)
     void registerSettingsCommands();
+    // --- context menus, tab colours, pinned tabs (ContextMenus.cpp)
+    struct ContextMenuEntry {
+        int id = 0;          // 0 = separator
+        QString text;        // empty = the command's menu text
+        QString folder;      // sub menu
+    };
+    void registerTabCommands();
+    void togglePin(EditorPane* p, int index);
+    QColor tabColour(int colourId) const;
+    void refreshTabDecorations(const core::Buffer& b);
+    std::vector<ContextMenuEntry> contextMenuEntries(bool editZone) const;
+    QMenu* buildContextMenu(const std::vector<ContextMenuEntry>& entries, QWidget* parent);
+    void showEditorContextMenu(EditorPane* p, const QPoint& globalPos);
+    void showTabContextMenu(EditorPane* p, int index, const QPoint& globalPos);
+    void ensureContextMenuFile();
     void buildMenus();
     void rebuildMenus();
     std::string localizationDir() const;

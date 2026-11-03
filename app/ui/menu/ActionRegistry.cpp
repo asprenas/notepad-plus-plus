@@ -232,4 +232,26 @@ std::vector<int> ActionRegistry::unimplementedMenuCommands() const
     return out;
 }
 
+int ActionRegistry::commandIdFromMenuNames(std::string_view entryName, std::string_view itemName)
+{
+    auto norm = [](std::string_view t) {
+        return QString::fromStdString(core::NativeLanguage::purifyMenuString(std::string(t))).section(QChar(9), 0, 0).trimmed().toCaseFolded();
+    };
+    const QString entry = norm(entryName), item = norm(itemName);
+    int depth = 0;
+    bool inEntry = false;
+    for (const MenuNode& n : menuTree()) {
+        if (n.kind == Node::Begin) {
+            if (depth == 0)
+                inEntry = norm(n.text) == entry;
+            ++depth;
+        } else if (n.kind == Node::End) {
+            --depth;
+        } else if (n.kind == Node::Item && inEntry && norm(n.text) == item) {
+            return n.id;
+        }
+    }
+    return -1;
+}
+
 } // namespace npp::ui

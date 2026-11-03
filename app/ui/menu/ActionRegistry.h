@@ -50,6 +50,10 @@ public:
     void applyShortcuts(const core::ShortcutsFile* userShortcuts);
     std::optional<core::KeyCombo> defaultShortcut(int id) const;
 
+    // contextMenu.xml MenuEntryName / MenuItemName: command id from the English main menu texts
+    // (case-insensitive, '&' and "	..." ignored, sub menus searched); -1 if not found.
+    static int commandIdFromMenuNames(std::string_view entryName, std::string_view itemName);
+
     // Refreshes enabled / checked state from the handlers (call before menus are shown).
     void updateStates();
     // Commands that appear in the menu but have no handler yet (later phases).

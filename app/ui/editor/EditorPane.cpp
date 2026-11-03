@@ -3,7 +3,10 @@
 #include <Scintilla.h>
 #include <ScintillaEditBase.h>
 
+#include <QContextMenuEvent>
 #include <QEvent>
+#include <QPainter>
+#include <QPainterPath>
 #include <QMouseEvent>
 #include <QVBoxLayout>
 
@@ -17,6 +20,30 @@ DocTabBar::DocTabBar(QWidget* parent) : QTabBar(parent)
     setExpanding(false);
     setUsesScrollButtons(true);
     setElideMode(Qt::ElideNone);
+}
+
+void DocTabBar::paintEvent(QPaintEvent* e)
+{
+    QTabBar::paintEvent(e);
+    QPainter p(this);
+    const bool lightUi = palette().color(QPalette::Window).lightness() > 128;
+    for (int i = 0; i < count(); ++i) {
+        const QColor c = tabData(i).value<QColor>();
+        if (!c.isValid())
+            continue;
+        const QRect r = tabRect(i);
+        if (i == currentIndex()) { // upstream: coloured top bar on the active tab
+            p.fillRect(QRect(r.left(), r.top(), r.width(), 4), c);
+        } else if (lightUi) {
+            p.setCompositionMode(QPainter::CompositionMode_Multiply);
+            p.fillRect(r.adjusted(1, 1, -1, 0), c);
+            p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+        } else {
+            QColor t = c;
+            t.setAlpha(140);
+            p.fillRect(r.adjusted(1, 1, -1, 0), t);
+        }
+    }
 }
 
 void DocTabBar::mouseDoubleClickEvent(QMouseEvent* e)
@@ -63,6 +90,15 @@ EditorPane::EditorPane(int viewIndex, QWidget* parent)
     connect(m_tabs, &QTabBar::tabCloseRequested, this, [this](int index) { emit closeRequested(bufferAt(index)); });
     connect(m_tabs, &DocTabBar::middleClicked, this, [this](int index) { emit closeRequested(bufferAt(index)); });
     connect(m_tabs, &DocTabBar::doubleClickedEmpty, this, &EditorPane::newDocumentRequested);
+    m_tabs->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_tabs, &QWidget::customContextMenuRequested, this, [this](const QPoint& at) {
+        const int i = m_tabs->tabAt(at);
+        if (i < 0)
+            return;
+        if (i != currentIndex())
+            activate(bufferAt(i));
+        emit tabContextMenuRequested(i, m_tabs->mapToGlobal(at));
+    });
 }
 
 EditorPane::~EditorPane()
@@ -75,6 +111,10 @@ bool EditorPane::eventFilter(QObject* watched, QEvent* event)
 {
     if (watched == m_editor && event->type() == QEvent::FocusIn)
         emit focused(m_viewIndex);
+    if (watched == m_editor && event->type() == QEvent::ContextMenu) { // upstream menu (contextMenu.xml)
+        emit editorContextMenuRequested(static_cast<QContextMenuEvent*>(event)->globalPos());
+        return true;
+    }
     return QWidget::eventFilter(watched, event);
 }
 
@@ -181,6 +221,35 @@ void EditorPane::setTabText(core::BufferId id, const QString& text, const QStrin
         return;
     m_tabs->setTabText(index, text);
     m_tabs->setTabToolTip(index, tooltip);
+}
+
+void EditorPane::setTabDecoration(core::BufferId id, const QColor& colour, bool pinned)
+{
+    const int index = indexOf(id);
+    if (index < 0)
+        return;
+    m_tabs->setTabData(index, colour);
+    if (pinned) {
+        QPixmap pm(12, 12);
+        pm.fill(Qt::transparent);
+        QPainter p(&pm);
+        p.setRenderHint(QPainter::Antialiasing);
+        const QColor ink = palette().color(QPalette::WindowText);
+        p.setPen(QPen(ink, 1.5));
+        p.drawLine(QPointF(6, 6), QPointF(6, 11.5));
+        p.setBrush(QColor(0xD0, 0x40, 0x40));
+        p.drawEllipse(QPointF(6, 4), 3.2, 3.2);
+        m_tabs->setTabIcon(index, QIcon(pm));
+    } else {
+        m_tabs->setTabIcon(index, QIcon());
+    }
+    m_tabs->update();
+}
+
+void EditorPane::moveTab(int from, int to)
+{
+    if (from != to && from >= 0 && to >= 0 && from < count() && to < count())
+        m_tabs->moveTab(from, to);
 }
 
 ViewState EditorPane::viewState(core::BufferId id) const

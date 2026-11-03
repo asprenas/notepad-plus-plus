@@ -17,6 +17,8 @@
 #include <QPalette>
 #include <QStyleHints>
 #include <QFile>
+#include <QFileInfo>
+#include <QMenu>
 #include <QCheckBox>
 #include <QDir>
 #include <QGroupBox>
@@ -210,6 +212,91 @@ private slots:
             }
         QVERIFY(found);
         QCOMPARE(out.internalCommands.size(), size_t(1)); // only the changed default is written
+    }
+
+    void tabColoursAndPinnedTabs()
+    {
+        QTemporaryDir dir;
+        QStringList files;
+        for (int i = 0; i < 4; ++i) {
+            files << dir.filePath(QStringLiteral("f%1.txt").arg(i));
+            QFile f(files.last());
+            QVERIFY(f.open(QIODevice::WriteOnly));
+            f.write("x");
+        }
+        for (const QString& f : files)
+            QVERIFY(m_w->openFile(f));
+        EditorPane* p = m_w->currentPane();
+        auto nameAt = [&](int i) { return QFileInfo(QString::fromStdString(m_w->files().find(p->bufferAt(i))->path)).fileName(); };
+        const int n = p->count(); // may include the initial "new 1"
+        // colour
+        p->activate(p->bufferAt(n - 2)); // f2
+        QVERIFY(m_w->actions()->trigger(IDM_VIEW_TAB_COLOUR_3));
+        QCOMPARE(m_w->currentBuffer()->docColorId, 2);
+        QVERIFY(p->tabBar()->tabData(n - 2).value<QColor>().isValid());
+        // pin f2 then f3: they move to the front, in pin order
+        QVERIFY(m_w->actions()->trigger(IDM_PINTAB));
+        QCOMPARE(nameAt(0), QStringLiteral("f2.txt"));
+        p->activate(p->bufferAt(n - 1)); // f3
+        QVERIFY(m_w->actions()->trigger(IDM_PINTAB));
+        QCOMPARE(nameAt(1), QStringLiteral("f3.txt"));
+        QVERIFY(!p->tabBar()->tabIcon(1).isNull());
+        // tab context menu: unpin text, colour icons
+        QMenu* m = m_w->tabContextMenu();
+        bool unpin = false, colourIcon = false;
+        for (QAction* a : m->findChildren<QAction*>()) {
+            if (a->objectName().toInt() == IDM_PINTAB)
+                unpin = a->text() == QStringLiteral("Unpin Tab");
+            if (a->objectName().toInt() == IDM_VIEW_TAB_COLOUR_1)
+                colourIcon = !a->icon().isNull();
+        }
+        delete m;
+        QVERIFY(unpin);
+        QVERIFY(colourIcon);
+        // session keeps colour and pin
+        const QString session = dir.filePath(QStringLiteral("s.xml"));
+        QVERIFY(m_w->saveSessionTo(session));
+        QFile sf(session);
+        QVERIFY(sf.open(QIODevice::ReadOnly));
+        const QByteArray xml = sf.readAll();
+        QVERIFY(xml.contains("tabColourId=\"2\""));
+        QCOMPARE(xml.count("tabPinned=\"yes\""), 2);
+        // Close All but Pinned
+        QVERIFY(m_w->actions()->trigger(IDM_FILE_CLOSEALL_BUT_PINNED));
+        QCOMPARE(p->count(), 2);
+        QVERIFY(m_w->files().find(p->bufferAt(0))->pinned);
+        // unpin f2 (index 0): goes after the remaining pinned tab
+        p->activate(p->bufferAt(0));
+        QVERIFY(m_w->actions()->trigger(IDM_PINTAB));
+        QCOMPARE(nameAt(1), QStringLiteral("f2.txt"));
+        QVERIFY(p->tabBar()->tabIcon(1).isNull());
+    }
+
+    void editorContextMenuFromXml()
+    {
+        QVERIFY(QFile::exists(QString::fromStdString(m_w->paths().contextMenuXml()))); // copied from the model
+        QMenu* m = m_w->editorContextMenu();
+        QList<QAction*> top = m->actions();
+        QVERIFY(top.contains(m_w->actions()->action(IDM_EDIT_CUT)));
+        QVERIFY(top.contains(m_w->actions()->action(IDM_EDIT_SELECTALL)));       // "Select all" (case-insensitive)
+        QVERIFY(top.contains(m_w->actions()->action(IDM_EDIT_BLOCK_COMMENT)));
+        QStringList subs;
+        for (QAction* a : top)
+            if (a->menu())
+                subs << a->text();
+        QVERIFY(subs.contains(QStringLiteral("Style all occurrences of token")));
+        QVERIFY(!subs.contains(QStringLiteral("Plugin commands"))); // no plugins yet: empty folder not created
+        delete m;
+        // translated folder names (TranslateID)
+        m_w->setUiLanguage("korean.xml");
+        m = m_w->editorContextMenu();
+        subs.clear();
+        for (QAction* a : m->actions())
+            if (a->menu())
+                subs << a->text();
+        QVERIFY2(subs.contains(QStringLiteral("모든 토큰에 형식 지정")), qPrintable(subs.join('|')));
+        delete m;
+        m_w->setUiLanguage("english.xml");
     }
 
     void screenshots()

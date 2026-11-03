@@ -32,6 +32,7 @@ signals:
     void doubleClickedEmpty();
     void middleClicked(int index);
 protected:
+    void paintEvent(QPaintEvent* e) override;
     void mouseDoubleClickEvent(QMouseEvent* e) override;
     void mouseReleaseEvent(QMouseEvent* e) override;
 };
@@ -58,6 +59,9 @@ public:
     void removeBuffer(core::BufferId id);
     void activate(core::BufferId id);
     void setTabText(core::BufferId id, const QString& text, const QString& tooltip);
+    // Individual tab colour (invalid = none) and pin mark
+    void setTabDecoration(core::BufferId id, const QColor& colour, bool pinned);
+    void moveTab(int from, int to);
     const std::vector<core::BufferId>& buffers() const noexcept { return m_buffers; }
 
     ViewState viewState(core::BufferId id) const;
@@ -68,6 +72,8 @@ signals:
     void closeRequested(core::BufferId id);
     void newDocumentRequested();
     void focused(int viewIndex);
+    void editorContextMenuRequested(const QPoint& globalPos);
+    void tabContextMenuRequested(int index, const QPoint& globalPos);
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event) override;

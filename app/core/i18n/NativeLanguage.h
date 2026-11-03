@@ -67,6 +67,9 @@ public:
     std::map<int, std::string> itemNames(const std::vector<std::string>& path, std::string_view idAttribute = "id") const;
     std::string itemName(const std::vector<std::string>& path, int id, std::string_view fallback = {},
                          std::string_view idAttribute = "id") const;
+    // Other attribute of an Item (e.g. TabBar alternativeName); empty if none.
+    std::string itemAttribute(const std::vector<std::string>& path, int id, std::string_view attribute,
+                              std::string_view idAttribute = "id") const;
     // Attribute of the node at path (upstream getAttrNameStr).
     std::string attribute(const std::vector<std::string>& path, std::string_view attribute,
                           std::string_view fallback = {}) const;

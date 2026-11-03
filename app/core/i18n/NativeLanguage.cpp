@@ -228,6 +228,17 @@ std::string NativeLanguage::itemName(const std::vector<std::string>& path, int i
     return it != names.end() ? it->second : std::string(fallback);
 }
 
+std::string NativeLanguage::itemAttribute(const std::vector<std::string>& path, int id, std::string_view attribute,
+                                          std::string_view idAttribute) const
+{
+    const pugi::xml_node node = descend(d->root, path);
+    const std::string idAttr(idAttribute), attr(attribute);
+    for (pugi::xml_node it = node.child("Item"); it; it = it.next_sibling("Item"))
+        if (it.attribute(idAttr.c_str()).as_int(-1) == id)
+            return it.attribute(attr.c_str()).value();
+    return {};
+}
+
 std::string NativeLanguage::attribute(const std::vector<std::string>& path, std::string_view attribute,
                                       std::string_view fallback) const
 {

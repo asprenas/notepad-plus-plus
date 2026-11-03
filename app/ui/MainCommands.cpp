@@ -98,6 +98,7 @@ void MainWindow::registerCommands()
 
     registerMacroCommands();
     registerSettingsCommands();
+    registerTabCommands();
     buildMenus();
 
     // Toolbar (upstream standard icons subset)

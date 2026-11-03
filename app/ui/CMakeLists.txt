@@ -11,6 +11,7 @@ qt_add_library(npp_ui STATIC
     Completion.cpp
     ToolDialogs.cpp
     SettingsCommands.cpp
+    ContextMenus.cpp
     Theme.cpp
     StyleConfigurator.h
     StyleConfigurator.cpp
@@ -93,6 +94,7 @@ add_custom_command(TARGET notepadpp-qt POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${NPP_LEGACY_SRC_DIR}/langs.model.xml
         ${NPP_LEGACY_SRC_DIR}/stylers.model.xml
+        ${CMAKE_CURRENT_SOURCE_DIR}/data/contextMenu.model.xml
         "${NPP_DATA_OUT}"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${NPP_ROOT_DIR}/PowerEditor/bin/userDefineLangs "${NPP_DATA_OUT}/userDefineLangs"

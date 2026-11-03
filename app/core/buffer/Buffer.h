@@ -65,6 +65,8 @@ public:
     uint64_t    fileSize = 0;
     FileTime    timestamp;          // last known write time of `path`
     std::string backupPath;         // snapshot backup file, empty if none
+    int         docColorId = -1;    // tab colour 0..4 (View > Tab > Apply Color), -1 none (session tabColourId)
+    bool        pinned = false;     // pinned tab (session tabPinned)
 
     bool isUntitled() const noexcept { return path.empty(); }
     bool isReadOnly() const noexcept { return userReadOnly || fileReadOnly; }

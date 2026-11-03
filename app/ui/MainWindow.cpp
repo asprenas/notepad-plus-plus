@@ -281,6 +281,7 @@ void MainWindow::loadSettings()
             if (l.name == m_nativeLang.languageName())
                 m_currentLanguageFile = l.fileName;
     m_shortcuts.load(m_paths.shortcutsXml());
+    ensureContextMenuFile();
 
     const GuiConfig& g = m_config.gui;
     m_applyOptions.sqlBackslashEscape = g.backslashIsEscapeForSql;
@@ -344,6 +345,9 @@ void MainWindow::createUi()
         connect(p, &EditorPane::closeRequested, this, [this, p](BufferId id) { closeBuffer(id, p); });
         connect(p, &EditorPane::newDocumentRequested, this, [this, p] { showBuffer(m_files->newDocument(), p); });
         connect(p, &EditorPane::focused, this, [this, p](int) { setActivePane(p); });
+        connect(p, &EditorPane::editorContextMenuRequested, this, [this, p](const QPoint& at) { showEditorContextMenu(p, at); });
+        connect(p, &EditorPane::tabContextMenuRequested, this,
+                [this, p](int i, const QPoint& at) { showTabContextMenu(p, i, at); });
         ScintillaEditBase* e = p->editor();
         connect(e, &ScintillaEditBase::savePointChanged, this, [this, p](bool dirty) {
             if (Buffer* b = buffer(p->current())) {
@@ -749,6 +753,7 @@ void MainWindow::refreshBuffer(Buffer* b)
         return;
     for (EditorPane* p : m_panes)
         p->setTabText(b->id, tabText(*b), b->isUntitled() ? QString() : q(b->path));
+    refreshTabDecorations(*b);
     updateTitleAndStatus();
 }
 
@@ -1156,6 +1161,8 @@ Session MainWindow::currentSession(bool withBackups) const
             f.lang = b->lang == L_USER ? b->userLangName : std::string(langInfo(b->lang).shortName);
             f.encoding = b->encoding;
             f.userReadOnly = b->userReadOnly;
+            f.tabColourId = b->docColorId;
+            f.tabPinned = b->pinned;
             f.backupFilePath = withBackups ? b->backupPath : std::string();
             f.originalFileLastModifTimestamp = b->timestamp.low();
             f.originalFileLastModifTimestampHigh = b->timestamp.high();
@@ -1212,6 +1219,8 @@ void MainWindow::restoreSession(const Session& s)
                 b->userLangName = f.lang;
             }
             b->userReadOnly = f.userReadOnly;
+            b->docColorId = std::clamp(f.tabColourId, -1, 4);
+            b->pinned = f.tabPinned;
             p->addBuffer(*b, false);
             watchFile(b->path, true);
             p->setViewState(b->id, {static_cast<intptr_t>(f.startPos), static_cast<intptr_t>(f.endPos),
