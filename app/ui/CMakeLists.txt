@@ -12,6 +12,10 @@ qt_add_library(npp_ui STATIC
     ToolDialogs.cpp
     SettingsCommands.cpp
     Theme.cpp
+    StyleConfigurator.h
+    StyleConfigurator.cpp
+    ShortcutMapper.h
+    ShortcutMapper.cpp
     prefs/PreferencesDialog.h
     prefs/PreferencesDialog.cpp
     prefs/PreferenceBindings.cpp

@@ -264,7 +264,8 @@ void MainWindow::loadSettings()
     auto pick = [this](const std::string& user, const char* model) {
         return pathExists(user, PathKind::File) ? user : pathAppend(m_dataDir, model);
     };
-    if (!m_langs.load(pick(m_paths.langsXml(), "langs.model.xml")) || !m_styles.load(pick(m_paths.stylersXml(), "stylers.model.xml")))
+    m_currentThemePath = pick(m_paths.stylersXml(), "stylers.model.xml");
+    if (!m_langs.load(pick(m_paths.langsXml(), "langs.model.xml")) || !m_styles.load(m_currentThemePath))
         QMessageBox::warning(this, QStringLiteral("Notepad++"), tr("langs.xml / stylers.xml could not be loaded."));
     for (const auto& ls : m_styles.lexers())
         if (!ls.ext.empty())
@@ -459,10 +460,16 @@ void MainWindow::applyScintillaKeys(ScintillaEditBase* e)
     for (const SciKey& k : scintillaKeyDefaults())
         if (const int d = def({k.ctrl, k.alt, k.shift, k.vk}))
             e->send(SCI_ASSIGNCMDKEY, static_cast<uptr_t>(d), k.sci);
-    for (const auto& sk : m_shortcuts.scintillaKeys)
+    for (const auto& sk : m_shortcuts.scintillaKeys) {
+        if (sk.combos.empty() || !sk.combos.front().isEnabled()) // shortcut removed in the Shortcut Mapper
+            for (const SciKey& k : scintillaKeyDefaults())
+                if (k.sci == sk.scintId)
+                    if (const int d = def({k.ctrl, k.alt, k.shift, k.vk}))
+                        e->send(SCI_CLEARCMDKEY, static_cast<uptr_t>(d));
         for (const KeyCombo& k : sk.combos)
             if (const int d = def(k))
                 e->send(SCI_ASSIGNCMDKEY, static_cast<uptr_t>(d), sk.scintId);
+    }
 }
 
 void MainWindow::applyEditorSettings(EditorPane* pane)

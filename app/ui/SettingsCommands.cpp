@@ -5,8 +5,11 @@
 #include "editor/EditorPane.h"
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
+#include "ShortcutMapper.h"
+#include "StyleConfigurator.h"
 #include "prefs/PreferencesDialog.h"
 #include "search/FindReplaceDialog.h"
+#include "search/SearchResultsPanel.h"
 
 #include "core/editor/AutoCompletion.h"
 #include "core/util/PathUtil.h"
@@ -86,6 +89,38 @@ void MainWindow::applySettings()
     updateTitleAndStatus();
 }
 
+// Style / override changes: the global options of the language application, then every view
+void MainWindow::applyStylesToEditors()
+{
+    const GuiConfig& g = m_config.gui;
+    m_applyOptions.override = {g.globalOverrideFg, g.globalOverrideBg, g.globalOverrideFont, g.globalOverrideFontSize,
+                               g.globalOverrideBold, g.globalOverrideItalic, g.globalOverrideUnderline};
+    for (const auto& ls : m_styles.lexers())
+        if (!ls.ext.empty())
+            if (const auto t = langTypeFromName(ls.name))
+                m_langs.addUserExtensions(*t, ls.ext);
+    for (EditorPane* p : m_panes) {
+        applyIndicatorStyles(p->editor());
+        if (Buffer* b = buffer(p->current()))
+            applyLanguageToPane(p, b);
+    }
+    if (m_searchResults)
+        m_searchResults->applyStyles(m_langs, m_styles, m_applyOptions);
+}
+
+// New shortcuts (Shortcut Mapper): saved to shortcuts.xml and applied to menus, macros and editors
+void MainWindow::setShortcuts(const ShortcutsFile& f)
+{
+    m_shortcuts = f;
+    std::error_code ec;
+    fs::create_directories(pathFromUtf8(m_paths.userDir()), ec);
+    m_shortcuts.save(m_paths.shortcutsXml());
+    m_actions->applyShortcuts(&m_shortcuts);
+    rebuildMacroMenu();
+    for (EditorPane* p : m_panes)
+        applyScintillaKeys(p->editor());
+}
+
 PreferencesDialog* MainWindow::preferencesDialog()
 {
     if (!m_prefs) {
@@ -127,6 +162,39 @@ void MainWindow::registerSettingsCommands()
         d->reload();
         d->showPage(QStringLiteral("SearchEngine"));
     }});
+    r->setHandler(IDM_LANGSTYLE_CONFIG_DLG, {[this] {
+        StyleConfigurator::Context ctx;
+        ctx.styles = &m_styles;
+        ctx.currentThemePath = &m_currentThemePath;
+        ctx.gui = &m_config.gui;
+        ctx.langs = &m_langs;
+        ctx.nativeLang = &m_nativeLang;
+        ctx.userThemesDir = pathAppend(m_paths.userDir(), "themes");
+        ctx.dataThemesDir = pathAppend(m_dataDir, "themes");
+        ctx.userStylersXml = m_paths.stylersXml();
+        ctx.modelStylersXml = pathAppend(m_dataDir, "stylers.model.xml");
+        ctx.apply = [this] { applyStylesToEditors(); };
+        auto* dlg = new StyleConfigurator(ctx, this);
+        dlg->setAttribute(Qt::WA_DeleteOnClose);
+        connect(dlg, &QDialog::accepted, this, [this] {
+            // upstream: the theme of the current mode is DarkMode darkThemeName / lightThemeName
+            // (file name in themes/, "" = stylers.xml)
+            const QFileInfo fi(QString::fromStdString(m_currentThemePath));
+            const bool isStylers = fi == QFileInfo(QString::fromStdString(m_paths.stylersXml()))
+                                   || fi == QFileInfo(QString::fromStdString(pathAppend(m_dataDir, "stylers.model.xml")));
+            const std::string name = isStylers ? std::string() : fi.fileName().toStdString();
+            (isDarkMode() ? m_config.gui.darkThemeName : m_config.gui.lightThemeName) = name;
+        });
+        m_styleConfigurator = dlg;
+        dlg->show();
+    }});
+    r->setHandler(IDM_SETTING_SHORTCUT_MAPPER, {[this] {
+        ShortcutMapper dlg(m_shortcuts, m_actions, &m_nativeLang, this);
+        if (dlg.exec() == QDialog::Accepted)
+            setShortcuts(dlg.result());
+    }});
+    r->setHandler(IDM_SETTING_SHORTCUT_MAPPER_MACRO, {[this] { m_actions->trigger(IDM_SETTING_SHORTCUT_MAPPER); }});
+    r->setHandler(IDM_SETTING_SHORTCUT_MAPPER_RUN, {[this] { m_actions->trigger(IDM_SETTING_SHORTCUT_MAPPER); }});
     r->setHandler(IDM_SETTING_IMPORTSTYLETHEMES, {[this] {
         const QStringList files = QFileDialog::getOpenFileNames(this, tr("Import style theme(s)"), {}, tr("Style themes (*.xml)"));
         if (files.isEmpty())

@@ -15,7 +15,9 @@
 #include "core/shortcut/Shortcuts.h"
 #include "editor/EditorAdapter.h"
 
+#include <QDialog>
 #include <QMainWindow>
+#include <QPointer>
 #include <QStringList>
 
 #include <array>
@@ -83,6 +85,10 @@ public:
     void applySettings();
     void setUiLanguage(const std::string& localizationFile);
     void applyTheme();
+    void applyStylesToEditors();
+    void setShortcuts(const core::ShortcutsFile& f);
+    QDialog* styleConfigurator() const noexcept { return m_styleConfigurator; }
+    const std::string& currentThemePath() const noexcept { return m_currentThemePath; }
     bool isDarkMode() const;
     core::ConfigFile& mutableConfig() noexcept { return m_config; }
     const core::StyleRegistry& styles() const noexcept { return m_styles; }
@@ -255,6 +261,7 @@ private:
     QString                      m_defaultStyleName;
     bool                         m_themeIsDark = false, m_themeApplied = false;
     std::string                  m_currentThemePath;
+    QPointer<QDialog>            m_styleConfigurator;
     bool                         m_goToOffsetMode = false, m_columnEditorNumbers = false;
     QDialog*                     m_charRangeDialog = nullptr;
     QToolBar*                    m_incBar = nullptr;
