@@ -8,11 +8,11 @@
 | 단계 | 항목 | 구현 | 비율 |
 |---|---|---|---|
 | 2 | 225 | 225 | 100% |
-| 3 | 188 | 81 | 43% |
-| 4 | 15 | 1 | 6% |
-| 5 | 38 | 6 | 15% |
+| 3 | 185 | 185 | 100% |
+| 4 | 16 | 1 | 6% |
+| 5 | 40 | 6 | 15% |
 | 7 | 1 | 0 | 0% |
-| 전체 | 467 | 313 | 67% |
+| 전체 | 467 | 417 | 89% |
 
 ## File
 
@@ -104,17 +104,17 @@
 | [x] | Line Operations > Sort Lines As Decimals (Comma) Descending | `IDM_EDIT_SORTLINES_DECIMALCOMMA_DESCENDING` | 3 |
 | [x] | Line Operations > Sort Lines As Decimals (Dot) Descending | `IDM_EDIT_SORTLINES_DECIMALDOT_DESCENDING` | 3 |
 | [x] | Line Operations > Sort Lines By Length Descending | `IDM_EDIT_SORTLINES_LENGTH_DESCENDING` | 3 |
-| [ ] | Comment/Uncomment > Toggle Single Line Comment | `IDM_EDIT_BLOCK_COMMENT` | 3 |
-| [ ] | Comment/Uncomment > Single Line Comment | `IDM_EDIT_BLOCK_COMMENT_SET` | 3 |
-| [ ] | Comment/Uncomment > Single Line Uncomment | `IDM_EDIT_BLOCK_UNCOMMENT` | 3 |
-| [ ] | Comment/Uncomment > Block Comment | `IDM_EDIT_STREAM_COMMENT` | 3 |
-| [ ] | Comment/Uncomment > Block Uncomment | `IDM_EDIT_STREAM_UNCOMMENT` | 3 |
-| [ ] | Auto-Completion > Function Completion | `IDM_EDIT_AUTOCOMPLETE` | 3 |
-| [ ] | Auto-Completion > Word Completion | `IDM_EDIT_AUTOCOMPLETE_CURRENTFILE` | 3 |
-| [ ] | Auto-Completion > Function Parameters Hint | `IDM_EDIT_FUNCCALLTIP` | 3 |
-| [ ] | Auto-Completion > Function Parameters Previous Hint | `IDM_EDIT_FUNCCALLTIP_PREVIOUS` | 3 |
-| [ ] | Auto-Completion > Function Parameters Next Hint | `IDM_EDIT_FUNCCALLTIP_NEXT` | 3 |
-| [ ] | Auto-Completion > Path Completion | `IDM_EDIT_AUTOCOMPLETE_PATH` | 3 |
+| [x] | Comment/Uncomment > Toggle Single Line Comment | `IDM_EDIT_BLOCK_COMMENT` | 3 |
+| [x] | Comment/Uncomment > Single Line Comment | `IDM_EDIT_BLOCK_COMMENT_SET` | 3 |
+| [x] | Comment/Uncomment > Single Line Uncomment | `IDM_EDIT_BLOCK_UNCOMMENT` | 3 |
+| [x] | Comment/Uncomment > Block Comment | `IDM_EDIT_STREAM_COMMENT` | 3 |
+| [x] | Comment/Uncomment > Block Uncomment | `IDM_EDIT_STREAM_UNCOMMENT` | 3 |
+| [x] | Auto-Completion > Function Completion | `IDM_EDIT_AUTOCOMPLETE` | 3 |
+| [x] | Auto-Completion > Word Completion | `IDM_EDIT_AUTOCOMPLETE_CURRENTFILE` | 3 |
+| [x] | Auto-Completion > Function Parameters Hint | `IDM_EDIT_FUNCCALLTIP` | 3 |
+| [x] | Auto-Completion > Function Parameters Previous Hint | `IDM_EDIT_FUNCCALLTIP_PREVIOUS` | 3 |
+| [x] | Auto-Completion > Function Parameters Next Hint | `IDM_EDIT_FUNCCALLTIP_NEXT` | 3 |
+| [x] | Auto-Completion > Path Completion | `IDM_EDIT_AUTOCOMPLETE_PATH` | 3 |
 | [x] | EOL Conversion > Windows (CR LF) | `IDM_FORMAT_TODOS` | 3 |
 | [x] | EOL Conversion > Unix (LF) | `IDM_FORMAT_TOUNIX` | 3 |
 | [x] | EOL Conversion > Macintosh (CR) | `IDM_FORMAT_TOMAC` | 3 |
@@ -135,7 +135,7 @@
 | [x] | On Selection > Open Containing Folder in Explorer | `IDM_EDIT_OPENSELECTEDFILEFOLDERINEXPLORER` | 3 |
 | [x] | On Selection > Redact Selection █ (Shift: ●) | `IDM_EDIT_REDACT_SELECTION` | 3 |
 | [x] | On Selection > Search on Internet | `IDM_EDIT_SEARCHONINTERNET` | 3 |
-| [ ] | On Selection > Change Search Engine... | `IDM_EDIT_CHANGESEARCHENGINE` | 3 |
+| [ ] | On Selection > Change Search Engine... | `IDM_EDIT_CHANGESEARCHENGINE` | 4 |
 | [x] | Multi-select All > Ignore Case  Whole Word | `IDM_EDIT_MULTISELECTALL` | 3 |
 | [x] | Multi-select All > Match Case Only | `IDM_EDIT_MULTISELECTALLMATCHCASE` | 3 |
 | [x] | Multi-select All > Match Whole Word Only | `IDM_EDIT_MULTISELECTALLWHOLEWORD` | 3 |
@@ -146,10 +146,10 @@
 | [x] | Multi-select Next > Match Case  Whole Word | `IDM_EDIT_MULTISELECTNEXTMATCHCASEWHOLEWORD` | 3 |
 | [x] | Undo the Latest Added Multi-Select | `IDM_EDIT_MULTISELECTUNDO` | 3 |
 | [x] | Skip Current  Go to Next Multi-select | `IDM_EDIT_MULTISELECTSSKIP` | 3 |
-| [ ] | Column Mode... | `IDM_EDIT_COLUMNMODETIP` | 3 |
-| [ ] | Column Editor... | `IDM_EDIT_COLUMNMODE` | 3 |
-| [ ] | Character Panel | `IDM_EDIT_CHAR_PANEL` | 3 |
-| [ ] | Clipboard History | `IDM_EDIT_CLIPBOARDHISTORY_PANEL` | 3 |
+| [x] | Column Mode... | `IDM_EDIT_COLUMNMODETIP` | 3 |
+| [x] | Column Editor... | `IDM_EDIT_COLUMNMODE` | 3 |
+| [ ] | Character Panel | `IDM_EDIT_CHAR_PANEL` | 5 |
+| [ ] | Clipboard History | `IDM_EDIT_CLIPBOARDHISTORY_PANEL` | 5 |
 | [x] | Read-Only in Notepad++ > Read-Only on Current Document | `IDM_EDIT_TOGGLEREADONLY` | 3 |
 | [x] | Read-Only in Notepad++ > Read-Only for All Documents | `IDM_EDIT_SETREADONLYFORALLDOCS` | 3 |
 | [x] | Read-Only in Notepad++ > Clear Read-Only for All Documents | `IDM_EDIT_CLEARREADONLYFORALLDOCS` | 3 |
@@ -159,72 +159,72 @@
 
 | | 메뉴 | ID | 단계 |
 |---|---|---|---|
-| [ ] | Find... | `IDM_SEARCH_FIND` | 3 |
-| [ ] | Find in Files... | `IDM_SEARCH_FINDINFILES` | 3 |
-| [ ] | Find Next | `IDM_SEARCH_FINDNEXT` | 3 |
-| [ ] | Find Previous | `IDM_SEARCH_FINDPREV` | 3 |
-| [ ] | Select and Find Next | `IDM_SEARCH_SETANDFINDNEXT` | 3 |
-| [ ] | Select and Find Previous | `IDM_SEARCH_SETANDFINDPREV` | 3 |
-| [ ] | Find (Volatile) Next | `IDM_SEARCH_VOLATILE_FINDNEXT` | 3 |
-| [ ] | Find (Volatile) Previous | `IDM_SEARCH_VOLATILE_FINDPREV` | 3 |
-| [ ] | Replace... | `IDM_SEARCH_REPLACE` | 3 |
-| [ ] | Incremental Search | `IDM_SEARCH_FINDINCREMENT` | 3 |
-| [ ] | Search Results Window | `IDM_FOCUS_ON_FOUND_RESULTS` | 3 |
-| [ ] | Next Search Result | `IDM_SEARCH_GOTONEXTFOUND` | 3 |
-| [ ] | Previous Search Result | `IDM_SEARCH_GOTOPREVFOUND` | 3 |
+| [x] | Find... | `IDM_SEARCH_FIND` | 3 |
+| [x] | Find in Files... | `IDM_SEARCH_FINDINFILES` | 3 |
+| [x] | Find Next | `IDM_SEARCH_FINDNEXT` | 3 |
+| [x] | Find Previous | `IDM_SEARCH_FINDPREV` | 3 |
+| [x] | Select and Find Next | `IDM_SEARCH_SETANDFINDNEXT` | 3 |
+| [x] | Select and Find Previous | `IDM_SEARCH_SETANDFINDPREV` | 3 |
+| [x] | Find (Volatile) Next | `IDM_SEARCH_VOLATILE_FINDNEXT` | 3 |
+| [x] | Find (Volatile) Previous | `IDM_SEARCH_VOLATILE_FINDPREV` | 3 |
+| [x] | Replace... | `IDM_SEARCH_REPLACE` | 3 |
+| [x] | Incremental Search | `IDM_SEARCH_FINDINCREMENT` | 3 |
+| [x] | Search Results Window | `IDM_FOCUS_ON_FOUND_RESULTS` | 3 |
+| [x] | Next Search Result | `IDM_SEARCH_GOTONEXTFOUND` | 3 |
+| [x] | Previous Search Result | `IDM_SEARCH_GOTOPREVFOUND` | 3 |
 | [x] | Go to... | `IDM_SEARCH_GOTOLINE` | 2 |
-| [ ] | Go to Matching Brace | `IDM_SEARCH_GOTOMATCHINGBRACE` | 3 |
-| [ ] | Select All In-between {} [] or () | `IDM_SEARCH_SELECTMATCHINGBRACES` | 3 |
-| [ ] | Mark... | `IDM_SEARCH_MARK` | 3 |
-| [ ] | Change History > Go to Next Change | `IDM_SEARCH_CHANGED_NEXT` | 3 |
-| [ ] | Change History > Go to Previous Change | `IDM_SEARCH_CHANGED_PREV` | 3 |
-| [ ] | Change History > Clear Change History | `IDM_SEARCH_CLEAR_CHANGE_HISTORY` | 3 |
-| [ ] | Style All Occurrences of Token > Using 1st Style | `IDM_SEARCH_MARKALLEXT1` | 3 |
-| [ ] | Style All Occurrences of Token > Using 2nd Style | `IDM_SEARCH_MARKALLEXT2` | 3 |
-| [ ] | Style All Occurrences of Token > Using 3rd Style | `IDM_SEARCH_MARKALLEXT3` | 3 |
-| [ ] | Style All Occurrences of Token > Using 4th Style | `IDM_SEARCH_MARKALLEXT4` | 3 |
-| [ ] | Style All Occurrences of Token > Using 5th Style | `IDM_SEARCH_MARKALLEXT5` | 3 |
-| [ ] | Style One Token > Using 1st Style | `IDM_SEARCH_MARKONEEXT1` | 3 |
-| [ ] | Style One Token > Using 2nd Style | `IDM_SEARCH_MARKONEEXT2` | 3 |
-| [ ] | Style One Token > Using 3rd Style | `IDM_SEARCH_MARKONEEXT3` | 3 |
-| [ ] | Style One Token > Using 4th Style | `IDM_SEARCH_MARKONEEXT4` | 3 |
-| [ ] | Style One Token > Using 5th Style | `IDM_SEARCH_MARKONEEXT5` | 3 |
-| [ ] | Clear Style > Clear 1st Style | `IDM_SEARCH_UNMARKALLEXT1` | 3 |
-| [ ] | Clear Style > Clear 2nd Style | `IDM_SEARCH_UNMARKALLEXT2` | 3 |
-| [ ] | Clear Style > Clear 3rd Style | `IDM_SEARCH_UNMARKALLEXT3` | 3 |
-| [ ] | Clear Style > Clear 4th Style | `IDM_SEARCH_UNMARKALLEXT4` | 3 |
-| [ ] | Clear Style > Clear 5th Style | `IDM_SEARCH_UNMARKALLEXT5` | 3 |
-| [ ] | Clear Style > Clear all Styles | `IDM_SEARCH_CLEARALLMARKS` | 3 |
-| [ ] | Jump Up > 1st Style | `IDM_SEARCH_GOPREVMARKER1` | 3 |
-| [ ] | Jump Up > 2nd Style | `IDM_SEARCH_GOPREVMARKER2` | 3 |
-| [ ] | Jump Up > 3rd Style | `IDM_SEARCH_GOPREVMARKER3` | 3 |
-| [ ] | Jump Up > 4th Style | `IDM_SEARCH_GOPREVMARKER4` | 3 |
-| [ ] | Jump Up > 5th Style | `IDM_SEARCH_GOPREVMARKER5` | 3 |
-| [ ] | Jump Up > Find Mark Style | `IDM_SEARCH_GOPREVMARKER_DEF` | 3 |
-| [ ] | Jump Down > 1st Style | `IDM_SEARCH_GONEXTMARKER1` | 3 |
-| [ ] | Jump Down > 2nd Style | `IDM_SEARCH_GONEXTMARKER2` | 3 |
-| [ ] | Jump Down > 3rd Style | `IDM_SEARCH_GONEXTMARKER3` | 3 |
-| [ ] | Jump Down > 4th Style | `IDM_SEARCH_GONEXTMARKER4` | 3 |
-| [ ] | Jump Down > 5th Style | `IDM_SEARCH_GONEXTMARKER5` | 3 |
-| [ ] | Jump Down > Find Mark Style | `IDM_SEARCH_GONEXTMARKER_DEF` | 3 |
-| [ ] | Copy Styled Text > 1st Style | `IDM_SEARCH_STYLE1TOCLIP` | 3 |
-| [ ] | Copy Styled Text > 2nd Style | `IDM_SEARCH_STYLE2TOCLIP` | 3 |
-| [ ] | Copy Styled Text > 3rd Style | `IDM_SEARCH_STYLE3TOCLIP` | 3 |
-| [ ] | Copy Styled Text > 4th Style | `IDM_SEARCH_STYLE4TOCLIP` | 3 |
-| [ ] | Copy Styled Text > 5th Style | `IDM_SEARCH_STYLE5TOCLIP` | 3 |
-| [ ] | Copy Styled Text > All Styles | `IDM_SEARCH_ALLSTYLESTOCLIP` | 3 |
-| [ ] | Copy Styled Text > Find Mark Style | `IDM_SEARCH_MARKEDTOCLIP` | 3 |
+| [x] | Go to Matching Brace | `IDM_SEARCH_GOTOMATCHINGBRACE` | 3 |
+| [x] | Select All In-between {} [] or () | `IDM_SEARCH_SELECTMATCHINGBRACES` | 3 |
+| [x] | Mark... | `IDM_SEARCH_MARK` | 3 |
+| [x] | Change History > Go to Next Change | `IDM_SEARCH_CHANGED_NEXT` | 3 |
+| [x] | Change History > Go to Previous Change | `IDM_SEARCH_CHANGED_PREV` | 3 |
+| [x] | Change History > Clear Change History | `IDM_SEARCH_CLEAR_CHANGE_HISTORY` | 3 |
+| [x] | Style All Occurrences of Token > Using 1st Style | `IDM_SEARCH_MARKALLEXT1` | 3 |
+| [x] | Style All Occurrences of Token > Using 2nd Style | `IDM_SEARCH_MARKALLEXT2` | 3 |
+| [x] | Style All Occurrences of Token > Using 3rd Style | `IDM_SEARCH_MARKALLEXT3` | 3 |
+| [x] | Style All Occurrences of Token > Using 4th Style | `IDM_SEARCH_MARKALLEXT4` | 3 |
+| [x] | Style All Occurrences of Token > Using 5th Style | `IDM_SEARCH_MARKALLEXT5` | 3 |
+| [x] | Style One Token > Using 1st Style | `IDM_SEARCH_MARKONEEXT1` | 3 |
+| [x] | Style One Token > Using 2nd Style | `IDM_SEARCH_MARKONEEXT2` | 3 |
+| [x] | Style One Token > Using 3rd Style | `IDM_SEARCH_MARKONEEXT3` | 3 |
+| [x] | Style One Token > Using 4th Style | `IDM_SEARCH_MARKONEEXT4` | 3 |
+| [x] | Style One Token > Using 5th Style | `IDM_SEARCH_MARKONEEXT5` | 3 |
+| [x] | Clear Style > Clear 1st Style | `IDM_SEARCH_UNMARKALLEXT1` | 3 |
+| [x] | Clear Style > Clear 2nd Style | `IDM_SEARCH_UNMARKALLEXT2` | 3 |
+| [x] | Clear Style > Clear 3rd Style | `IDM_SEARCH_UNMARKALLEXT3` | 3 |
+| [x] | Clear Style > Clear 4th Style | `IDM_SEARCH_UNMARKALLEXT4` | 3 |
+| [x] | Clear Style > Clear 5th Style | `IDM_SEARCH_UNMARKALLEXT5` | 3 |
+| [x] | Clear Style > Clear all Styles | `IDM_SEARCH_CLEARALLMARKS` | 3 |
+| [x] | Jump Up > 1st Style | `IDM_SEARCH_GOPREVMARKER1` | 3 |
+| [x] | Jump Up > 2nd Style | `IDM_SEARCH_GOPREVMARKER2` | 3 |
+| [x] | Jump Up > 3rd Style | `IDM_SEARCH_GOPREVMARKER3` | 3 |
+| [x] | Jump Up > 4th Style | `IDM_SEARCH_GOPREVMARKER4` | 3 |
+| [x] | Jump Up > 5th Style | `IDM_SEARCH_GOPREVMARKER5` | 3 |
+| [x] | Jump Up > Find Mark Style | `IDM_SEARCH_GOPREVMARKER_DEF` | 3 |
+| [x] | Jump Down > 1st Style | `IDM_SEARCH_GONEXTMARKER1` | 3 |
+| [x] | Jump Down > 2nd Style | `IDM_SEARCH_GONEXTMARKER2` | 3 |
+| [x] | Jump Down > 3rd Style | `IDM_SEARCH_GONEXTMARKER3` | 3 |
+| [x] | Jump Down > 4th Style | `IDM_SEARCH_GONEXTMARKER4` | 3 |
+| [x] | Jump Down > 5th Style | `IDM_SEARCH_GONEXTMARKER5` | 3 |
+| [x] | Jump Down > Find Mark Style | `IDM_SEARCH_GONEXTMARKER_DEF` | 3 |
+| [x] | Copy Styled Text > 1st Style | `IDM_SEARCH_STYLE1TOCLIP` | 3 |
+| [x] | Copy Styled Text > 2nd Style | `IDM_SEARCH_STYLE2TOCLIP` | 3 |
+| [x] | Copy Styled Text > 3rd Style | `IDM_SEARCH_STYLE3TOCLIP` | 3 |
+| [x] | Copy Styled Text > 4th Style | `IDM_SEARCH_STYLE4TOCLIP` | 3 |
+| [x] | Copy Styled Text > 5th Style | `IDM_SEARCH_STYLE5TOCLIP` | 3 |
+| [x] | Copy Styled Text > All Styles | `IDM_SEARCH_ALLSTYLESTOCLIP` | 3 |
+| [x] | Copy Styled Text > Find Mark Style | `IDM_SEARCH_MARKEDTOCLIP` | 3 |
 | [x] | Bookmark > Toggle Bookmark | `IDM_SEARCH_TOGGLE_BOOKMARK` | 2 |
-| [ ] | Bookmark > Next Bookmark | `IDM_SEARCH_NEXT_BOOKMARK` | 3 |
-| [ ] | Bookmark > Previous Bookmark | `IDM_SEARCH_PREV_BOOKMARK` | 3 |
+| [x] | Bookmark > Next Bookmark | `IDM_SEARCH_NEXT_BOOKMARK` | 3 |
+| [x] | Bookmark > Previous Bookmark | `IDM_SEARCH_PREV_BOOKMARK` | 3 |
 | [x] | Bookmark > Clear All Bookmarks | `IDM_SEARCH_CLEAR_BOOKMARKS` | 2 |
-| [ ] | Bookmark > Cut Bookmarked Lines | `IDM_SEARCH_CUTMARKEDLINES` | 3 |
-| [ ] | Bookmark > Copy Bookmarked Lines | `IDM_SEARCH_COPYMARKEDLINES` | 3 |
-| [ ] | Bookmark > Paste to (Replace) Bookmarked Lines | `IDM_SEARCH_PASTEMARKEDLINES` | 3 |
-| [ ] | Bookmark > Remove Bookmarked Lines | `IDM_SEARCH_DELETEMARKEDLINES` | 3 |
-| [ ] | Bookmark > Remove Non-Bookmarked Lines | `IDM_SEARCH_DELETEUNMARKEDLINES` | 3 |
-| [ ] | Bookmark > Inverse Bookmarks | `IDM_SEARCH_INVERSEMARKS` | 3 |
-| [ ] | Find characters in range... | `IDM_SEARCH_FINDCHARINRANGE` | 3 |
+| [x] | Bookmark > Cut Bookmarked Lines | `IDM_SEARCH_CUTMARKEDLINES` | 3 |
+| [x] | Bookmark > Copy Bookmarked Lines | `IDM_SEARCH_COPYMARKEDLINES` | 3 |
+| [x] | Bookmark > Paste to (Replace) Bookmarked Lines | `IDM_SEARCH_PASTEMARKEDLINES` | 3 |
+| [x] | Bookmark > Remove Bookmarked Lines | `IDM_SEARCH_DELETEMARKEDLINES` | 3 |
+| [x] | Bookmark > Remove Non-Bookmarked Lines | `IDM_SEARCH_DELETEUNMARKEDLINES` | 3 |
+| [x] | Bookmark > Inverse Bookmarks | `IDM_SEARCH_INVERSEMARKS` | 3 |
+| [x] | Find characters in range... | `IDM_SEARCH_FINDCHARINRANGE` | 3 |
 
 ## View
 
@@ -278,27 +278,27 @@
 | [ ] | Tab > Remove Color | `IDM_VIEW_TAB_COLOUR_NONE` | 4 |
 | [x] | Word wrap | `IDM_VIEW_WRAP` | 2 |
 | [x] | Focus on Another View | `IDM_VIEW_SWITCHTO_OTHER_VIEW` | 5 |
-| [ ] | Hide Lines | `IDM_VIEW_HIDELINES` | 3 |
-| [ ] | Fold All | `IDM_VIEW_FOLDALL` | 3 |
-| [ ] | Unfold All | `IDM_VIEW_UNFOLDALL` | 3 |
-| [ ] | Fold Current Level | `IDM_VIEW_FOLD_CURRENT` | 3 |
-| [ ] | Unfold Current Level | `IDM_VIEW_UNFOLD_CURRENT` | 3 |
-| [ ] | Fold Level > 1 | `IDM_VIEW_FOLD_1` | 3 |
-| [ ] | Fold Level > 2 | `IDM_VIEW_FOLD_2` | 3 |
-| [ ] | Fold Level > 3 | `IDM_VIEW_FOLD_3` | 3 |
-| [ ] | Fold Level > 4 | `IDM_VIEW_FOLD_4` | 3 |
-| [ ] | Fold Level > 5 | `IDM_VIEW_FOLD_5` | 3 |
-| [ ] | Fold Level > 6 | `IDM_VIEW_FOLD_6` | 3 |
-| [ ] | Fold Level > 7 | `IDM_VIEW_FOLD_7` | 3 |
-| [ ] | Fold Level > 8 | `IDM_VIEW_FOLD_8` | 3 |
-| [ ] | Unfold Level > 1 | `IDM_VIEW_UNFOLD_1` | 3 |
-| [ ] | Unfold Level > 2 | `IDM_VIEW_UNFOLD_2` | 3 |
-| [ ] | Unfold Level > 3 | `IDM_VIEW_UNFOLD_3` | 3 |
-| [ ] | Unfold Level > 4 | `IDM_VIEW_UNFOLD_4` | 3 |
-| [ ] | Unfold Level > 5 | `IDM_VIEW_UNFOLD_5` | 3 |
-| [ ] | Unfold Level > 6 | `IDM_VIEW_UNFOLD_6` | 3 |
-| [ ] | Unfold Level > 7 | `IDM_VIEW_UNFOLD_7` | 3 |
-| [ ] | Unfold Level > 8 | `IDM_VIEW_UNFOLD_8` | 3 |
+| [x] | Hide Lines | `IDM_VIEW_HIDELINES` | 3 |
+| [x] | Fold All | `IDM_VIEW_FOLDALL` | 3 |
+| [x] | Unfold All | `IDM_VIEW_UNFOLDALL` | 3 |
+| [x] | Fold Current Level | `IDM_VIEW_FOLD_CURRENT` | 3 |
+| [x] | Unfold Current Level | `IDM_VIEW_UNFOLD_CURRENT` | 3 |
+| [x] | Fold Level > 1 | `IDM_VIEW_FOLD_1` | 3 |
+| [x] | Fold Level > 2 | `IDM_VIEW_FOLD_2` | 3 |
+| [x] | Fold Level > 3 | `IDM_VIEW_FOLD_3` | 3 |
+| [x] | Fold Level > 4 | `IDM_VIEW_FOLD_4` | 3 |
+| [x] | Fold Level > 5 | `IDM_VIEW_FOLD_5` | 3 |
+| [x] | Fold Level > 6 | `IDM_VIEW_FOLD_6` | 3 |
+| [x] | Fold Level > 7 | `IDM_VIEW_FOLD_7` | 3 |
+| [x] | Fold Level > 8 | `IDM_VIEW_FOLD_8` | 3 |
+| [x] | Unfold Level > 1 | `IDM_VIEW_UNFOLD_1` | 3 |
+| [x] | Unfold Level > 2 | `IDM_VIEW_UNFOLD_2` | 3 |
+| [x] | Unfold Level > 3 | `IDM_VIEW_UNFOLD_3` | 3 |
+| [x] | Unfold Level > 4 | `IDM_VIEW_UNFOLD_4` | 3 |
+| [x] | Unfold Level > 5 | `IDM_VIEW_UNFOLD_5` | 3 |
+| [x] | Unfold Level > 6 | `IDM_VIEW_UNFOLD_6` | 3 |
+| [x] | Unfold Level > 7 | `IDM_VIEW_UNFOLD_7` | 3 |
+| [x] | Unfold Level > 8 | `IDM_VIEW_UNFOLD_8` | 3 |
 | [ ] | Summary... | `IDM_VIEW_SUMMARY` | 5 |
 | [ ] | Project Panels > Project Panel 1 | `IDM_VIEW_PROJECT_PANEL_1` | 5 |
 | [ ] | Project Panels > Project Panel 2 | `IDM_VIEW_PROJECT_PANEL_2` | 5 |
@@ -307,8 +307,8 @@
 | [ ] | Document Map | `IDM_VIEW_DOC_MAP` | 5 |
 | [x] | Document List | `IDM_VIEW_DOCLIST` | 5 |
 | [ ] | Function List | `IDM_VIEW_FUNC_LIST` | 5 |
-| [ ] | Synchronize Vertical Scrolling | `IDM_VIEW_SYNSCROLLV` | 3 |
-| [ ] | Synchronize Horizontal Scrolling | `IDM_VIEW_SYNSCROLLH` | 3 |
+| [x] | Synchronize Vertical Scrolling | `IDM_VIEW_SYNSCROLLV` | 3 |
+| [x] | Synchronize Horizontal Scrolling | `IDM_VIEW_SYNSCROLLH` | 3 |
 | [x] | Text Direction RTL | `IDM_EDIT_RTL` | 2 |
 | [x] | Text Direction LTR | `IDM_EDIT_LTR` | 2 |
 | [ ] | Monitoring (tail -f) | `IDM_VIEW_MONITORING` | 5 |
@@ -508,11 +508,11 @@
 
 | | 메뉴 | ID | 단계 |
 |---|---|---|---|
-| [ ] | Start Recording | `IDM_MACRO_STARTRECORDINGMACRO` | 3 |
-| [ ] | Stop Recording | `IDM_MACRO_STOPRECORDINGMACRO` | 3 |
-| [ ] | Playback | `IDM_MACRO_PLAYBACKRECORDEDMACRO` | 3 |
-| [ ] | Save Current Recorded Macro... | `IDM_MACRO_SAVECURRENTMACRO` | 3 |
-| [ ] | Run a Macro Multiple Times... | `IDM_MACRO_RUNMULTIMACRODLG` | 3 |
+| [x] | Start Recording | `IDM_MACRO_STARTRECORDINGMACRO` | 3 |
+| [x] | Stop Recording | `IDM_MACRO_STOPRECORDINGMACRO` | 3 |
+| [x] | Playback | `IDM_MACRO_PLAYBACKRECORDEDMACRO` | 3 |
+| [x] | Save Current Recorded Macro... | `IDM_MACRO_SAVECURRENTMACRO` | 3 |
+| [x] | Run a Macro Multiple Times... | `IDM_MACRO_RUNMULTIMACRODLG` | 3 |
 
 ## Run
 

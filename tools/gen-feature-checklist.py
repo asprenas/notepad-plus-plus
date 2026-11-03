@@ -21,6 +21,14 @@ handled |= set(re.findall(r"NPP_LANGCMD\((IDM_\w+)", (menu_dir / "LanguageComman
 ranges = []  # (first, last) id ranges registered in loops
 if "IDM_VIEW_TAB1 + i" in src:
     ranges.append((values["IDM_VIEW_TAB1"], values["IDM_VIEW_TAB1"] + 8))
+# loops registering "FIRST + i" / "FIRST + i * 2" / "(... ? A : B) + 1 + level"
+for first, count, step in [("IDM_SEARCH_MARKALLEXT1", 5, 2), ("IDM_SEARCH_UNMARKALLEXT1", 5, 2), ("IDM_SEARCH_MARKONEEXT1", 5, 1),
+                           ("IDM_SEARCH_GONEXTMARKER1", 5, 1), ("IDM_SEARCH_GOPREVMARKER1", 5, 1)]:
+    if re.search(re.escape(first) + r" \+ i( \* 2)?", src):
+        handled.update(n for n, v in values.items() if v in range(values[first], values[first] + count * step, step))
+if "(collapse ? IDM_VIEW_FOLD : IDM_VIEW_UNFOLD) + 1 + level" in src:
+    for base in ("IDM_VIEW_FOLD", "IDM_VIEW_UNFOLD"):
+        handled.update(n for n, v in values.items() if values[base] + 1 <= v <= values[base] + 8 and n.startswith(base + "_"))
 if "IDM_FORMAT_ENCODE + i" in src:
     ranges.append((values["IDM_FORMAT_ENCODE"], values.get("IDM_FORMAT_ENCODE_END", values["IDM_FORMAT_ENCODE"] + 60)))
 
@@ -46,7 +54,11 @@ OVERRIDE = [(r"^IDM_SEARCH_(GOTOLINE|TOGGLE_BOOKMARK|CLEAR_BOOKMARKS)$", 2),
             # tab colours / pinned tabs follow the TabSetting options and themes (phase 4)
             (r"^IDM_(VIEW_TAB_COLOUR_|FILE_CLOSEALL_BUT_PINNED|PINTAB)", 4),
             # non-printing character representations come with the Editing settings page (phase 4)
-            (r"^IDM_VIEW_NPC", 4)]
+            (r"^IDM_VIEW_NPC", 4),
+            # panels (phase 5): Character Panel, Clipboard History
+            (r"^IDM_EDIT_(CHAR_PANEL|CLIPBOARDHISTORY_PANEL)$", 5),
+            # Change Search Engine opens the Preferences dialog (phase 4)
+            (r"^IDM_EDIT_CHANGESEARCHENGINE$", 4)]
 
 
 def phase_of(top, name):
