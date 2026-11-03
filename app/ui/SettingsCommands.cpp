@@ -25,6 +25,8 @@
 #include <QStatusBar>
 #include <QTimer>
 #include <QToolBar>
+#include <QUrl>
+#include <QDesktopServices>
 #include <map>
 #include <QLibraryInfo>
 #include <QTranslator>
@@ -253,6 +255,47 @@ void MainWindow::registerSettingsCommands()
                           fs::copy_options::overwrite_existing, ec);
         QMessageBox::information(this, QStringLiteral("Notepad++"), tr("%n theme(s) imported.", nullptr, static_cast<int>(files.size())));
     }});
+    // upstream addNppPlugins: each plugin goes to plugins/<name>/<name>.dll; loaded at the next start
+    // (the plugin host itself arrives in phase 7)
+    r->setHandler(IDM_SETTING_IMPORTPLUGIN, {[this] {
+#if defined(Q_OS_WIN)
+        const QString filter = tr("Notepad++ plugin (*.dll)");
+#else
+        const QString filter = tr("Notepad++ plugin (*.so)");
+#endif
+        const QStringList files = QFileDialog::getOpenFileNames(this, tr("Import plugin(s)"), {}, filter);
+        if (importPlugins(files) > 0) {
+            const auto t = m_nativeLang.messageBox("NeedToRestartToLoadPlugins",
+                                                   "You have to restart Notepad++ to load plugins you installed.",
+                                                   "Notepad++ needs to be relaunched");
+            QMessageBox::information(this, QString::fromStdString(t.title), QString::fromStdString(t.message));
+        }
+    }});
+    r->setHandler(IDM_SETTING_OPENPLUGINSDIR, {[this] {
+        std::error_code ec;
+        fs::create_directories(pathFromUtf8(pluginsDir()), ec);
+        QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(pluginsDir())));
+    }});
+}
+
+std::string MainWindow::pluginsDir() const
+{
+    return pathAppend(m_paths.userDir(), "plugins");
+}
+
+int MainWindow::importPlugins(const QStringList& files)
+{
+    int copied = 0;
+    std::error_code ec;
+    for (const QString& f : files) {
+        const QFileInfo fi(f);
+        const fs::path dir = pathFromUtf8(pathAppend(pluginsDir(), fi.completeBaseName().toStdString()));
+        fs::create_directories(dir, ec);
+        if (fs::copy_file(pathFromUtf8(f.toStdString()), dir / pathFromUtf8(fi.fileName().toStdString()),
+                          fs::copy_options::overwrite_existing, ec))
+            ++copied;
+    }
+    return copied;
 }
 
 } // namespace npp::ui

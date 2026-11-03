@@ -474,6 +474,20 @@ private slots:
         QCOMPARE(f->findChild<QAbstractButton*>(QStringLiteral("1609"))->text(), QStringLiteral("Replace &All"));
     }
 
+    void importPlugin()
+    {
+        QTemporaryDir dir;
+        const QString dll = dir.filePath(QStringLiteral("MyPlugin.dll"));
+        QFile f(dll);
+        QVERIFY(f.open(QIODevice::WriteOnly));
+        f.write("MZ");
+        f.close();
+        QCOMPARE(m_w->importPlugins({dll}), 1);
+        QVERIFY(QFile::exists(QString::fromStdString(m_w->pluginsDir()) + QStringLiteral("/MyPlugin/MyPlugin.dll")));
+        QVERIFY(m_w->actions()->hasHandler(IDM_SETTING_IMPORTPLUGIN));
+        QVERIFY(m_w->actions()->hasHandler(IDM_SETTING_OPENPLUGINSDIR));
+    }
+
     void screenshots()
     {
         const QString out = qEnvironmentVariable("NPP_SCREENSHOT_DIR");
