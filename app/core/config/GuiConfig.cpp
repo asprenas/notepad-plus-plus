@@ -1,5 +1,7 @@
 #include "GuiConfig.h"
 
+#include <sstream>
+
 #include "core/config/XmlHelpers.h"
 
 #include <pugixml.hpp>
@@ -94,6 +96,22 @@ void GuiConfig::load(const pugi::xml_node& root)
                 autoInsertUserPairs.emplace_back(static_cast<char>(open), static_cast<char>(close));
         }
     }
+    {
+        std::string edges; // "80 120 " -> "80 120"
+        for (int c : edgeColumns(edgeMultiColumnPos))
+            edges += (edges.empty() ? "" : " ") + std::to_string(c);
+        edgeMultiColumnPos = edges;
+    }
+}
+
+std::vector<int> GuiConfig::edgeColumns(const std::string& s)
+{
+    std::vector<int> out;
+    std::istringstream in(s);
+    for (int c; in >> c;)
+        if (c >= 0)
+            out.push_back(c);
+    return out;
 }
 
 void GuiConfig::save(pugi::xml_node root) const
@@ -114,6 +132,19 @@ void GuiConfig::save(pugi::xml_node root) const
 #undef NPP_INT_TEXT
 #undef NPP_STR_TEXT
 
+    // upstream writes every edge column followed by a space ("80 120 ")
+    {
+        pugi::xml_node n = guiNodeForWrite(root, "ScintillaPrimaryView");
+        const std::string old = n.attribute("edgeMultiColumnPos").value();
+        if (edgeColumns(old) != edgeColumns(edgeMultiColumnPos)) { // unchanged columns keep the file text
+            std::string edges;
+            for (int c : edgeColumns(edgeMultiColumnPos))
+                edges += std::to_string(c) + ' ';
+            xml::setString(n, "edgeMultiColumnPos", edges);
+        } else {
+            xml::setString(n, "edgeMultiColumnPos", old);
+        }
+    }
     xml::setText(guiNodeForWrite(root, "StatusBar"), statusBarShow ? "show" : "hide");
     xml::setText(guiNodeForWrite(root, "MenuBar"), menuBarShow ? "show" : "hide");
     xml::setText(guiNodeForWrite(root, "ScintillaViewsSplitter"), splitterVertical ? "vertical" : "horizontal");

@@ -70,3 +70,7 @@ add_dependencies(test_ui_settings notepadpp-qt)
 add_test(NAME ui.settings COMMAND test_ui_settings)
 set_tests_properties(ui.settings PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 npp_test_env(ui.settings)
+
+# --- settings compatibility helper (tools/settings-compat/run-with-npp.ps1, phase 4) --------
+add_executable(settings_compat tools/settings_compat.cpp)
+target_link_libraries(settings_compat PRIVATE npp_core)

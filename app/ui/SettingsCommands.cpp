@@ -123,6 +123,8 @@ void MainWindow::applySettings()
     }
     menuBar()->setVisible(g.menuBarShow);
     statusBar()->setVisible(g.statusBarShow);
+    if (m_themeApplied) // Preferences > Toolbar changes the settings of the current mode
+        syncToolbarToMode(m_themeIsDark);
     buildToolbar();
     if (g.snapshotMode)
         m_backupTimer->start(std::max(1000, g.snapshotBackupTiming));

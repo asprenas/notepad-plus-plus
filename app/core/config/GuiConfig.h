@@ -63,6 +63,8 @@ struct GuiConfig {
 
     // Helpers matching upstream string encodings
     static int fileAutoDetectionFromString(const std::string& s);
+    // edgeMultiColumnPos ("80 120") as column numbers
+    static std::vector<int> edgeColumns(const std::string& s);
     static std::string fileAutoDetectionToString(int flags);
 };
 

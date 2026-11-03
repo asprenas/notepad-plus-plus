@@ -488,6 +488,33 @@ private slots:
         QVERIFY(m_w->actions()->hasHandler(IDM_SETTING_OPENPLUGINSDIR));
     }
 
+    void allThemesApply()
+    {
+        // every installer theme previews in the editor (Style Configurator theme switch), no crash;
+        // the editor default background is the theme's one; Cancel restores the original theme
+        const QDir themes(QCoreApplication::applicationDirPath() + QStringLiteral("/data/themes"));
+        const QStringList files = themes.entryList({QStringLiteral("*.xml")}, QDir::Files);
+        QCOMPARE(files.size(), 22);
+        QVERIFY(m_w->actions()->trigger(IDM_LANGSTYLE_CONFIG_DLG));
+        auto* dlg = qobject_cast<StyleConfigurator*>(m_w->styleConfigurator());
+        QVERIFY(dlg);
+        const QString original = dlg->currentThemeFile();
+        ScintillaEditBase* e = m_w->currentPane()->editor();
+        const QString out = qEnvironmentVariable("NPP_SCREENSHOT_DIR");
+        for (const QString& f : files) {
+            const QString name = QFileInfo(f).completeBaseName();
+            dlg->setTheme(name);
+            QVERIFY2(QFileInfo(dlg->currentThemeFile()).fileName() == f, qPrintable(f));
+            const Style* def = m_w->styles().globalStyle(STYLE_DEFAULT);
+            QVERIFY2(def && def->bg >= 0, qPrintable(f));
+            QCOMPARE(int(e->send(SCI_STYLEGETBACK, STYLE_DEFAULT)), Style::scintillaColour(def->bg));
+            if (!out.isEmpty())
+                m_w->grab().save(QDir(out).filePath(QStringLiteral("theme-%1.png").arg(name)));
+        }
+        dlg->cancel();
+        QCOMPARE(QFileInfo(m_w->currentThemePath().c_str()).fileName(), QFileInfo(original).fileName());
+    }
+
     void screenshots()
     {
         const QString out = qEnvironmentVariable("NPP_SCREENSHOT_DIR");

@@ -235,6 +235,8 @@ private:
     // nativeLang.xml, or english.xml when none (to restore dialog texts after a switch to English)
     const core::NativeLanguage* dialogLanguage();
     void loadQtTranslation();
+    void syncToolbarFromMode(bool dark);
+    void syncToolbarToMode(bool dark);
 public:
     std::string pluginsDir() const;
     int importPlugins(const QStringList& files); // Settings > Import > Import plugin(s)

@@ -1,0 +1,42 @@
+﻿Original Notepad++ 8.8.8 (C:\Program Files\Notepad++\notepad++.exe)
+
+== 1. NPP -> port: Notepad++ default config.xml loaded and re-saved by the port
+  default-differs autoUpdateNextDate: expected "" got "20080426"   (written by Notepad++'s updater)
+  default-differs lightTbFluentCustomColor: expected "0" got "12873472"   (0 = accent colour; Notepad++ stores the resolved accent)
+  default-differs maintainIndent: expected "2" got "1"   (8.9.8.1 default is 2 = advanced)
+  default-differs toolbarFluentCustomColor: expected "0" got "12873472"   (0 = accent colour; Notepad++ stores the resolved accent)
+  4 field(s) of the Notepad++ default config differ from the port defaults
+  lines in NPP file: 358, lost by the port: 0, added by the port: 24
+  + /NotepadPlus/GUIConfigs/FinderConfig[FinderConfig]/@FiF_ignoreunsavedChangesInOpenedFiles=no   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/Print[Print]/@formFeedPageBreak=no   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/MISC[MISC]/@isFawSymlinkAllowed=no   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ScintillaPrimaryView[ScintillaPrimaryView]/@zoomSync=no   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ScintillaPrimaryView[ScintillaPrimaryView]/@disableSelectedTextDragDrop=no   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/shortcutsXmlHMAC[shortcutsXmlHMAC]/@name=shortcutsXmlHMAC   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/shortcutsXmlHMAC[shortcutsXmlHMAC]/@value=   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ColorPickerCustomColors[ColorPickerCustomColors]/@name=ColorPickerCustomColors   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ColorPickerCustomColors[ColorPickerCustomColors]/@color0=0   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ColorPickerCustomColors[ColorPickerCustomColors]/@color1=0   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ColorPickerCustomColors[ColorPickerCustomColors]/@color2=0   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ColorPickerCustomColors[ColorPickerCustomColors]/@color3=0   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ColorPickerCustomColors[ColorPickerCustomColors]/@color4=0   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ColorPickerCustomColors[ColorPickerCustomColors]/@color5=0   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ColorPickerCustomColors[ColorPickerCustomColors]/@color6=0   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ColorPickerCustomColors[ColorPickerCustomColors]/@color7=0   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ColorPickerCustomColors[ColorPickerCustomColors]/@color8=0   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ColorPickerCustomColors[ColorPickerCustomColors]/@color9=0   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ColorPickerCustomColors[ColorPickerCustomColors]/@color10=0   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ColorPickerCustomColors[ColorPickerCustomColors]/@color11=0   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ColorPickerCustomColors[ColorPickerCustomColors]/@color12=0   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ColorPickerCustomColors[ColorPickerCustomColors]/@color13=0   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ColorPickerCustomColors[ColorPickerCustomColors]/@color14=0   (8.9.x setting, unknown to 8.8.8)
+  + /NotepadPlus/GUIConfigs/ColorPickerCustomColors[ColorPickerCustomColors]/@color15=0   (8.9.x setting, unknown to 8.8.8)
+
+== 2. port -> NPP: config.xml (all GUIConfig fields changed) + shortcuts.xml written by the port, loaded and re-saved by Notepad++
+  not-kept disableSelectedTextDragDrop: expected "yes" got "no"   (8.9.x setting, unknown to 8.8.8)
+  not-kept fawSymlinkAllowed: expected "yes" got "no"   (8.9.x setting, unknown to 8.8.8)
+  not-kept fifIgnoreUnsavedChanges: expected "yes" got "no"   (8.9.x setting, unknown to 8.8.8)
+  not-kept printFormFeedPageBreak: expected "yes" got "no"   (8.9.x setting, unknown to 8.8.8)
+  not-kept zoomSync: expected "yes" got "no"   (8.9.x setting, unknown to 8.8.8)
+  5 difference(s)
+  unexpected differences: 0

@@ -134,16 +134,11 @@ void MainWindow::applyTheme()
                 if (Buffer* b = buffer(p->current()))
                     applyLanguageToPane(p, b);
         }
-        if (m_themeApplied) { // upstream: each mode keeps its own toolbar icon set
-            static constexpr const char* kSets[] = {"small", "large", "small2", "large2", "standard"};
-            GuiConfig& mg = m_config.gui;
-            int cur = 4;
-            for (int i = 0; i < 5; ++i)
-                if (mg.toolbarIconSet == kSets[i])
-                    cur = i;
-            (m_themeIsDark ? mg.darkToolBarIconSet : mg.lightToolBarIconSet) = cur;
-            mg.toolbarIconSet = kSets[std::clamp(dark ? mg.darkToolBarIconSet : mg.lightToolBarIconSet, 0, 4)];
-        }
+        // upstream NppDarkMode::getToolbarIconInfo: each mode keeps its own toolbar settings
+        // (DarkMode dark* / light*); <ToolBar> mirrors the ones of the current mode
+        if (m_themeApplied)
+            syncToolbarToMode(m_themeIsDark);
+        syncToolbarFromMode(dark);
         m_themeIsDark = dark;
         m_themeApplied = true;
     }
@@ -153,6 +148,32 @@ void MainWindow::applyTheme()
         for (BufferId id : p->buffers())
             if (const Buffer* b = buffer(id))
                 refreshTabDecorations(*b);
+}
+
+namespace {
+constexpr const char* kIconSets[] = {"small", "large", "small2", "large2", "standard"};
+}
+
+void MainWindow::syncToolbarFromMode(bool dark)
+{
+    GuiConfig& g = m_config.gui;
+    g.toolbarIconSet = kIconSets[std::clamp(dark ? g.darkToolBarIconSet : g.lightToolBarIconSet, 0, 4)];
+    g.toolbarFluentColor = dark ? g.darkTbFluentColor : g.lightTbFluentColor;
+    g.toolbarFluentCustomColor = dark ? g.darkTbFluentCustomColor : g.lightTbFluentCustomColor;
+    g.toolbarFluentMono = dark ? g.darkTbFluentMono : g.lightTbFluentMono;
+}
+
+void MainWindow::syncToolbarToMode(bool dark)
+{
+    GuiConfig& g = m_config.gui;
+    int set = 4;
+    for (int i = 0; i < 5; ++i)
+        if (g.toolbarIconSet == kIconSets[i])
+            set = i;
+    (dark ? g.darkToolBarIconSet : g.lightToolBarIconSet) = set;
+    (dark ? g.darkTbFluentColor : g.lightTbFluentColor) = g.toolbarFluentColor;
+    (dark ? g.darkTbFluentCustomColor : g.lightTbFluentCustomColor) = g.toolbarFluentCustomColor;
+    (dark ? g.darkTbFluentMono : g.lightTbFluentMono) = g.toolbarFluentMono;
 }
 
 void MainWindow::connectSystemTheme()
