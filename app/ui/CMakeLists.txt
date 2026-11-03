@@ -4,6 +4,7 @@ qt_add_library(npp_ui STATIC
     MainWindow.cpp
     MainCommands.cpp
     EditCommands.cpp
+    SearchCommands.cpp
     menu/ActionRegistry.h
     menu/ActionRegistry.cpp
     menu/CommandIds.h

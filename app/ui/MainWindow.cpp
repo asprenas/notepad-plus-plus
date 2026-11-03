@@ -49,6 +49,7 @@ constexpr char kPanelDocList[] = "npp.documentList";
 constexpr char kPanelFolder[] = "npp.folderAsWorkspace";
 constexpr int kMarginLineNumber = 0, kMarginBookmark = 1, kMarginFold = 2;
 constexpr int kMarkBookmark = 20; // upstream MARK_BOOKMARK
+constexpr int kMarkHideBegin = 19, kMarkHideEnd = 18; // MARK_HIDELINESBEGIN / END
 
 QString q(const std::string& s) { return QString::fromStdString(s); }
 
@@ -346,6 +347,19 @@ void MainWindow::createUi()
             if (margin != kMarginBookmark)
                 return;
             const auto line = e->send(SCI_LINEFROMPOSITION, static_cast<uptr_t>(pos));
+            const auto markers = e->send(SCI_MARKERGET, static_cast<uptr_t>(line));
+            if (markers & ((1 << kMarkHideBegin) | (1 << kMarkHideEnd))) { // show the hidden block
+                const bool begin = markers & (1 << kMarkHideBegin);
+                const auto other = e->send(begin ? SCI_MARKERNEXT : SCI_MARKERPREVIOUS, static_cast<uptr_t>(begin ? line + 1 : line - 1),
+                                           1 << (begin ? kMarkHideEnd : kMarkHideBegin));
+                if (other >= 0) {
+                    const auto first = begin ? line : other, last = begin ? other : line;
+                    e->send(SCI_SHOWLINES, static_cast<uptr_t>(first + 1), last - 1);
+                    e->send(SCI_MARKERDELETE, static_cast<uptr_t>(first), kMarkHideBegin);
+                    e->send(SCI_MARKERDELETE, static_cast<uptr_t>(last), kMarkHideEnd);
+                }
+                return;
+            }
             if (e->send(SCI_MARKERGET, static_cast<uptr_t>(line)) & (1 << kMarkBookmark))
                 e->send(SCI_MARKERDELETE, static_cast<uptr_t>(line), kMarkBookmark);
             else
@@ -482,7 +496,7 @@ void MainWindow::applyEditorSettings(EditorPane* pane)
     e->send(SCI_SETMARGINTYPEN, kMarginLineNumber, SC_MARGIN_NUMBER);
     e->send(SCI_SETMARGINWIDTHN, kMarginLineNumber, g.lineNumberMargin ? 48 : 0);
     e->send(SCI_SETMARGINTYPEN, kMarginBookmark, SC_MARGIN_SYMBOL);
-    e->send(SCI_SETMARGINMASKN, kMarginBookmark, 1 << kMarkBookmark);
+    e->send(SCI_SETMARGINMASKN, kMarginBookmark, (1 << kMarkBookmark) | (1 << kMarkHideBegin) | (1 << kMarkHideEnd));
     e->send(SCI_SETMARGINWIDTHN, kMarginBookmark, g.bookmarkMargin ? 16 : 0);
     e->send(SCI_SETMARGINSENSITIVEN, kMarginBookmark, 1);
     e->send(SCI_MARKERDEFINE, kMarkBookmark, SC_MARK_BOOKMARK);
@@ -508,6 +522,7 @@ void MainWindow::applyEditorSettings(EditorPane* pane)
         e->send(SCI_MARKERSETFORE, static_cast<uptr_t>(num), 0xFFFFFF);
         e->send(SCI_MARKERSETBACK, static_cast<uptr_t>(num), 0x808080);
     }
+    applyIndicatorStyles(e);
     applyScintillaKeys(e);
 }
 

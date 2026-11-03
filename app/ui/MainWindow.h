@@ -135,6 +135,9 @@ private:
     void registerMiscCommands();
     // --- commands (EditCommands.cpp)
     void registerEditOpsCommands();
+    // --- commands (SearchCommands.cpp)
+    void registerSearchMiscCommands();
+    void applyIndicatorStyles(ScintillaEditBase* e);
 
     CommandLine                 m_cmd;
     core::AppPaths              m_paths;
@@ -169,6 +172,8 @@ private:
     intptr_t                     m_beginSelectPos = -1; // Begin/End Select
     bool                         m_beginSelectColumn = false;
     int                          m_multiSelectFlag = 0;  // last Multi-select search flags
+    bool                         m_syncScrollV = false, m_syncScrollH = false, m_syncing = false;
+    intptr_t                     m_syncLineOffset = 0, m_syncXOffset = 0;
     std::array<QLabel*, 6>       m_status{}; // language, length/lines, position, EOL, encoding, INS/OVR
 };
 
