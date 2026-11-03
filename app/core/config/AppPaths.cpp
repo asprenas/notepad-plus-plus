@@ -30,14 +30,14 @@ void ensureDir(const std::string& dir, bool create)
 std::string AppPaths::platformUserDir()
 {
 #if defined(Q_OS_WIN)
-    return pathAppend(env("APPDATA"), "Notepad++");
+    return pathAppend(env("APPDATA"), "Notepad++Qt");
 #elif defined(Q_OS_MACOS)
-    return pathAppend(env("HOME"), "Library/Application Support/Notepad++");
+    return pathAppend(env("HOME"), "Library/Application Support/Notepad++Qt");
 #else
     std::string base = env("XDG_CONFIG_HOME");
     if (base.empty())
         base = pathAppend(env("HOME"), ".config");
-    return pathAppend(base, "notepad++");
+    return pathAppend(base, "notepad++qt");
 #endif
 }
 

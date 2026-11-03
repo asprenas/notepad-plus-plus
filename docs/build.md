@@ -123,7 +123,7 @@ bash ci/check-docking-abstraction.sh   # ADS 사용이 app/ui/docking/ads/ 밖�
 
 0단계 샘플은 창/도킹 상태를 `QSettings`(조직명 `NotepadPlusPlusQt`)에 저장한다.
 Windows: 레지스트리 `HKCU\Software\NotepadPlusPlusQt`, Linux: `~/.config/NotepadPlusPlusQt/`.
-기존 Notepad++ 설정 파일(`%APPDATA%\Notepad++`)은 아직 읽거나 쓰지 않는다 (1단계 `npp-core`에서 도입).
+설정 파일 폴더는 `%APPDATA%\Notepad++Qt` (Linux `~/.config/notepad++qt`)이며 원본 Notepad++ 폴더와 분리되어 있다.
 
 ## CLion
 

@@ -156,7 +156,7 @@
 
 | 대상 | 작업 내용 |
 |---|---|
-| `Parameters.cpp/h` | 경로 결정을 `QStandardPaths`로(Windows `%APPDATA%\Notepad++`, Linux `~/.config/notepad++`, macOS `~/Library/Application Support/Notepad++`), Registry/`HWND`/GDI(`HFONT`, `COLORREF`) 의존 분리. 데이터 모델과 XML 직렬화만 코어에 남김 |
+| `Parameters.cpp/h` | 경로 결정을 `QStandardPaths`로(Windows `%APPDATA%\Notepad++Qt`, Linux `~/.config/notepad++qt`, macOS `~/Library/Application Support/Notepad++Qt`), Registry/`HWND`/GDI(`HFONT`, `COLORREF`) 의존 분리. 데이터 모델과 XML 직렬화만 코어에 남김 |
 | `ScintillaComponent/Buffer.*` | `Win32_IO_File`, `GetFileAttributesEx`, `MoveFileEx`, 타임아웃 스레드를 `QFile`/`QFileInfo`/`QSaveFile`/`std::filesystem`으로 교체 |
 | `Utf8_16.*`, `EncodingMapper.*` | 코드페이지 변환(`MultiByteToWideChar`)을 ICU 또는 `QStringConverter`(Qt 6.x의 ICU 백엔드) 기반으로 교체 |
 | `MISC/Common/Common.*` | 문자열 유틸·경로 함수 정리, Win32 전용 함수 제거 |
@@ -222,11 +222,11 @@
 
 ### 6.2 Windows
 - 배포: `windeployqt`로 Qt DLL 동봉, MSVC 런타임 포함.
-- 기존 사용자 설정 경로(`%APPDATA%\Notepad++`) 및 `doLocalConf.xml`(포터블 모드) 동작 유지. 로컬 개인 사용 단계에서는 별도 폴더를 두지 않음. 원본 Notepad++와 설정을 공유하게 되므로, 테스트 중에는 포터블 모드(`doLocalConf.xml`) 사용을 권장 — 원본 설정 파일 손상 방지.
+- 사용자 설정 경로는 `%APPDATA%\Notepad++Qt` (원본 Notepad++의 `%APPDATA%\Notepad++`와 분리, 2026-11-03 결정). `doLocalConf.xml`(포터블 모드) 동작 유지. 로컬 개인 사용 단계에서는 별도 폴더를 두지 않음. 원본 Notepad++와 설정을 공유하게 되므로, 테스트 중에는 포터블 모드(`doLocalConf.xml`) 사용을 권장 — 원본 설정 파일 손상 방지.
 - 관리자 권한 저장(UAC) 흐름 재설계.
 
 ### 6.3 Linux
-- 설정 경로: `$XDG_CONFIG_HOME/<앱이름>`, 백업/세션은 `$XDG_STATE_HOME` 검토.
+- 설정 경로: `$XDG_CONFIG_HOME/notepad++qt`, 백업/세션은 `$XDG_STATE_HOME` 검토.
 - 신규 문서 기본 EOL을 LF로 (설정 호환 유지).
 - 저장 시 원본 권한·소유자 유지, 권한 부족 시 `pkexec` 기반 저장 흐름 검토.
 - Wayland: 창 위치 복원 불가(best-effort), 단일 인스턴스 활성화는 `xdg-activation` 확인, 플로팅 도킹 패널 동작 검증(부록 B).
@@ -306,7 +306,7 @@
 | 3플랫폼 동시 지원 부담 (CI, IME, 단축키, 배포) | 품질 편차 | 중 | 로컬 CI로 Windows/Linux 상시 검증, macOS는 Mac 장비에서 같은 스크립트 실행, 플랫폼별 체크리스트 |
 | 플러그인 생태계 부재 | 사용성 저하 | 높음 | 7장 계획, 핵심 기능 내장화 검토 |
 | ADS의 Wayland/macOS 플로팅 동작 이슈 | 사용성 저하 | 중 | `DockManager` 추상화로 구현 교체 가능하게 유지, 0단계 스파이크에서 확인 |
-| 원본 Notepad++와 설정 폴더 공유 | 원본 설정 손상 | 중 | 개발·테스트 중 포터블 모드 사용, 설정 파일 백업 |
+| 원본 Notepad++와 설정 폴더 공유 | — | 해소 | 2026-11-03: 설정 폴더를 `Notepad++Qt`(Linux `notepad++qt`)로 분리 |
 | macOS 서명/공증 | 배포 시 Gatekeeper 경고 | 중 | 개인 사용은 ad-hoc 서명, 외부 배포 시 Developer 계정 |
 | 명칭/상표 | "Notepad++" 이름·로고 사용 | 낮음(로컬 사용) | 외부 배포 시점에 포크 명칭 지정 (GPL은 코드 사용 허용, 상표는 별개) |
 | 라이선스 | GPL-3.0 + Qt(LGPL-3/GPL) + (선택) ADS(LGPL-2.1)/KDDockWidgets(GPL) | 낮음 | 전체 GPL-3.0 배포로 호환, Qt 동적 링크 |

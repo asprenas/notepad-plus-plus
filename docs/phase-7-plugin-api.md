@@ -95,9 +95,9 @@ intptr_t npp_compat_send(unsigned nppmMessage, uintptr_t w, intptr_t l);
 
 | 플랫폼 | 경로 |
 |---|---|
-| Windows | `<설치 폴더>\plugins\<이름>\<이름>.dll`, 사용자 `%APPDATA%\Notepad++\plugins\` |
-| Linux | `<설치 폴더>/plugins/<이름>/lib<이름>.so`, `$XDG_DATA_HOME/notepad++/plugins/` |
-| macOS | `<번들>/Contents/PlugIns/<이름>/lib<이름>.dylib`, `~/Library/Application Support/Notepad++/plugins/` |
+| Windows | `<설치 폴더>\plugins\<이름>\<이름>.dll`, 사용자 `%APPDATA%\Notepad++Qt\plugins\` |
+| Linux | `<설치 폴더>/plugins/<이름>/lib<이름>.so`, `$XDG_DATA_HOME/notepad++qt/plugins/` |
+| macOS | `<번들>/Contents/PlugIns/<이름>/lib<이름>.dylib`, `~/Library/Application Support/Notepad++Qt/plugins/` |
 
 - `apiVersion` 불일치 시 로드 거부 + 알림. 로드 실패·초기화 예외는 플러그인 단위로 격리하고 해당 플러그인만 비활성화.
 - 플러그인 메뉴: "플러그인" 메뉴 아래 플러그인별 하위 메뉴. 단축키는 단축키 매퍼 "플러그인 명령" 탭(4단계)과 연결.

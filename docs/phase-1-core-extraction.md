@@ -119,9 +119,9 @@ public:
 
 | 플랫폼 | 사용자 설정 폴더 | 포터블 모드 |
 |---|---|---|
-| Windows | `%APPDATA%\Notepad++` (원본과 동일) | 실행 파일 옆 `doLocalConf.xml` 존재 시 실행 파일 폴더 |
-| Linux | `$XDG_CONFIG_HOME/notepad++` | 동일 규칙 |
-| macOS | `~/Library/Application Support/Notepad++` | 동일 규칙 |
+| Windows | `%APPDATA%\Notepad++Qt` (원본 Notepad++ 폴더와 분리) | 실행 파일 옆 `doLocalConf.xml` 존재 시 실행 파일 폴더 |
+| Linux | `$XDG_CONFIG_HOME/notepad++qt` | 동일 규칙 |
+| macOS | `~/Library/Application Support/Notepad++Qt` | 동일 규칙 |
 
 - **왕복 원칙**: 읽은 뒤 바로 저장하면 원본 XML과 의미상 같아야 한다 (모르는 요소·속성도 보존). pugixml 노드를 보관해 모르는 부분을 그대로 다시 쓴다.
 
@@ -261,4 +261,4 @@ struct LexerSpec {
 
 ### 9.4 안전 규칙 (샘플 앱)
 
-샘플 앱은 원본 Notepad++와 설정 폴더를 공유하므로 **설정 파일을 쓰지 않는다**. 세션에서 복원한 백업 파일은 연결을 끊어 삭제·덮어쓰기를 막는다.
+설정 폴더는 2026-11-03부터 `Notepad++Qt`(Linux `notepad++qt`)로 원본 Notepad++와 분리되었다. 샘플 앱은 아직 설정 파일을 쓰지 않으며(쓰기는 2단계), 설정이 없으면 함께 배포한 모델 파일(`data/`)을 사용한다.

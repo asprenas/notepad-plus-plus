@@ -2,9 +2,10 @@
 //
 // Order: -settingsDir=<dir> command line > cloud/choice > portable (doLocalConf.xml next to the
 // executable) > per-platform user directory:
-//   Windows  %APPDATA%\Notepad++
-//   Linux    $XDG_CONFIG_HOME/notepad++  (default ~/.config/notepad++)
-//   macOS    ~/Library/Application Support/Notepad++
+//   Windows  %APPDATA%\Notepad++Qt
+// (separate from the original Notepad++ folder so both can be installed side by side)
+//   Linux    $XDG_CONFIG_HOME/notepad++qt  (default ~/.config/notepad++qt)
+//   macOS    ~/Library/Application Support/Notepad++Qt
 #pragma once
 
 #include <string>

@@ -17,7 +17,7 @@ Windows·Linux와 같은 코드베이스로 macOS 빌드·실행·배포를 지�
 | `macos-release` CMake 프리셋 (Universal 2: arm64 + x86_64) | `CMakePresets.json` |
 | 번들 데이터 경로 (`Contents/Resources/data`) | `app/ui/CMakeLists.txt`, `MainWindow::loadSettings` |
 | 코드페이지 변환 (iconv) | `app/core/platform/posix/CodepagePosix.cpp` |
-| 설정 경로 `~/Library/Application Support/Notepad++` | `app/core/config/AppPaths.cpp` |
+| 설정 경로 `~/Library/Application Support/Notepad++Qt` | `app/core/config/AppPaths.cpp` |
 | 정규식 UTF-8 로케일 초기화 | `npp::core::initRegexLocale()` |
 | About/Quit 메뉴 역할 지정 | `MainWindow::createMenus` (`QAction::MenuRole`) |
 
@@ -36,7 +36,7 @@ Windows·Linux와 같은 코드베이스로 macOS 빌드·실행·배포를 지�
 | ID | 작업 |
 |---|---|
 | MAC-04 | macOS에서 코어 단위 테스트 실행 (`bash ci/local-ci.sh`; iconv는 macOS libiconv 이름 차이 확인) |
-| MAC-05 | macOS 설정 경로(`~/Library/Application Support/Notepad++`) 동작 확인 |
+| MAC-05 | macOS 설정 경로(`~/Library/Application Support/Notepad++Qt`) 동작 확인 |
 
 ### 2단계 MVP ([phase-2-mvp.md](phase-2-mvp.md))
 
@@ -75,7 +75,7 @@ Windows·Linux와 같은 코드베이스로 macOS 빌드·실행·배포를 지�
 - **다크 모드**: 시스템 외관 추종(`QStyleHints::colorScheme`).
 - **IME**: 한국어 2벌식 조합 표시·커서 위치 확인.
 - **배포**: `macdeployqt`, `.dmg`, 개인 사용은 ad-hoc 서명(`codesign -s -`), 외부 배포는 Apple Developer 계정으로 서명·공증.
-- **플러그인**: `.dylib`, 경로 `<번들>/Contents/PlugIns/`, `~/Library/Application Support/Notepad++/plugins/`.
+- **플러그인**: `.dylib`, 경로 `<번들>/Contents/PlugIns/`, `~/Library/Application Support/Notepad++Qt/plugins/`.
 
 ## 5. 완료 기준
 
