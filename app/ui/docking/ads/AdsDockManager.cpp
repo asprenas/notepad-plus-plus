@@ -178,4 +178,20 @@ bool AdsDockManager::restoreNativeState(const QByteArray& state)
     return !state.isEmpty() && m_manager->restoreState(state);
 }
 
+// ADS draws title bars / tabs with its own style sheet: colors from the application palette
+void AdsDockManager::applyPalette(const QPalette& p)
+{
+    const QString win = p.color(QPalette::Window).name(), text = p.color(QPalette::WindowText).name();
+    const QString base = p.color(QPalette::Base).name(), mid = p.color(QPalette::Mid).name(), hi = p.color(QPalette::Highlight).name();
+    m_manager->setStyleSheet(QStringLiteral(
+        "ads--CDockContainerWidget, ads--CDockAreaWidget { background: %1; }"
+        "ads--CDockAreaTitleBar { background: %1; border-bottom: 1px solid %4; }"
+        "ads--CDockWidgetTab { background: %1; border-color: %4; }"
+        "ads--CDockWidgetTab[activeTab=\"true\"] { background: %3; }"
+        "ads--CDockWidgetTab QLabel, ads--CDockAreaTitleBar QLabel { color: %2; }"
+        "ads--CDockSplitter::handle { background: %4; }"
+        "ads--CDockWidgetTab[focused=\"true\"] { background: %5; }")
+        .arg(win, text, base, mid, hi));
+}
+
 } // namespace npp::ui

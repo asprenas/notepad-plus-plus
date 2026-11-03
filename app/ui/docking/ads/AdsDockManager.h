@@ -39,6 +39,7 @@ public:
 
     QByteArray saveNativeState() const override;
     bool restoreNativeState(const QByteArray& state) override;
+    void applyPalette(const QPalette& palette) override;
 
 private:
     struct Panel {

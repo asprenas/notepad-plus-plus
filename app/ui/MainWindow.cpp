@@ -197,6 +197,8 @@ MainWindow::MainWindow(const CommandLine& cmd, QWidget* parent) : QMainWindow(pa
     createUi();
     registerCommands();
     restoreWindowState();
+    connectSystemTheme();
+    applyTheme();
 
     m_watcher = new QFileSystemWatcher(this);
     connect(m_watcher, &QFileSystemWatcher::fileChanged, this, [this](const QString&) {
@@ -272,6 +274,10 @@ void MainWindow::loadSettings()
     if (m_udls.languages().empty())
         m_udls.loadAll({}, pathAppend(m_dataDir, "userDefineLangs"));
     m_nativeLang.loadFile(m_paths.nativeLangXml());
+    if (m_nativeLang.isLoaded()) // which localization file (nativeLang.xml is a copy of it)
+        for (const auto& l : NativeLanguage::availableLanguages(pathAppend(m_dataDir, "localization")))
+            if (l.name == m_nativeLang.languageName())
+                m_currentLanguageFile = l.fileName;
     m_shortcuts.load(m_paths.shortcutsXml());
 
     const GuiConfig& g = m_config.gui;

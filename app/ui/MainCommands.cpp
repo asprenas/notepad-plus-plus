@@ -54,6 +54,34 @@ constexpr LangCmd kLangCommands[] = {
 
 } // namespace
 
+// Menu bar from the menu tree in the current UI language (rebuilt when the language changes)
+void MainWindow::buildMenus()
+{
+    const auto menus = m_actions->buildMenuBar(menuBar(), &m_nativeLang, m_config.gui.langMenuCompact);
+    m_actions->applyShortcuts(&m_shortcuts);
+    for (const auto& [id, menu] : menus)
+        connect(menu, &QMenu::aboutToShow, m_actions, &ActionRegistry::updateStates);
+    if (const auto it = menus.find("file"); it != menus.end()) {
+        m_recentMenu = new QMenu(miscString("recent-files", "Recent Files"), this);
+        QAction* exitAction = m_actions->action(IDM_FILE_EXIT);
+        it->second->insertMenu(exitAction, m_recentMenu);
+        it->second->insertSeparator(exitAction);
+        updateRecentMenu();
+    }
+    rebuildMacroMenu();
+}
+
+void MainWindow::rebuildMenus()
+{
+    m_savedMacroActions.clear(); // owned by the old menus
+    delete m_recentMenu;
+    m_recentMenu = nullptr;
+    setMenuBar(new QMenuBar); // deletes the old bar and its menus
+    menuBar()->setVisible(m_config.gui.menuBarShow);
+    buildMenus();
+    m_actions->updateStates();
+}
+
 void MainWindow::registerCommands()
 {
     registerFileCommands();
@@ -68,19 +96,9 @@ void MainWindow::registerCommands()
     registerCompletionCommands();
     registerToolDialogs();
 
-    const auto menus = m_actions->buildMenuBar(menuBar(), &m_nativeLang, m_config.gui.langMenuCompact);
-    m_actions->applyShortcuts(&m_shortcuts);
     registerMacroCommands();
-    for (const auto& [id, menu] : menus)
-        connect(menu, &QMenu::aboutToShow, m_actions, &ActionRegistry::updateStates);
-
-    if (const auto it = menus.find("file"); it != menus.end()) {
-        m_recentMenu = new QMenu(miscString("recent-files", "Recent Files"), this);
-        QAction* exitAction = m_actions->action(IDM_FILE_EXIT);
-        it->second->insertMenu(exitAction, m_recentMenu);
-        it->second->insertSeparator(exitAction);
-        updateRecentMenu();
-    }
+    registerSettingsCommands();
+    buildMenus();
 
     // Toolbar (upstream standard icons subset)
     QToolBar* tb = addToolBar(tr("Toolbar"));

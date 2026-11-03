@@ -50,6 +50,7 @@ class DockManager;
 class EditorPane;
 class FindReplaceDialog;
 class SearchResultsPanel;
+class PreferencesDialog;
 
 // Command line options of upstream CmdLineParams handled by the MVP
 struct CommandLine {
@@ -78,6 +79,14 @@ public:
     void ensureDocument();
 
     // Access for tests
+    PreferencesDialog* preferencesDialog();
+    void applySettings();
+    void setUiLanguage(const std::string& localizationFile);
+    void applyTheme();
+    bool isDarkMode() const;
+    core::ConfigFile& mutableConfig() noexcept { return m_config; }
+    const core::StyleRegistry& styles() const noexcept { return m_styles; }
+    const core::NativeLanguage& nativeLanguage() const noexcept { return m_nativeLang; }
     void showGoToDialog();
     void goTo(long long n, bool offset);
     void showIncrementalSearch();
@@ -191,6 +200,12 @@ private:
     void hideIncrementalSearch();
     enum IncType { IncFirst, IncNext, IncHighlightOnly };
     void incrementalSearch(IncType type, bool down);
+    // --- settings (SettingsCommands.cpp, Theme.cpp)
+    void registerSettingsCommands();
+    void buildMenus();
+    void rebuildMenus();
+    std::string localizationDir() const;
+    void connectSystemTheme();
     // --- macros (MacroCommands.cpp)
     void registerMacroCommands();
     void recordFindAction(int action);
@@ -235,6 +250,11 @@ private:
     FindReplaceDialog*           m_findDialog = nullptr;
     bool                         m_recording = false, m_playingMacro = false;
     bool                         m_highlighting = false;
+    PreferencesDialog*           m_prefs = nullptr;
+    std::string                  m_currentLanguageFile;
+    QString                      m_defaultStyleName;
+    bool                         m_themeIsDark = false, m_themeApplied = false;
+    std::string                  m_currentThemePath;
     bool                         m_goToOffsetMode = false, m_columnEditorNumbers = false;
     QDialog*                     m_charRangeDialog = nullptr;
     QToolBar*                    m_incBar = nullptr;

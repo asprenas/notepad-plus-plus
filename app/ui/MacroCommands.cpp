@@ -310,7 +310,6 @@ void MainWindow::registerMacroCommands()
         const int idx = which->currentData().toInt();
         runMacroMultiple(idx < 0 ? m_macro : m_shortcuts.macros[static_cast<size_t>(idx)].steps, toEof->isChecked() ? -1 : count->value());
     }, [this] { return !m_recording && (!m_macro.empty() || !m_shortcuts.macros.empty()); }});
-    rebuildMacroMenu();
 }
 
 void MainWindow::saveMacro(const MacroShortcut& m)

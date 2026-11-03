@@ -9,6 +9,7 @@
 #pragma once
 
 #include <QByteArray>
+#include <QPalette>
 #include <QIcon>
 #include <QObject>
 #include <QString>
@@ -71,6 +72,9 @@ public:
     // Backend-specific state (exact restore, same backend only).
     virtual QByteArray saveNativeState() const = 0;
     virtual bool restoreNativeState(const QByteArray& state) = 0;
+
+    // Light / dark palette of the application (phase 4): backends with their own styling follow it.
+    virtual void applyPalette(const QPalette& palette) { Q_UNUSED(palette); }
 
 signals:
     void panelVisibilityChanged(const std::string& id, bool visible);

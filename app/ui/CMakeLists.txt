@@ -10,6 +10,12 @@ qt_add_library(npp_ui STATIC
     Highlighters.cpp
     Completion.cpp
     ToolDialogs.cpp
+    SettingsCommands.cpp
+    Theme.cpp
+    prefs/PreferencesDialog.h
+    prefs/PreferencesDialog.cpp
+    prefs/PreferenceBindings.cpp
+    prefs/PreferencePages.inc
     menu/MacroableCommands.inc
     search/FindReplaceDialog.h
     search/FindReplaceDialog.cpp
@@ -88,4 +94,8 @@ add_custom_command(TARGET notepadpp-qt POST_BUILD
         ${NPP_ROOT_DIR}/PowerEditor/bin/userDefineLangs "${NPP_DATA_OUT}/userDefineLangs"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${NPP_ROOT_DIR}/PowerEditor/installer/APIs "${NPP_DATA_OUT}/autoCompletion"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${NPP_ROOT_DIR}/PowerEditor/installer/nativeLang "${NPP_DATA_OUT}/localization"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${NPP_ROOT_DIR}/PowerEditor/installer/themes "${NPP_DATA_OUT}/themes"
     VERBATIM)
