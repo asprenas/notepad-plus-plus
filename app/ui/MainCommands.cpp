@@ -68,6 +68,7 @@ void MainWindow::registerCommands()
 
     const auto menus = m_actions->buildMenuBar(menuBar(), &m_nativeLang, m_config.gui.langMenuCompact);
     m_actions->applyShortcuts(&m_shortcuts);
+    registerMacroCommands();
     for (const auto& [id, menu] : menus)
         connect(menu, &QMenu::aboutToShow, m_actions, &ActionRegistry::updateStates);
 

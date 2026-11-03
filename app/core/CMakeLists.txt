@@ -38,6 +38,9 @@ add_library(npp_core STATIC
 
     shortcut/Shortcuts.h
     shortcut/Shortcuts.cpp
+    shortcut/Macro.h
+    shortcut/Macro.cpp
+    shortcut/MacroMessages.inc
 
     lang/LangTypes.inc
     lang/LangType.h

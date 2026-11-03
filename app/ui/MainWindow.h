@@ -25,6 +25,7 @@
 #include <memory>
 #include <optional>
 
+class QAction;
 class QFileSystemWatcher;
 class QLabel;
 class QListWidget;
@@ -68,6 +69,9 @@ public:
     void ensureDocument();
 
     // Access for tests
+    void playMacro(const std::vector<core::MacroStep>& steps);
+    const std::vector<core::MacroStep>& recordedMacro() const noexcept { return m_macro; }
+    const core::ShortcutsFile& shortcuts() const noexcept { return m_shortcuts; }
     FindReplaceDialog* findDialog();
     SearchResultsPanel* searchResults(bool show = true);
     ActionRegistry* actions() const noexcept { return m_actions; }
@@ -152,6 +156,13 @@ private:
     void openSearchResult(const QString& file, intptr_t start, intptr_t end, int line, bool lineRelative);
     std::vector<core::Buffer*> openBuffersInTabOrder() const;
     template <class F> auto withDocument(core::Buffer* b, F&& f);
+    // --- macros (MacroCommands.cpp)
+    void registerMacroCommands();
+    void recordFindAction(int action);
+    void rebuildMacroMenu();
+    void saveMacro(const core::MacroShortcut& m);
+    void runMacroMultiple(std::vector<core::MacroStep> steps, int times);
+    QMenu* macroMenu() const;
 
     CommandLine                 m_cmd;
     core::AppPaths              m_paths;
@@ -187,6 +198,9 @@ private:
     bool                         m_beginSelectColumn = false;
     int                          m_multiSelectFlag = 0;  // last Multi-select search flags
     FindReplaceDialog*           m_findDialog = nullptr;
+    bool                         m_recording = false, m_playingMacro = false;
+    std::vector<core::MacroStep> m_macro;
+    std::vector<QAction*>        m_savedMacroActions;
     SearchResultsPanel*          m_searchResults = nullptr;
     bool                         m_syncScrollV = false, m_syncScrollH = false, m_syncing = false;
     intptr_t                     m_syncLineOffset = 0, m_syncXOffset = 0;

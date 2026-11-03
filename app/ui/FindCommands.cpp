@@ -201,6 +201,7 @@ void MainWindow::runFindAction(int actionValue)
     if (o.findWhat.empty() && a != Action::ClearMarks && a != Action::CopyMarked)
         return;
     d->addToHistory();
+    recordFindAction(actionValue);
     ScintillaEditBase* ed = currentPane()->editor();
     const IEditor& e = currentPane()->adapter();
     const bool inSel = d->inSelection() && ed->send(SCI_GETSELECTIONSTART) != ed->send(SCI_GETSELECTIONEND);

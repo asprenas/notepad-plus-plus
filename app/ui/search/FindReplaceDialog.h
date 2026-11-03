@@ -48,6 +48,7 @@ public:
     void setFilters(const QString& f);
     bool recursive() const;
     bool includeHidden() const;
+    void setFifOptions(bool recursive, bool includeHidden);
     bool bookmarkLine() const;
     bool purgeBeforeMark() const;
     void setMarkOptions(bool bookmarkLine, bool purge);

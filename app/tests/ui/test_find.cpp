@@ -8,6 +8,7 @@
 #include "search/SearchResultsPanel.h"
 
 #include "core/search/Search.h"
+#include "core/shortcut/Shortcuts.h"
 
 #include <SciLexer.h>
 #include <Scintilla.h>
@@ -18,6 +19,8 @@
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QProgressDialog>
@@ -272,6 +275,60 @@ private slots:
         dlg()->setOptions(opts("nothing")); // 9990 hits: long enough to be cancelled
         run(Action::FindInFiles);
         QVERIFY2(dlg()->status() == QStringLiteral("The search was cancelled."), qPrintable(dlg()->status()));
+    }
+
+    // A macro recorded in the original Notepad++ (tools/macro-compat/record-in-npp.ps1) replays
+    // with the same result; recording the same actions here gives the same steps.
+    void macroRecordedInOriginalReplays()
+    {
+        QFile f(QStringLiteral(NPP_TEST_DATA_DIR "/macros/recorded-in-npp.json"));
+        QVERIFY(f.open(QIODevice::ReadOnly));
+        const QJsonObject j = QJsonDocument::fromJson(f.readAll()).object();
+        qInfo("%s", qPrintable(j.value(QStringLiteral("source")).toString()));
+        ShortcutsFile sc;
+        QVERIFY(sc.loadFromString(j.value(QStringLiteral("shortcutsXml")).toString().toStdString()));
+        QCOMPARE(sc.macros.size(), size_t(1));
+        const std::string input = j.value(QStringLiteral("input")).toString().toStdString();
+
+        ed()->send(SCI_SETEOLMODE, SC_EOL_CRLF); // the original's new document
+        setText(input.c_str());
+        m_w->playMacro(sc.macros[0].steps);
+        QCOMPARE(QString::fromStdString(text(ed())), j.value(QStringLiteral("expected")).toString());
+
+        // record the same actions in the port
+        setText(input.c_str());
+        auto* a = m_w->actions();
+        a->trigger(IDM_MACRO_STARTRECORDINGMACRO);
+        a->trigger(IDM_EDIT_TRIMTRAILING);
+        a->trigger(IDM_EDIT_SORTLINES_LEXICOGRAPHIC_ASCENDING);
+        ed()->send(SCI_DOCUMENTEND);
+        ed()->send(SCI_REPLACESEL, 0, reinterpret_cast<sptr_t>("zucchini"));
+        ed()->send(SCI_DOCUMENTSTART);
+        ed()->send(SCI_LINEEND);
+        ed()->send(SCI_REPLACESEL, 0, reinterpret_cast<sptr_t>(" (first)"));
+        dlg()->showTab(FindReplaceDialog::ReplaceTab);
+        SearchOptions o = opts("^(\\w)(\\w*)", "\\U$1\\E$2", SearchType::Regex);
+        o.wrap = true;
+        dlg()->setOptions(o);
+        dlg()->setInSelection(false);
+        run(Action::ReplaceAll);
+        a->trigger(IDM_EDIT_UPPERCASE);
+        a->trigger(IDM_MACRO_STOPRECORDINGMACRO);
+        QCOMPARE(QString::fromStdString(text(ed())), j.value(QStringLiteral("expected")).toString());
+        const auto& mine = m_w->recordedMacro();
+        // the last original step is UPPERCASE sent without a selection: that menu item is disabled
+        // here (no selection), so it is not part of the port's recording
+        auto orig = sc.macros[0].steps;
+        QCOMPARE(orig.back().wParam, (long long)IDM_EDIT_UPPERCASE);
+        orig.pop_back();
+        QCOMPARE(mine.size(), orig.size());
+        for (size_t i = 0; i < orig.size(); ++i) {
+            QCOMPARE(mine[i].type, orig[i].type);
+            QCOMPARE(mine[i].message, orig[i].message);
+            QCOMPARE(mine[i].wParam, orig[i].wParam);
+            QCOMPARE(mine[i].lParam, orig[i].lParam);
+            QCOMPARE(mine[i].sParam, orig[i].sParam);
+        }
     }
 
     void historyIsSaved()

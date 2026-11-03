@@ -253,6 +253,11 @@ QString FindReplaceDialog::filters() const { return m_filters->currentText(); }
 void FindReplaceDialog::setFilters(const QString& f) { m_filters->setCurrentText(f); }
 bool FindReplaceDialog::recursive() const { return m_recursive->isChecked(); }
 bool FindReplaceDialog::includeHidden() const { return m_hidden->isChecked(); }
+void FindReplaceDialog::setFifOptions(bool rec, bool hidden)
+{
+    m_recursive->setChecked(rec);
+    m_hidden->setChecked(hidden);
+}
 bool FindReplaceDialog::bookmarkLine() const { return m_bookmarkLine->isChecked(); }
 bool FindReplaceDialog::purgeBeforeMark() const { return m_purge->isChecked(); }
 void FindReplaceDialog::setMarkOptions(bool bookmark, bool purge)
