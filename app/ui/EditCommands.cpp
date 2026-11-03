@@ -6,6 +6,7 @@
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
 
+#include "core/editor/CommentOps.h"
 #include "core/editor/Sorters.h"
 #include "core/editor/TextOps.h"
 #include "core/util/PathUtil.h"
@@ -132,6 +133,29 @@ void MainWindow::registerEditOpsCommands()
     r->setHandler(IDM_EDIT_REMOVEEMPTYLINESWITHBLANK, {[ed] { removeEmptyLines(ed(), true); }, writable});
     r->setHandler(IDM_EDIT_BLANKLINEABOVECURRENT, {[ed] { insertNewLineAboveCurrentLine(ed()); }, writable});
     r->setHandler(IDM_EDIT_BLANKLINEBELOWCURRENT, {[ed] { insertNewLineBelowCurrentLine(ed()); }, writable});
+
+    // --- Comment / Uncomment (symbols from langs.xml or the UDL comment keywords)
+    auto symbols = [this]() {
+        CommentSymbols s;
+        const Buffer* b = currentBuffer();
+        if (!b)
+            return s;
+        if (b->lang == L_USER) {
+            if (const UserLanguage* u = m_udls.find(b->userLangName))
+                s = udlCommentSymbols(u->keywordLists[kUdlCommentsKeywordList]);
+        } else if (const LanguageDef* d = m_langs.find(b->lang)) {
+            s.line = d->commentLine;
+            s.start = d->commentStart;
+            s.end = d->commentEnd;
+        }
+        s.lang = b->lang;
+        return s;
+    };
+    r->setHandler(IDM_EDIT_BLOCK_COMMENT, {[ed, symbols] { doBlockComment(ed(), symbols(), CommentMode::Toggle); }, writable});
+    r->setHandler(IDM_EDIT_BLOCK_COMMENT_SET, {[ed, symbols] { doBlockComment(ed(), symbols(), CommentMode::Comment); }, writable});
+    r->setHandler(IDM_EDIT_BLOCK_UNCOMMENT, {[ed, symbols] { doBlockComment(ed(), symbols(), CommentMode::Uncomment); }, writable});
+    r->setHandler(IDM_EDIT_STREAM_COMMENT, {[ed, symbols] { doStreamComment(ed(), symbols()); }, writable});
+    r->setHandler(IDM_EDIT_STREAM_UNCOMMENT, {[ed, symbols] { undoStreamComment(ed(), symbols(), true); }, writable});
 
     // --- Blank Operations
     r->setHandler(IDM_EDIT_TRIMTRAILING, {[ed] { doTrim(ed(), TrimPart::Tail); }, writable});

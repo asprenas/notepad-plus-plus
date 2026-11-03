@@ -16,6 +16,7 @@ namespace npp::core {
 inline constexpr int kUdlKeywordListCount = 28; // SCE_USER_KWLIST_TOTAL
 inline constexpr int kUdlKeywordGroups = 8;     // SCE_USER_TOTAL_KEYWORD_GROUPS
 inline constexpr int kUdlStyleCount = 24;       // SCE_USER_STYLE_TOTAL_STYLES
+inline constexpr int kUdlCommentsKeywordList = 0; // SCE_USER_KWLIST_COMMENTS
 
 struct UserLanguage {
     std::string name, ext, udlVersion;

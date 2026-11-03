@@ -59,6 +59,8 @@ add_library(npp_core STATIC
     editor/Sorters.h
     editor/TextOps.h
     editor/TextOps.cpp
+    editor/CommentOps.h
+    editor/CommentOps.cpp
 
     buffer/Buffer.h
     buffer/FileManager.h

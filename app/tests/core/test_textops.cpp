@@ -1,4 +1,5 @@
 // Edit menu text operations (core/editor/TextOps): input / output pairs incl. Hangul and emoji.
+#include "core/editor/CommentOps.h"
 #include "core/editor/Sorters.h"
 #include "core/editor/TextOps.h"
 #include "core/search/Search.h"
@@ -217,6 +218,52 @@ private slots:
         setText("한\tb");
         wsTabConvert(e(), SpaceTab::Tab2Space);
         QCOMPARE(text(), u8("한   b"));
+    }
+
+    void lineComments()
+    {
+        const CommentSymbols cpp{"//", "/*", "*/", L_CPP};
+        setText("int a;\n  int b;\n\nint c;");
+        m_e->send(SCI_SETSEL, 0, 22);
+        QVERIFY(doBlockComment(e(), cpp, CommentMode::Comment));
+        QCOMPARE(text(), u8("// int a;\n  // int b;\n\n// int c;"));
+        QVERIFY(doBlockComment(e(), cpp, CommentMode::Toggle));
+        QCOMPARE(text(), u8("int a;\n  int b;\n\nint c;"));
+        // uncomment without the space after the symbol, case insensitive (REM)
+        const CommentSymbols bat{"REM", "", "", L_BATCH};
+        setText("rem x\nREMy");
+        m_e->send(SCI_SETSEL, 0, 10);
+        QVERIFY(doBlockComment(e(), bat, CommentMode::Uncomment));
+        QCOMPARE(text(), u8("x\ny"));
+    }
+
+    void streamComments()
+    {
+        const CommentSymbols cpp{"//", "/*", "*/", L_CPP};
+        setText("a b c");
+        m_e->send(SCI_SETSEL, 2, 3);
+        QVERIFY(doStreamComment(e(), cpp));
+        QCOMPARE(text(), u8("a /* b */ c"));
+        m_e->send(SCI_SETSEL, 5, 5);
+        QVERIFY(undoStreamComment(e(), cpp));
+        QCOMPARE(text(), u8("a b c"));
+        // no line comment symbol (HTML/XML): advanced single line mode
+        const CommentSymbols xml{"", "<!--", "-->", L_XML};
+        setText("<a/>\n<b/>");
+        m_e->send(SCI_SETSEL, 0, 9);
+        QVERIFY(doBlockComment(e(), xml, CommentMode::Comment));
+        QCOMPARE(text(), u8("<!-- <a/> -->\n<!-- <b/> -->"));
+        m_e->send(SCI_SETSEL, 0, 27);
+        QVERIFY(doBlockComment(e(), xml, CommentMode::Toggle));
+        QCOMPARE(text(), u8("<a/>\n<b/>"));
+    }
+
+    void udlSymbols()
+    {
+        const auto s = udlCommentSymbols("00# 01 02 03{* 04*}");
+        QCOMPARE(s.line, std::string("#"));
+        QCOMPARE(s.start, std::string("{*"));
+        QCOMPARE(s.end, std::string("*}"));
     }
 
     void undoIsOneAction()
