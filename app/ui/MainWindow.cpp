@@ -29,6 +29,7 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QMimeData>
+#include <QMouseEvent>
 #include <QScreen>
 #include <QSplitter>
 #include <QStatusBar>
@@ -129,6 +130,28 @@ const std::vector<SciKey>& scintillaKeyDefaults()
     return keys;
 }
 
+// Status bar cell with a double click action (upstream: language / EOL / encoding menus, ...)
+class StatusCell final : public QLabel {
+public:
+    std::function<void(QPoint)> onDoubleClick;
+
+protected:
+    void mouseDoubleClickEvent(QMouseEvent* e) override
+    {
+        if (onDoubleClick)
+            onDoubleClick(e->globalPosition().toPoint());
+    }
+};
+
+// Menu that contains the action of a command (to pop it up from the status bar)
+QMenu* menuOf(QAction* a)
+{
+    for (QObject* o : a->associatedObjects())
+        if (auto* m = qobject_cast<QMenu*>(o))
+            return m;
+    return nullptr;
+}
+
 } // namespace
 
 // ------------------------------------------------------------------------------------------------
@@ -145,6 +168,8 @@ CommandLine parseCommandLine(const QStringList& args)
         else if (a.startsWith(QLatin1String("-c")) && a.size() > 2 && a[2].isDigit()) c.column = num(2);
         else if (a.startsWith(QLatin1String("-p")) && a.size() > 2 && a[2].isDigit()) c.position = num(2);
         else if (a.startsWith(QLatin1String("-l")) && a.size() > 2) c.language = a.mid(2);
+        else if (a.startsWith(QLatin1String("-x")) && a.size() > 2) c.x = num(2);
+        else if (a.startsWith(QLatin1String("-y")) && a.size() > 2) c.y = num(2);
         else if (a == QLatin1String("-multiInst")) c.multiInstance = true;
         else if (a == QLatin1String("-nosession")) c.noSession = true;
         else if (a == QLatin1String("-ro")) c.readOnly = true;
@@ -363,10 +388,29 @@ void MainWindow::createPanels()
 
 void MainWindow::createStatusBar()
 {
-    for (auto& l : m_status) {
-        l = new QLabel;
-        l->setContentsMargins(6, 0, 6, 0);
+    std::array<StatusCell*, 6> cells{};
+    for (size_t i = 0; i < cells.size(); ++i) {
+        cells[i] = new StatusCell;
+        cells[i]->setContentsMargins(6, 0, 6, 0);
+        m_status[i] = cells[i];
     }
+    auto popup = [this](int commandId) {
+        return [this, commandId](QPoint at) {
+            if (QMenu* m = menuOf(m_actions->action(commandId))) {
+                m_actions->updateStates();
+                m->popup(at);
+            }
+        };
+    };
+    cells[0]->onDoubleClick = popup(IDM_LANG_TEXT);
+    cells[2]->onDoubleClick = [this](QPoint) { m_actions->trigger(IDM_SEARCH_GOTOLINE); };
+    cells[3]->onDoubleClick = popup(IDM_FORMAT_TODOS);
+    cells[4]->onDoubleClick = popup(IDM_FORMAT_ANSI);
+    cells[5]->onDoubleClick = [this](QPoint) {
+        ScintillaEditBase* e = currentPane()->editor();
+        e->send(SCI_SETOVERTYPE, !e->send(SCI_GETOVERTYPE));
+        updateTitleAndStatus();
+    };
     statusBar()->addWidget(m_status[0], 1);
     for (size_t i = 1; i < m_status.size(); ++i)
         statusBar()->addPermanentWidget(m_status[i]);
@@ -471,7 +515,9 @@ void MainWindow::restoreWindowState()
             r.moveCenter(QGuiApplication::primaryScreen()->availableGeometry().center());
         setGeometry(r);
     }
-    if (g.appMaximized)
+    if (m_cmd.x != INT_MIN || m_cmd.y != INT_MIN) // -x / -y
+        move(m_cmd.x != INT_MIN ? m_cmd.x : x(), m_cmd.y != INT_MIN ? m_cmd.y : y());
+    else if (g.appMaximized)
         setWindowState(windowState() | Qt::WindowMaximized);
     // Panel layout is kept by the docking backend next to config.xml
     if (const auto st = readFileContent(pathAppend(m_paths.userDir(), "dockLayout-" + m_dock->backendName().toStdString() + ".bin")))

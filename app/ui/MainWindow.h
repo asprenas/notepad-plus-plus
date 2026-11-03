@@ -18,6 +18,7 @@
 #include <QStringList>
 
 #include <array>
+#include <climits>
 #include <deque>
 #include <memory>
 #include <optional>
@@ -40,6 +41,7 @@ class EditorPane;
 struct CommandLine {
     QStringList files;
     int  line = -1, column = -1, position = -1;
+    int  x = INT_MIN, y = INT_MIN;  // -x<left> -y<top>
     QString language;          // -l<lang>
     QString sessionFile;       // -openSession <file>
     QString settingsDir;       // -settingsDir=<dir>

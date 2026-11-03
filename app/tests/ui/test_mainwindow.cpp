@@ -214,10 +214,12 @@ private slots:
     void commandLine()
     {
         const auto c = parseCommandLine({QStringLiteral("npp"), QStringLiteral("-n12"), QStringLiteral("-c3"),
-                                         QStringLiteral("-lcpp"), QStringLiteral("-multiInst"), QStringLiteral("-ro"),
+                                         QStringLiteral("-lcpp"), QStringLiteral("-multiInst"), QStringLiteral("-ro"), QStringLiteral("-x100"), QStringLiteral("-y-20"),
                                          QStringLiteral("-openSession"), QStringLiteral("s.xml"), QStringLiteral("f.txt")});
         QCOMPARE(c.line, 12);
         QCOMPARE(c.column, 3);
+        QCOMPARE(c.x, 100);
+        QCOMPARE(c.y, -20);
         QCOMPARE(c.language, QStringLiteral("cpp"));
         QVERIFY(c.multiInstance && c.readOnly);
         QCOMPARE(c.sessionFile, QStringLiteral("s.xml"));

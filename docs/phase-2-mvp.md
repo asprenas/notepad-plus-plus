@@ -120,9 +120,9 @@
 
 - [ ] 기능 체크리스트의 2단계 담당 항목 완료
 - [ ] 기존 설정 폴더로 시작해 언어 강조, 단축키, 세션이 원본과 같음
-- [ ] Windows·Linux에서 열기/편집/저장/세션 복원 동작
+- [x] Windows·Linux에서 열기/편집/저장/세션 복원 동작 (offscreen UI 테스트, 양 플랫폼 CI)
 - [ ] 4시간 연속 일상 사용(개발자 본인) 중 데이터 손실·크래시 없음
-- [ ] 로컬 CI 통과
+- [x] 로컬 CI 통과 (Windows MinGW/MSVC, Linux Docker × ADS/QT, `ui.mainwindow` 포함)
 
 ## 7. 리스크
 
@@ -132,3 +132,22 @@
 | 탭 바 세부 동작이 많음 | 1차는 핵심 동작, 세부는 4단계 설정과 함께 |
 | macOS 단축키 충돌 | 충돌 목록 작성 후 대체 키 결정, 문서화 |
 | Wayland에서 단일 인스턴스 창 활성화 제약 | `xdg-activation` 토큰 전달 시도, 불가 시 알림 표시 |
+
+## 8. 진행 현황
+
+| ID | 상태 | 구현 위치 / 비고 |
+|---|---|---|
+| P2-01 | 완료 | `tools/gen-menu-table.py` → `app/ui/menu/*.inc`, `CommandIds.h`; `ActionRegistry` (nativeLang 메뉴 이름, 핸들러 없는 명령은 비활성) |
+| P2-02 | 완료 | `EditorPane` + `EditorAdapter`; 실행 취소/다시 실행, 잘라내기·복사(선택 없으면 줄), 붙여넣기, 줄 복제/이동/합치기/나누기, 대소문자, 빈 줄 삭제, 읽기 전용, 경로 복사, 줄 이동, 북마크 |
+| P2-03 | 핵심 완료 | `DocTabBar`: 닫기 버튼, 드래그 순서 변경, 가운데 클릭 닫기, 빈 곳 더블클릭 새 문서, 변경(`*`)·읽기 전용 표시, 탭 1–9/다음/이전. 남음: 다른 뷰로 탭 드래그, 탭 색상, 고정 탭 (4단계 설정과 함께) |
+| P2-04 | 완료 | `QSplitter` + 패널 2개, 이동/복제(문서 공유), 다른 뷰로 전환, 새 인스턴스로 이동/열기 |
+| P2-05 | 완료 | 새로/열기/다시 읽기/저장/다른 이름/사본/모두 저장/이름 바꾸기/휴지통 삭제/닫기 계열/마지막 닫은 파일/폴더 열기/명령 창, 없는 파일 생성 질문, 2GB 경고, 폴더 드롭 |
+| P2-06 | 완료 | EOL 변환, Encode in(다시 읽기 + `uniModeOverride`), Convert to, 문자 집합, 언어 메뉴(`LanguageCommands.inc`) + UDL |
+| P2-07 | 완료 | `QFileSystemWatcher` + 앱 활성화 시 `checkFileState` (`fileAutoDetection` 모드), 스냅샷 백업 타이머 |
+| P2-08 | 완료 | `session.xml`(Notepad++Qt 폴더), 백업 포함 마지막 세션, 최근 파일 메뉴, `QLocalServer` 단일 인스턴스, 명령줄 `-n -c -p -l -x -y -multiInst -nosession -ro -alwaysOnTop -openSession -settingsDir=` |
+| P2-09 | 완료 | 원본 기본 단축키 + `shortcuts.xml` 덮어쓰기, Scintilla 키맵(`SCI_ASSIGNCMDKEY`) |
+| P2-10 | 부분 | 상태바 6칸 + 더블클릭(언어/EOL/인코딩 메뉴, 줄 이동, INS/OVR). 툴바는 Qt 표준 아이콘 일부 — `toolbarButtonsConf.xml`·아이콘 세트는 4단계 테마와 함께 |
+| P2-11 | 완료 | 로컬 CI Windows·Linux 통과 |
+| P2-12 | 완료 | 창/편집기 URL 드롭, 첫 실행 시 원본 Notepad++ 설정 가져오기(Windows `%APPDATA%\Notepad++` → `Notepad++Qt`, 세션·백업 제외) |
+
+수동 확인으로 남은 항목: 실제 사용자 설정 폴더로 언어 강조·단축키·세션 비교, 외부 수정/삭제/이름 변경 감지 시나리오, 단일 인스턴스 전달, 4시간 연속 사용.
