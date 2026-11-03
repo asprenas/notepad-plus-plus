@@ -5,6 +5,9 @@
 - 선행: [0단계](phase-0-preparation.md) 완료
 - 다음 단계: [2단계 MVP](phase-2-mvp.md)
 
+
+> 개발 범위: 현재 대상 플랫폼은 **Windows·Linux**. macOS는 차후 개발 예정이므로 macOS 관련 작업·테스트는 완료 기준에서 제외하고 `차후 구현 항목` 절에 둔다.
+
 ---
 
 ## 1. 목표
@@ -180,7 +183,7 @@ struct LexerSpec {
 | 4–5 | `lang/` (`LanguageRegistry`, `StyleRegistry`, `UserLanguageRegistry`, 렉서 테이블 85개) + 골든 테스트 |
 | 5–6 | `buffer/` (로드/저장/백업/변경 확인) + 파일 테스트 |
 | 7 | `search/`, `editor/` |
-| 8 | 0단계 샘플 앱을 코어 기반으로 교체, 3플랫폼 로컬 CI, 문서화 |
+| 8 | 0단계 샘플 앱을 코어 기반으로 교체, Windows·Linux 로컬 CI, 문서화 |
 
 ## 6. 테스트
 
@@ -192,7 +195,7 @@ struct LexerSpec {
 | 골든 | 언어별 스타일 배열을 원본과 비교 | `app/tests/data/golden/` |
 | 기존 자산 | `PowerEditor/Test/UrlDetection`, `xmlValidator` CTest 편입 | |
 
-모든 테스트는 `ci/local-ci.sh`로 Windows(MinGW, MSVC), Linux, macOS에서 실행한다.
+모든 테스트는 `ci/local-ci.sh`로 Windows(MinGW, MSVC), Linux에서 실행한다.
 
 ## 7. 완료 기준
 
@@ -202,7 +205,7 @@ struct LexerSpec {
 - [x] 인코딩 샘플 전부 바이트 일치
 - [x] 렉서 골든 테스트: 주요 20개 언어 통과, 나머지 목록화
 - [x] 0단계 샘플 앱이 코어 API로 동작 (기존 설정 폴더 로드)
-- [~] 3플랫폼 로컬 CI 통과 (Windows·Linux 완료, macOS는 Mac 장비 필요 — 9.2 참조)
+- [x] Windows·Linux 로컬 CI 통과
 
 ## 8. 리스크
 
@@ -232,7 +235,7 @@ struct LexerSpec {
 | `search/` | 완료 | `core.search` — 정규식 찾기 30건, 바꾸기 15건, 파일에서 찾기/바꾸기 |
 | 샘플 앱 코어 전환 | 완료 | 스모크 스크린샷 (기존 Notepad++ 설정·세션·백업 복원 확인) |
 
-로컬 CI: Windows(MinGW, MSVC) × Linux × ADS/QT 전부 통과. macOS는 0단계 P0-13과 함께 진행.
+로컬 CI: Windows(MinGW, MSVC) × Linux × ADS/QT 전부 통과.
 
 ### 9.2 완료 기준 점검
 
@@ -242,7 +245,7 @@ struct LexerSpec {
 - [x] 인코딩 샘플 전부 바이트 일치
 - [x] 렉서: 28개 언어 33개 기준 토큰 테스트 통과, 전 언어 적용 확인 (9.3 참조)
 - [x] 샘플 앱이 코어 API로 동작, 기존 설정 폴더 로드
-- [~] 3플랫폼 로컬 CI: Windows(MinGW, MSVC)·Linux 통과. **macOS는 Mac 장비가 필요해 이 환경에서 실행 불가** — 0단계 P0-13(2026-11-09 주)에서 같은 `ci/local-ci.sh`로 확인
+- [x] Windows·Linux 로컬 CI: Windows(MinGW, MSVC)·Linux 통과
 
 ### 9.3 계획과 달라진 점
 
@@ -259,3 +262,10 @@ struct LexerSpec {
 ### 9.4 안전 규칙 (샘플 앱)
 
 샘플 앱은 원본 Notepad++와 설정 폴더를 공유하므로 **설정 파일을 쓰지 않는다**. 세션에서 복원한 백업 파일은 연결을 끊어 삭제·덮어쓰기를 막는다.
+
+---
+
+## 차후 구현 항목 (macOS)
+
+- macOS에서 코어 단위 테스트 실행 (`bash ci/local-ci.sh`; iconv는 macOS libiconv 이름 차이 확인)
+- macOS 설정 경로(`~/Library/Application Support/Notepad++`) 동작 확인

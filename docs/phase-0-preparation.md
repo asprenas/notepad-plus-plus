@@ -5,6 +5,9 @@
 - 상태: **대부분 완료** — 남은 항목은 4장 참조
 - 다음 단계: [1단계 코어 추출](phase-1-core-extraction.md)
 
+
+> 개발 범위: 현재 대상 플랫폼은 **Windows·Linux**. macOS는 차후 개발 예정이므로 macOS 관련 작업·테스트는 완료 기준에서 제외하고 `차후 구현 항목` 절에 둔다.
+
 ---
 
 ## 1. 목표
@@ -40,8 +43,8 @@
 | P0-10 | 로컬 CI (Windows MinGW·MSVC, Linux Docker × ADS/QT) | `ci/local-ci.sh`, `ci/docker/linux.Dockerfile` | 완료 |
 | P0-11 | 도킹 추상화 누수 검사 | `ci/check-docking-abstraction.sh` | 완료 |
 | P0-12 | CLion 실행·디버그 구성 (MSVC + LLDB) | `CMakeUserPresets.json`(로컬), [build.md](build.md) | 완료 |
-| P0-13 | **macOS 빌드 환경** | Xcode CLT, Qt 6 Universal, `macos-release` 프리셋 검증 | 미완료 (2026-11-09 주) |
-| P0-14 | **한글 IME 수동 확인** (Windows MS IME, Linux ibus/fcitx5, macOS) | 확인 결과 기록 | 미완료 |
+| P0-13 | macOS 빌드 환경 | — | 차후 구현 항목으로 이동 |
+| P0-14 | **한글 IME 수동 확인** (Windows MS IME, Linux ibus/fcitx5) | 확인 결과 기록 | 미완료 |
 | P0-15 | **도킹 수동 확인**: 패널 플로팅 드래그, 재도킹, 재시작 후 복원 | 확인 결과 기록 | 미완료 |
 | P0-16 | Linux 실제 데스크톱 확인 (X11, Wayland) | 확인 결과 기록 | 미완료 |
 | P0-17 | 기능 체크리스트 작성 (메뉴 기준) | `docs/feature-checklist.md` | 미완료 |
@@ -83,7 +86,6 @@
 ## 5. 완료 기준
 
 - [x] Windows(MinGW, MSVC)와 Linux에서 빌드·테스트·스모크 실행이 로컬 CI로 통과
-- [ ] macOS에서 빌드·실행
 - [ ] 한글 IME와 도킹 수동 확인 표 작성 완료
 - [ ] 기능 체크리스트 작성 완료
 
@@ -97,3 +99,11 @@
 | ADS `DockManager.h`와 프로젝트 헤더 이름 충돌 | ADS는 `<...>`, 프로젝트는 `"..."` include 규칙 |
 | CLion 기본 MinGW(GCC 16)와 Qt kit MinGW(13.1)는 런타임 다름 | CLion은 MSVC + LLDB 사용 |
 | `include(CTest)`가 IDE 실행 구성을 28개 추가 | `enable_testing()` 사용 |
+
+---
+
+## 차후 구현 항목 (macOS)
+
+- macOS 빌드 환경 (Xcode CLT, Qt 6 Universal + Qt 5 Compatibility, `macos-release` 프리셋 검증) — 4.1절 절차
+- `ci/local-ci.sh`에 macOS 대상 추가
+- macOS 한글 IME, 도킹, HiDPI 수동 확인 (4.2절 표의 macOS 열)
