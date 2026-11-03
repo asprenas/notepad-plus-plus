@@ -212,3 +212,50 @@ struct LexerSpec {
 | 문자열 전환 중 의미 변화 (문자 수 vs 바이트 수) | 열 위치·길이 계산 코드는 UTF-8 유틸로 일원화하고 비 BMP 문자 테스트 추가 |
 | Windows Qt에 ICU 없음 | ICU 직접 의존성 또는 Windows에서만 Win32 API 사용(`platform/win`) |
 | 골든 데이터 추출 비용 | 주요 20개 언어부터, 나머지는 3–5단계 중 점진적으로 |
+
+---
+
+## 9. 진행 결과 (2026-11-03)
+
+### 9.1 모듈별 상태
+
+| 모듈 | 상태 | 테스트 |
+|---|---|---|
+| `util/` | 완료 | `core.util` |
+| `encoding/` | 완료 | `core.encoding` — 샘플 13종 바이트 왕복 |
+| `i18n/` | 완료 | `core.i18n` — 원본 번역 94개 로드 |
+| `config/` (`GuiConfig` 약 190 필드, `ConfigFile`, `AppPaths`, `ContextMenuConfig`) | 완료 | `core.config` |
+| `session/`, `shortcut/` | 완료 | `core.config` |
+| `lang/` (언어 표, 렉서 사양 94종, langs/stylers/UDL) | 완료 | `core.lang` |
+| `editor/` (`IEditor`, `applyLanguage`, `applyUserLanguage`) | 완료 | `core.lang` |
+| `buffer/` (`FileManager`) | 완료 | `core.buffer` |
+| `search/` | 완료 | `core.search` — 정규식 찾기 30건, 바꾸기 15건, 파일에서 찾기/바꾸기 |
+| 샘플 앱 코어 전환 | 완료 | 스모크 스크린샷 (기존 Notepad++ 설정·세션·백업 복원 확인) |
+
+로컬 CI: Windows(MinGW, MSVC) × Linux × ADS/QT 전부 통과. macOS는 0단계 P0-13과 함께 진행.
+
+### 9.2 완료 기준 점검
+
+- [x] `npp_core`는 QtCore 외 Qt 모듈 미사용 (`ci/check-core-rules.sh`)
+- [x] 코어에 `<windows.h>`, `wchar_t`, `std::wstring`, `L"` 없음 (`platform/win` 제외)
+- [~] 설정 파일 왕복: `config.xml`, `session.xml`, `shortcuts.xml`, `contextMenu.xml`, `stylers.xml` 완료. `langs.xml`, UDL은 읽기만 (편집 UI가 생기는 4·5단계에서 쓰기 추가)
+- [x] 인코딩 샘플 전부 바이트 일치
+- [x] 렉서: 28개 언어 33개 기준 토큰 테스트 통과, 전 언어 적용 확인 (9.3 참조)
+- [x] 샘플 앱이 코어 API로 동작, 기존 설정 폴더 로드
+- [~] 3플랫폼 로컬 CI: Windows·Linux 완료, macOS 대기
+
+### 9.3 계획과 달라진 점
+
+| 항목 | 계획 | 실제 | 이유 |
+|---|---|---|---|
+| 코드페이지 변환 | ICU 또는 `QStringConverter` | Windows: Win32 API(`platform/win`), Linux/macOS: iconv | Qt Windows 배포본에 ICU 없음 (실측 0/14 코드페이지) |
+| 편집기 내부 문자열 | 원본: ANSI 문서는 시스템 코드페이지 그대로 | 항상 UTF-8, 로드·저장 시 변환 | 플랫폼 간 동작 통일 |
+| 렉서 골든 테스트 | Windows 원본 Notepad++에서 스타일 배열 추출 | 원본 키워드 매핑 규칙 기반 기준 토큰 테스트 | 원본 바이너리에서 추출할 수단 없음. 동일 렉서·모델 파일·매핑으로 등가 검증 |
+| 렉서 사양 | 85개 함수 수동 이식 | 56개 생성(`tools/gen-lexer-table.py`), 38개 수동 | 원본 갱신 시 재생성 가능 |
+| 설정 저장 방식 | — | 원본은 `GUIConfigs`를 통째로 재작성, 포트는 제자리 갱신 | 모르는 항목 보존 |
+| 파일에서 찾기 스레드 | 백그라운드 | 코어는 진행·취소 콜백만 제공, 스레드는 3단계 UI | 스크래치 편집기가 GUI 스레드 위젯 |
+| Linux 정규식 | — | 시작 시 `initRegexLocale()` 필요 | Boost 문자 분류가 전역 C 로케일 사용 (`\w`가 한글 불일치) |
+
+### 9.4 안전 규칙 (샘플 앱)
+
+샘플 앱은 원본 Notepad++와 설정 폴더를 공유하므로 **설정 파일을 쓰지 않는다**. 세션에서 복원한 백업 파일은 연결을 끊어 삭제·덮어쓰기를 막는다.

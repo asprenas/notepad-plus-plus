@@ -217,7 +217,7 @@ private slots:
     void findAndReplaceInFiles()
     {
         const std::string dir = utf8FromPath(fs::temp_directory_path()) + "/npp-core-fif";
-        fs::remove_all(pathFromUtf8(dir));
+        { std::error_code ec_; fs::remove_all(pathFromUtf8(dir), ec_); }
         fs::create_directories(pathFromUtf8(dir + "/sub"));
         fs::create_directories(pathFromUtf8(dir + "/node_modules"));
         QVERIFY(writeFileContent(dir + "/a.cpp", "int main() {\n  return 0; // needle\n}\n"));
@@ -266,7 +266,7 @@ private slots:
         QCOMPARE(replaceInFiles(fm, files, o), 5);
         QCOMPARE(readFileContent(dir + "/k.cpp").value(), std::string("\xC7\xD1\xB1\xDB pin\n"));
         QCOMPARE(readFileContent(dir + "/b.h").value(), std::string("// pin pin\n"));
-        fs::remove_all(pathFromUtf8(dir));
+        { std::error_code ec_; fs::remove_all(pathFromUtf8(dir), ec_); }
     }
 };
 

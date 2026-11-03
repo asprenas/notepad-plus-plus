@@ -2,8 +2,7 @@ qt_add_executable(notepadpp-qt
     main.cpp
     MainWindow.h
     MainWindow.cpp
-    editor/LanguageConfig.h
-    editor/LanguageConfig.cpp
+    editor/EditorAdapter.h
     docking/DockManager.h
     docking/DockManager.cpp
 )
@@ -26,8 +25,7 @@ target_include_directories(notepadpp-qt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(notepadpp-qt PRIVATE NPP_QT_VERSION="${PROJECT_VERSION}")
 target_link_libraries(notepadpp-qt PRIVATE
     npp_scintilla
-    npp_lexilla
-    npp_pugixml
+    npp_core
     Qt6::Widgets)
 
 set_target_properties(notepadpp-qt PROPERTIES
@@ -64,4 +62,6 @@ add_custom_command(TARGET notepadpp-qt POST_BUILD
         ${NPP_LEGACY_SRC_DIR}/langs.model.xml
         ${NPP_LEGACY_SRC_DIR}/stylers.model.xml
         "${NPP_DATA_OUT}"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${NPP_ROOT_DIR}/PowerEditor/bin/userDefineLangs "${NPP_DATA_OUT}/userDefineLangs"
     VERBATIM)

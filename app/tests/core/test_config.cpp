@@ -269,7 +269,7 @@ private slots:
     void appPaths()
     {
         const std::string base = utf8FromPath(fs::temp_directory_path()) + "/npp-core-paths";
-        fs::remove_all(pathFromUtf8(base));
+        { std::error_code ec_; fs::remove_all(pathFromUtf8(base), ec_); }
         const std::string appDir = base + "/app", userDir = base + "/user", cloudDir = base + "/cloud",
                           settingsDir = base + "/settings";
         for (const auto& d : {appDir, userDir, cloudDir, settingsDir})
@@ -304,7 +304,7 @@ private slots:
         p = AppPaths::resolve(o);
         QCOMPARE(p.userDir(), settingsDir);
         QCOMPARE(p.sessionDir(), settingsDir);
-        fs::remove_all(pathFromUtf8(base));
+        { std::error_code ec_; fs::remove_all(pathFromUtf8(base), ec_); }
     }
 };
 

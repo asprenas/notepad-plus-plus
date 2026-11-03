@@ -1,5 +1,7 @@
 #include "MainWindow.h"
 
+#include "core/search/Search.h"
+
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QTimer>
@@ -14,19 +16,26 @@ int main(int argc, char* argv[])
     QApplication::setApplicationVersion(QStringLiteral(NPP_QT_VERSION));
 
     QCommandLineParser parser;
-    parser.setApplicationDescription(QStringLiteral("Notepad++ Qt port (phase 0 spike)"));
+    parser.setApplicationDescription(QStringLiteral("Notepad++ Qt port (npp-core)"));
     parser.addHelpOption();
     parser.addVersionOption();
     QCommandLineOption screenshotOpt(QStringLiteral("screenshot"),
                                      QStringLiteral("Smoke test: render the window, save it as PNG and exit."),
                                      QStringLiteral("file.png"));
     parser.addOption(screenshotOpt);
+    QCommandLineOption sessionOpt(QStringLiteral("npp-session"),
+                                  QStringLiteral("Open the files of the Notepad++ session.xml (read only)."));
+    parser.addOption(sessionOpt);
     parser.addPositionalArgument(QStringLiteral("files"), QStringLiteral("Files to open"), QStringLiteral("[files...]"));
     parser.process(app);
 
+    npp::core::initRegexLocale();
     npp::ui::MainWindow window;
+    if (parser.isSet(sessionOpt))
+        window.restoreNppSession();
     for (const QString& f : parser.positionalArguments())
         window.openFile(f);
+    window.ensureDocument();
     window.show();
 
     if (parser.isSet(screenshotOpt)) {

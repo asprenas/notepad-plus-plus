@@ -121,7 +121,7 @@ private slots:
         bool timedOut = true;
         QVERIFY(pathExists(file, PathKind::Any, std::chrono::milliseconds(2000), &timedOut));
         QVERIFY(!timedOut);
-        fs::remove_all(pathFromUtf8(dir));
+        { std::error_code ec_; fs::remove_all(pathFromUtf8(dir), ec_); }
         QVERIFY(!pathExists(file));
     }
 
