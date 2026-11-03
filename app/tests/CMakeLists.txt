@@ -71,7 +71,7 @@ add_test(NAME ui.settings COMMAND test_ui_settings)
 set_tests_properties(ui.settings PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 npp_test_env(ui.settings)
 # "Follow system" dark mode needs a platform plugin that can change the colour scheme
-# (offscreen cannot): the real platform on Windows, xcb under Xvfb on Linux.
+# (offscreen cannot): the real platform on Windows, xcb + GTK platform theme under Xvfb on Linux.
 if(WIN32)
     add_test(NAME ui.settings.systemtheme COMMAND test_ui_settings systemModeFollowsColorScheme)
     set_tests_properties(ui.settings.systemtheme PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=windows")
@@ -80,7 +80,7 @@ elseif(UNIX AND NOT APPLE)
     find_program(NPP_XVFB_RUN xvfb-run)
     if(NPP_XVFB_RUN)
         add_test(NAME ui.settings.systemtheme COMMAND ${NPP_XVFB_RUN} -a $<TARGET_FILE:test_ui_settings> systemModeFollowsColorScheme)
-        set_tests_properties(ui.settings.systemtheme PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=xcb" SKIP_REGULAR_EXPRESSION "SKIP   :")
+        set_tests_properties(ui.settings.systemtheme PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=xcb;QT_QPA_PLATFORMTHEME=gtk3" SKIP_REGULAR_EXPRESSION "SKIP   :")
     endif()
 endif()
 

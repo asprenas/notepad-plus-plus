@@ -13,5 +13,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         qt6-base-dev qt6-base-private-dev qt6-5compat-dev \
         libxcb1-dev libgl-dev \
         fonts-dejavu-core fonts-noto-cjk \
-        xvfb xauth \
+        xvfb xauth qt6-gtk-platformtheme \
     && rm -rf /var/lib/apt/lists/*

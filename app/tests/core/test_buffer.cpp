@@ -14,6 +14,7 @@
 #include <QJsonObject>
 #include <QCoreApplication>
 #include <QTest>
+#include <QThread>
 
 #include <thread>
 
@@ -62,7 +63,7 @@ private slots:
     {
         m_scratch.reset();
         delete m_editor;
-        fs::remove_all(pathFromUtf8(tempDir()));
+        { std::error_code ec_; fs::remove_all(pathFromUtf8(tempDir()), ec_); }
     }
 
     void eolDetection()
@@ -176,7 +177,14 @@ private slots:
         QVERIFY(fm.reload(*b));
         QCOMPARE(fm.utf8Content(*b), std::string("two"));
 
-        fs::remove(pathFromUtf8(path));
+        // a just written file can be held briefly by another process (virus scanner): retry
+        for (int i = 0; i < 100 && pathExists(path); ++i) {
+            std::error_code ec_;
+            fs::remove(pathFromUtf8(path), ec_);
+            if (pathExists(path))
+                QThread::msleep(20);
+        }
+        QVERIFY(!pathExists(path));
         QCOMPARE(fm.checkFileState(*b), FileChange::Deleted);
         QCOMPARE(b->status, DocStatus::Deleted);
         QVERIFY(writeFileContent(path, "back"));

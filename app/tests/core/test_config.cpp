@@ -134,7 +134,7 @@ private slots:
     {
         ConfigFile cfg;
         const std::string path = utf8FromPath(fs::temp_directory_path()) + "/npp-core-config-test-" + std::to_string(QCoreApplication::applicationPid()) + ".xml";
-        fs::remove(pathFromUtf8(path));
+        { std::error_code ec_; fs::remove(pathFromUtf8(path), ec_); }
         QVERIFY(cfg.load(path));
         QVERIFY(cfg.isNew());
         QCOMPARE(cfg.gui.tabSize, 4); // upstream default
@@ -153,7 +153,7 @@ private slots:
         QVERIFY(back.gui.darkModeEnabled);
         QCOMPARE(back.history.files, (std::vector<std::string>{"/tmp/a.txt", "/tmp/b.txt"}));
         QCOMPARE(back.findHistory.finds, (std::vector<std::string>{"needle"}));
-        fs::remove(pathFromUtf8(path));
+        { std::error_code ec_; fs::remove(pathFromUtf8(path), ec_); }
     }
 
     void autoDetectionStrings()
