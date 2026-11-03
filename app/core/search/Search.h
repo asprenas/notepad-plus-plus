@@ -15,6 +15,11 @@ namespace npp::core {
 
 class FileManager;
 
+// Must be called once at startup (before the first regex search): Boost.Regex character classes
+// (\w, [[:alpha:]]) use the global C++ locale outside Windows; with the default "C" locale they
+// do not match non-ASCII letters such as Hangul. Selects a UTF-8 locale; no-op on Windows.
+void initRegexLocale();
+
 enum class SearchType { Normal = 0, Extended = 1, Regex = 2 }; // upstream FindHistory::searchMode
 
 struct SearchOptions {

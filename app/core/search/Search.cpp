@@ -10,6 +10,8 @@
 #include <QFileInfo>
 
 #include <algorithm>
+#include <locale>
+#include <stdexcept>
 
 namespace npp::core {
 
@@ -61,6 +63,23 @@ intptr_t searchInTarget(const IEditor& e, const std::string& pattern, intptr_t s
 
 } // namespace
 
+void initRegexLocale()
+{
+#if !defined(_WIN32)
+    for (const char* name : {"", "C.UTF-8", "en_US.UTF-8"}) {
+        try {
+            std::locale loc(name);
+            if (std::string(name).empty() && loc.name().find("UTF-8") == std::string::npos
+                && loc.name().find("utf8") == std::string::npos)
+                continue; // environment locale is not UTF-8
+            std::locale::global(loc);
+            return;
+        } catch (const std::exception&) {
+        }
+    }
+#endif
+}
+
 std::string convertExtended(std::string_view q)
 {
     std::string out;
@@ -82,7 +101,7 @@ std::string convertExtended(std::string_view q)
             const int base = n == 'b' ? 2 : n == 'o' ? 8 : n == 'd' ? 10 : 16;
             int v = 0;
             if (readBase(q, i + 1, size, base, v)) {
-                appendUtf8(out, static_cast<char32_t>(v)); // upstream builds a wchar_t, i.e. a code point
+                appendUtf8(out, static_cast<char32_t>(v)); // upstream builds a UTF-16 unit, i.e. a code point
                 i += static_cast<size_t>(size);
                 break;
             }
