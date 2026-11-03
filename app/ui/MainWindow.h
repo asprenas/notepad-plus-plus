@@ -133,6 +133,8 @@ private:
     void registerFormatCommands();
     void registerLanguageCommands();
     void registerMiscCommands();
+    // --- commands (EditCommands.cpp)
+    void registerEditOpsCommands();
 
     CommandLine                 m_cmd;
     core::AppPaths              m_paths;
@@ -164,6 +166,9 @@ private:
     bool                         m_exiting = false;
     bool                         m_distractionFree = false;
     bool                         m_postIt = false;
+    intptr_t                     m_beginSelectPos = -1; // Begin/End Select
+    bool                         m_beginSelectColumn = false;
+    int                          m_multiSelectFlag = 0;  // last Multi-select search flags
     std::array<QLabel*, 6>       m_status{}; // language, length/lines, position, EOL, encoding, INS/OVR
 };
 

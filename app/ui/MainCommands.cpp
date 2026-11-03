@@ -62,6 +62,7 @@ void MainWindow::registerCommands()
     registerFormatCommands();
     registerLanguageCommands();
     registerMiscCommands();
+    registerEditOpsCommands();
 
     const auto menus = m_actions->buildMenuBar(menuBar(), &m_nativeLang, m_config.gui.langMenuCompact);
     m_actions->applyShortcuts(&m_shortcuts);
@@ -316,8 +317,6 @@ void MainWindow::registerEditCommands()
     simple(IDM_EDIT_LINE_UP, SCI_MOVESELECTEDLINESUP, writable);
     simple(IDM_EDIT_LINE_DOWN, SCI_MOVESELECTEDLINESDOWN, writable);
     simple(IDM_EDIT_JOIN_LINES, SCI_LINESJOIN, writable);
-    simple(IDM_EDIT_UPPERCASE, SCI_UPPERCASE, hasSel);
-    simple(IDM_EDIT_LOWERCASE, SCI_LOWERCASE, hasSel);
     simple(IDM_EDIT_INS_TAB, SCI_TAB, writable);
     simple(IDM_EDIT_RMV_TAB, SCI_BACKTAB, writable);
     r->setHandler(IDM_EDIT_SPLIT_LINES, {[sci] {

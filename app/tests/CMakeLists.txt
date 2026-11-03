@@ -32,6 +32,7 @@ npp_core_add_test(config SOURCES core/test_config.cpp)
 npp_core_add_test(lang SOURCES core/test_lang.cpp LIBS npp_scintilla Qt6::Widgets)
 npp_core_add_test(buffer SOURCES core/test_buffer.cpp LIBS npp_scintilla Qt6::Widgets)
 npp_core_add_test(search SOURCES core/test_search.cpp LIBS npp_scintilla Qt6::Widgets)
+npp_core_add_test(textops SOURCES core/test_textops.cpp LIBS npp_scintilla Qt6::Widgets)
 
 # --- UI tests (phase 2): MainWindow against a temporary user directory --------------------
 add_executable(test_ui_mainwindow ui/test_mainwindow.cpp)

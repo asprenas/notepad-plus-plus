@@ -8,11 +8,11 @@
 | 단계 | 항목 | 구현 | 비율 |
 |---|---|---|---|
 | 2 | 225 | 225 | 100% |
-| 3 | 188 | 17 | 9% |
+| 3 | 188 | 81 | 43% |
 | 4 | 15 | 1 | 6% |
 | 5 | 38 | 6 | 15% |
 | 7 | 1 | 0 | 0% |
-| 전체 | 467 | 249 | 53% |
+| 전체 | 467 | 313 | 67% |
 
 ## File
 
@@ -57,53 +57,53 @@
 | [x] | Paste | `IDM_EDIT_PASTE` | 2 |
 | [x] | Delete | `IDM_EDIT_DELETE` | 2 |
 | [x] | Select All | `IDM_EDIT_SELECTALL` | 2 |
-| [ ] | Begin/End Select | `IDM_EDIT_BEGINENDSELECT` | 3 |
-| [ ] | Begin/End Select in Column Mode | `IDM_EDIT_BEGINENDSELECT_COLUMNMODE` | 3 |
-| [ ] | Insert > Date Time (short) | `IDM_EDIT_INSERT_DATETIME_SHORT` | 3 |
-| [ ] | Insert > Date Time (long) | `IDM_EDIT_INSERT_DATETIME_LONG` | 3 |
-| [ ] | Insert > Date Time (customized) | `IDM_EDIT_INSERT_DATETIME_CUSTOMIZED` | 3 |
+| [x] | Begin/End Select | `IDM_EDIT_BEGINENDSELECT` | 3 |
+| [x] | Begin/End Select in Column Mode | `IDM_EDIT_BEGINENDSELECT_COLUMNMODE` | 3 |
+| [x] | Insert > Date Time (short) | `IDM_EDIT_INSERT_DATETIME_SHORT` | 3 |
+| [x] | Insert > Date Time (long) | `IDM_EDIT_INSERT_DATETIME_LONG` | 3 |
+| [x] | Insert > Date Time (customized) | `IDM_EDIT_INSERT_DATETIME_CUSTOMIZED` | 3 |
 | [x] | Copy to Clipboard > Copy Current Full File path | `IDM_EDIT_FULLPATHTOCLIP` | 3 |
 | [x] | Copy to Clipboard > Copy Current Filename | `IDM_EDIT_FILENAMETOCLIP` | 3 |
 | [x] | Copy to Clipboard > Copy Current Dir. Path | `IDM_EDIT_CURRENTDIRTOCLIP` | 3 |
-| [ ] | Copy to Clipboard > Copy All Filenames | `IDM_EDIT_COPY_ALL_NAMES` | 3 |
-| [ ] | Copy to Clipboard > Copy All File Paths | `IDM_EDIT_COPY_ALL_PATHS` | 3 |
+| [x] | Copy to Clipboard > Copy All Filenames | `IDM_EDIT_COPY_ALL_NAMES` | 3 |
+| [x] | Copy to Clipboard > Copy All File Paths | `IDM_EDIT_COPY_ALL_PATHS` | 3 |
 | [x] | Indent > Increase Line Indent | `IDM_EDIT_INS_TAB` | 3 |
 | [x] | Indent > Decrease Line Indent | `IDM_EDIT_RMV_TAB` | 3 |
 | [x] | Convert Case to > UPPERCASE | `IDM_EDIT_UPPERCASE` | 3 |
 | [x] | Convert Case to > lowercase | `IDM_EDIT_LOWERCASE` | 3 |
-| [ ] | Convert Case to > Proper Case | `IDM_EDIT_PROPERCASE_FORCE` | 3 |
-| [ ] | Convert Case to > Proper Case (blend) | `IDM_EDIT_PROPERCASE_BLEND` | 3 |
-| [ ] | Convert Case to > Sentence case | `IDM_EDIT_SENTENCECASE_FORCE` | 3 |
-| [ ] | Convert Case to > Sentence case (blend) | `IDM_EDIT_SENTENCECASE_BLEND` | 3 |
-| [ ] | Convert Case to > iNVERT cASE | `IDM_EDIT_INVERTCASE` | 3 |
-| [ ] | Convert Case to > ranDOm CasE | `IDM_EDIT_RANDOMCASE` | 3 |
+| [x] | Convert Case to > Proper Case | `IDM_EDIT_PROPERCASE_FORCE` | 3 |
+| [x] | Convert Case to > Proper Case (blend) | `IDM_EDIT_PROPERCASE_BLEND` | 3 |
+| [x] | Convert Case to > Sentence case | `IDM_EDIT_SENTENCECASE_FORCE` | 3 |
+| [x] | Convert Case to > Sentence case (blend) | `IDM_EDIT_SENTENCECASE_BLEND` | 3 |
+| [x] | Convert Case to > iNVERT cASE | `IDM_EDIT_INVERTCASE` | 3 |
+| [x] | Convert Case to > ranDOm CasE | `IDM_EDIT_RANDOMCASE` | 3 |
 | [x] | Line Operations > Duplicate Current Line | `IDM_EDIT_DUP_LINE` | 3 |
-| [ ] | Line Operations > Remove Duplicate Lines | `IDM_EDIT_REMOVE_ANY_DUP_LINES` | 3 |
-| [ ] | Line Operations > Remove Consecutive Duplicate Lines | `IDM_EDIT_REMOVE_CONSECUTIVE_DUP_LINES` | 3 |
+| [x] | Line Operations > Remove Duplicate Lines | `IDM_EDIT_REMOVE_ANY_DUP_LINES` | 3 |
+| [x] | Line Operations > Remove Consecutive Duplicate Lines | `IDM_EDIT_REMOVE_CONSECUTIVE_DUP_LINES` | 3 |
 | [x] | Line Operations > Split Lines | `IDM_EDIT_SPLIT_LINES` | 3 |
 | [x] | Line Operations > Join Lines | `IDM_EDIT_JOIN_LINES` | 3 |
 | [x] | Line Operations > Move Up Current Line | `IDM_EDIT_LINE_UP` | 3 |
 | [x] | Line Operations > Move Down Current Line | `IDM_EDIT_LINE_DOWN` | 3 |
 | [x] | Line Operations > Remove Empty Lines | `IDM_EDIT_REMOVEEMPTYLINES` | 3 |
-| [ ] | Line Operations > Remove Empty Lines (Containing Blank characters) | `IDM_EDIT_REMOVEEMPTYLINESWITHBLANK` | 3 |
-| [ ] | Line Operations > Insert Blank Line Above Current | `IDM_EDIT_BLANKLINEABOVECURRENT` | 3 |
-| [ ] | Line Operations > Insert Blank Line Below Current | `IDM_EDIT_BLANKLINEBELOWCURRENT` | 3 |
-| [ ] | Line Operations > Reverse Line Order | `IDM_EDIT_SORTLINES_REVERSE_ORDER` | 3 |
-| [ ] | Line Operations > Randomize Line Order | `IDM_EDIT_SORTLINES_RANDOMLY` | 3 |
-| [ ] | Line Operations > Sort Lines Lexicographically Ascending | `IDM_EDIT_SORTLINES_LEXICOGRAPHIC_ASCENDING` | 3 |
-| [ ] | Line Operations > Sort Lines Lex. Ascending Ignoring Case | `IDM_EDIT_SORTLINES_LEXICO_CASE_INSENS_ASCENDING` | 3 |
-| [ ] | Line Operations > Sort Lines In Locale Order Ascending | `IDM_EDIT_SORTLINES_LOCALE_ASCENDING` | 3 |
-| [ ] | Line Operations > Sort Lines As Integers Ascending | `IDM_EDIT_SORTLINES_INTEGER_ASCENDING` | 3 |
-| [ ] | Line Operations > Sort Lines As Decimals (Comma) Ascending | `IDM_EDIT_SORTLINES_DECIMALCOMMA_ASCENDING` | 3 |
-| [ ] | Line Operations > Sort Lines As Decimals (Dot) Ascending | `IDM_EDIT_SORTLINES_DECIMALDOT_ASCENDING` | 3 |
-| [ ] | Line Operations > Sort Lines By Length Ascending | `IDM_EDIT_SORTLINES_LENGTH_ASCENDING` | 3 |
-| [ ] | Line Operations > Sort Lines Lexicographically Descending | `IDM_EDIT_SORTLINES_LEXICOGRAPHIC_DESCENDING` | 3 |
-| [ ] | Line Operations > Sort Lines Lex. Descending Ignoring Case | `IDM_EDIT_SORTLINES_LEXICO_CASE_INSENS_DESCENDING` | 3 |
-| [ ] | Line Operations > Sort Lines In Locale Order Descending | `IDM_EDIT_SORTLINES_LOCALE_DESCENDING` | 3 |
-| [ ] | Line Operations > Sort Lines As Integers Descending | `IDM_EDIT_SORTLINES_INTEGER_DESCENDING` | 3 |
-| [ ] | Line Operations > Sort Lines As Decimals (Comma) Descending | `IDM_EDIT_SORTLINES_DECIMALCOMMA_DESCENDING` | 3 |
-| [ ] | Line Operations > Sort Lines As Decimals (Dot) Descending | `IDM_EDIT_SORTLINES_DECIMALDOT_DESCENDING` | 3 |
-| [ ] | Line Operations > Sort Lines By Length Descending | `IDM_EDIT_SORTLINES_LENGTH_DESCENDING` | 3 |
+| [x] | Line Operations > Remove Empty Lines (Containing Blank characters) | `IDM_EDIT_REMOVEEMPTYLINESWITHBLANK` | 3 |
+| [x] | Line Operations > Insert Blank Line Above Current | `IDM_EDIT_BLANKLINEABOVECURRENT` | 3 |
+| [x] | Line Operations > Insert Blank Line Below Current | `IDM_EDIT_BLANKLINEBELOWCURRENT` | 3 |
+| [x] | Line Operations > Reverse Line Order | `IDM_EDIT_SORTLINES_REVERSE_ORDER` | 3 |
+| [x] | Line Operations > Randomize Line Order | `IDM_EDIT_SORTLINES_RANDOMLY` | 3 |
+| [x] | Line Operations > Sort Lines Lexicographically Ascending | `IDM_EDIT_SORTLINES_LEXICOGRAPHIC_ASCENDING` | 3 |
+| [x] | Line Operations > Sort Lines Lex. Ascending Ignoring Case | `IDM_EDIT_SORTLINES_LEXICO_CASE_INSENS_ASCENDING` | 3 |
+| [x] | Line Operations > Sort Lines In Locale Order Ascending | `IDM_EDIT_SORTLINES_LOCALE_ASCENDING` | 3 |
+| [x] | Line Operations > Sort Lines As Integers Ascending | `IDM_EDIT_SORTLINES_INTEGER_ASCENDING` | 3 |
+| [x] | Line Operations > Sort Lines As Decimals (Comma) Ascending | `IDM_EDIT_SORTLINES_DECIMALCOMMA_ASCENDING` | 3 |
+| [x] | Line Operations > Sort Lines As Decimals (Dot) Ascending | `IDM_EDIT_SORTLINES_DECIMALDOT_ASCENDING` | 3 |
+| [x] | Line Operations > Sort Lines By Length Ascending | `IDM_EDIT_SORTLINES_LENGTH_ASCENDING` | 3 |
+| [x] | Line Operations > Sort Lines Lexicographically Descending | `IDM_EDIT_SORTLINES_LEXICOGRAPHIC_DESCENDING` | 3 |
+| [x] | Line Operations > Sort Lines Lex. Descending Ignoring Case | `IDM_EDIT_SORTLINES_LEXICO_CASE_INSENS_DESCENDING` | 3 |
+| [x] | Line Operations > Sort Lines In Locale Order Descending | `IDM_EDIT_SORTLINES_LOCALE_DESCENDING` | 3 |
+| [x] | Line Operations > Sort Lines As Integers Descending | `IDM_EDIT_SORTLINES_INTEGER_DESCENDING` | 3 |
+| [x] | Line Operations > Sort Lines As Decimals (Comma) Descending | `IDM_EDIT_SORTLINES_DECIMALCOMMA_DESCENDING` | 3 |
+| [x] | Line Operations > Sort Lines As Decimals (Dot) Descending | `IDM_EDIT_SORTLINES_DECIMALDOT_DESCENDING` | 3 |
+| [x] | Line Operations > Sort Lines By Length Descending | `IDM_EDIT_SORTLINES_LENGTH_DESCENDING` | 3 |
 | [ ] | Comment/Uncomment > Toggle Single Line Comment | `IDM_EDIT_BLOCK_COMMENT` | 3 |
 | [ ] | Comment/Uncomment > Single Line Comment | `IDM_EDIT_BLOCK_COMMENT_SET` | 3 |
 | [ ] | Comment/Uncomment > Single Line Uncomment | `IDM_EDIT_BLOCK_UNCOMMENT` | 3 |
@@ -118,42 +118,42 @@
 | [x] | EOL Conversion > Windows (CR LF) | `IDM_FORMAT_TODOS` | 3 |
 | [x] | EOL Conversion > Unix (LF) | `IDM_FORMAT_TOUNIX` | 3 |
 | [x] | EOL Conversion > Macintosh (CR) | `IDM_FORMAT_TOMAC` | 3 |
-| [ ] | Blank Operations > Trim Trailing Space | `IDM_EDIT_TRIMTRAILING` | 3 |
-| [ ] | Blank Operations > Trim Leading Space | `IDM_EDIT_TRIMLINEHEAD` | 3 |
-| [ ] | Blank Operations > Trim Leading and Trailing Space | `IDM_EDIT_TRIM_BOTH` | 3 |
-| [ ] | Blank Operations > EOL to Space | `IDM_EDIT_EOL2WS` | 3 |
-| [ ] | Blank Operations > Trim both and EOL to Space | `IDM_EDIT_TRIMALL` | 3 |
-| [ ] | Blank Operations > TAB to Space | `IDM_EDIT_TAB2SW` | 3 |
-| [ ] | Blank Operations > Space to TAB (All) | `IDM_EDIT_SW2TAB_ALL` | 3 |
-| [ ] | Blank Operations > Space to TAB (Leading) | `IDM_EDIT_SW2TAB_LEADING` | 3 |
-| [ ] | Paste Special > Paste HTML Content | `IDM_EDIT_PASTE_AS_HTML` | 3 |
-| [ ] | Paste Special > Paste RTF Content | `IDM_EDIT_PASTE_AS_RTF` | 3 |
-| [ ] | Paste Special > Copy Binary Content | `IDM_EDIT_COPY_BINARY` | 3 |
-| [ ] | Paste Special > Cut Binary Content | `IDM_EDIT_CUT_BINARY` | 3 |
-| [ ] | Paste Special > Paste Binary Content | `IDM_EDIT_PASTE_BINARY` | 3 |
-| [ ] | On Selection > Open File | `IDM_EDIT_OPENSELECTEDFILETOEDIT` | 3 |
-| [ ] | On Selection > Open Containing Folder in Explorer | `IDM_EDIT_OPENSELECTEDFILEFOLDERINEXPLORER` | 3 |
-| [ ] | On Selection > Redact Selection █ (Shift: ●) | `IDM_EDIT_REDACT_SELECTION` | 3 |
-| [ ] | On Selection > Search on Internet | `IDM_EDIT_SEARCHONINTERNET` | 3 |
+| [x] | Blank Operations > Trim Trailing Space | `IDM_EDIT_TRIMTRAILING` | 3 |
+| [x] | Blank Operations > Trim Leading Space | `IDM_EDIT_TRIMLINEHEAD` | 3 |
+| [x] | Blank Operations > Trim Leading and Trailing Space | `IDM_EDIT_TRIM_BOTH` | 3 |
+| [x] | Blank Operations > EOL to Space | `IDM_EDIT_EOL2WS` | 3 |
+| [x] | Blank Operations > Trim both and EOL to Space | `IDM_EDIT_TRIMALL` | 3 |
+| [x] | Blank Operations > TAB to Space | `IDM_EDIT_TAB2SW` | 3 |
+| [x] | Blank Operations > Space to TAB (All) | `IDM_EDIT_SW2TAB_ALL` | 3 |
+| [x] | Blank Operations > Space to TAB (Leading) | `IDM_EDIT_SW2TAB_LEADING` | 3 |
+| [x] | Paste Special > Paste HTML Content | `IDM_EDIT_PASTE_AS_HTML` | 3 |
+| [x] | Paste Special > Paste RTF Content | `IDM_EDIT_PASTE_AS_RTF` | 3 |
+| [x] | Paste Special > Copy Binary Content | `IDM_EDIT_COPY_BINARY` | 3 |
+| [x] | Paste Special > Cut Binary Content | `IDM_EDIT_CUT_BINARY` | 3 |
+| [x] | Paste Special > Paste Binary Content | `IDM_EDIT_PASTE_BINARY` | 3 |
+| [x] | On Selection > Open File | `IDM_EDIT_OPENSELECTEDFILETOEDIT` | 3 |
+| [x] | On Selection > Open Containing Folder in Explorer | `IDM_EDIT_OPENSELECTEDFILEFOLDERINEXPLORER` | 3 |
+| [x] | On Selection > Redact Selection █ (Shift: ●) | `IDM_EDIT_REDACT_SELECTION` | 3 |
+| [x] | On Selection > Search on Internet | `IDM_EDIT_SEARCHONINTERNET` | 3 |
 | [ ] | On Selection > Change Search Engine... | `IDM_EDIT_CHANGESEARCHENGINE` | 3 |
-| [ ] | Multi-select All > Ignore Case  Whole Word | `IDM_EDIT_MULTISELECTALL` | 3 |
-| [ ] | Multi-select All > Match Case Only | `IDM_EDIT_MULTISELECTALLMATCHCASE` | 3 |
-| [ ] | Multi-select All > Match Whole Word Only | `IDM_EDIT_MULTISELECTALLWHOLEWORD` | 3 |
-| [ ] | Multi-select All > Match Case  Whole Word | `IDM_EDIT_MULTISELECTALLMATCHCASEWHOLEWORD` | 3 |
-| [ ] | Multi-select Next > Ignore Case  Whole Word | `IDM_EDIT_MULTISELECTNEXT` | 3 |
-| [ ] | Multi-select Next > Match Case Only | `IDM_EDIT_MULTISELECTNEXTMATCHCASE` | 3 |
-| [ ] | Multi-select Next > Match Whole Word Only | `IDM_EDIT_MULTISELECTNEXTWHOLEWORD` | 3 |
-| [ ] | Multi-select Next > Match Case  Whole Word | `IDM_EDIT_MULTISELECTNEXTMATCHCASEWHOLEWORD` | 3 |
-| [ ] | Undo the Latest Added Multi-Select | `IDM_EDIT_MULTISELECTUNDO` | 3 |
-| [ ] | Skip Current  Go to Next Multi-select | `IDM_EDIT_MULTISELECTSSKIP` | 3 |
+| [x] | Multi-select All > Ignore Case  Whole Word | `IDM_EDIT_MULTISELECTALL` | 3 |
+| [x] | Multi-select All > Match Case Only | `IDM_EDIT_MULTISELECTALLMATCHCASE` | 3 |
+| [x] | Multi-select All > Match Whole Word Only | `IDM_EDIT_MULTISELECTALLWHOLEWORD` | 3 |
+| [x] | Multi-select All > Match Case  Whole Word | `IDM_EDIT_MULTISELECTALLMATCHCASEWHOLEWORD` | 3 |
+| [x] | Multi-select Next > Ignore Case  Whole Word | `IDM_EDIT_MULTISELECTNEXT` | 3 |
+| [x] | Multi-select Next > Match Case Only | `IDM_EDIT_MULTISELECTNEXTMATCHCASE` | 3 |
+| [x] | Multi-select Next > Match Whole Word Only | `IDM_EDIT_MULTISELECTNEXTWHOLEWORD` | 3 |
+| [x] | Multi-select Next > Match Case  Whole Word | `IDM_EDIT_MULTISELECTNEXTMATCHCASEWHOLEWORD` | 3 |
+| [x] | Undo the Latest Added Multi-Select | `IDM_EDIT_MULTISELECTUNDO` | 3 |
+| [x] | Skip Current  Go to Next Multi-select | `IDM_EDIT_MULTISELECTSSKIP` | 3 |
 | [ ] | Column Mode... | `IDM_EDIT_COLUMNMODETIP` | 3 |
 | [ ] | Column Editor... | `IDM_EDIT_COLUMNMODE` | 3 |
 | [ ] | Character Panel | `IDM_EDIT_CHAR_PANEL` | 3 |
 | [ ] | Clipboard History | `IDM_EDIT_CLIPBOARDHISTORY_PANEL` | 3 |
 | [x] | Read-Only in Notepad++ > Read-Only on Current Document | `IDM_EDIT_TOGGLEREADONLY` | 3 |
-| [ ] | Read-Only in Notepad++ > Read-Only for All Documents | `IDM_EDIT_SETREADONLYFORALLDOCS` | 3 |
-| [ ] | Read-Only in Notepad++ > Clear Read-Only for All Documents | `IDM_EDIT_CLEARREADONLYFORALLDOCS` | 3 |
-| [ ] | Read-Only Attribute in Windows | `IDM_EDIT_TOGGLESYSTEMREADONLY` | 3 |
+| [x] | Read-Only in Notepad++ > Read-Only for All Documents | `IDM_EDIT_SETREADONLYFORALLDOCS` | 3 |
+| [x] | Read-Only in Notepad++ > Clear Read-Only for All Documents | `IDM_EDIT_CLEARREADONLYFORALLDOCS` | 3 |
+| [x] | Read-Only Attribute in Windows | `IDM_EDIT_TOGGLESYSTEMREADONLY` | 3 |
 
 ## Search
 
