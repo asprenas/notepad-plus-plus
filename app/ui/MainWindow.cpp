@@ -23,7 +23,6 @@
 #include <QDropEvent>
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QFileSystemModel>
 #include <QFileSystemWatcher>
 #include <QFontDatabase>
 #include <QHeaderView>
@@ -38,7 +37,6 @@
 #include <QSplitter>
 #include <QStatusBar>
 #include <QTimer>
-#include <QTreeView>
 
 #include <algorithm>
 
@@ -50,7 +48,6 @@ using namespace cmd;
 namespace {
 
 constexpr char kPanelDocList[] = "npp.documentList";
-constexpr char kPanelFolder[] = "npp.folderAsWorkspace";
 constexpr int kMarginLineNumber = 0, kMarginBookmark = 1, kMarginFold = 2;
 constexpr int kMarkBookmark = 20; // upstream MARK_BOOKMARK
 constexpr int kMarkHideBegin = 19, kMarkHideEnd = 18; // MARK_HIDELINESBEGIN / END
@@ -198,6 +195,7 @@ MainWindow::MainWindow(const CommandLine& cmd, QWidget* parent) : QMainWindow(pa
     createUi();
     registerCommands();
     restoreWindowState();
+    panelsAfterRestore();
     connectSystemTheme();
     applyTheme();
 
@@ -404,24 +402,6 @@ void MainWindow::createPanels()
     });
     m_dock->addPanel({kPanelDocList, tr("Document List"), {}, DockArea::Left, true, false}, m_docList);
 
-    auto* model = new QFileSystemModel(this);
-    model->setRootPath(QDir::homePath());
-    auto* tree = new QTreeView;
-    tree->setModel(model);
-    tree->setRootIndex(model->index(QDir::homePath()));
-    for (int c = 1; c < model->columnCount(); ++c)
-        tree->hideColumn(c);
-    tree->header()->hide();
-    m_setWorkspaceRoot = [this, model, tree](const QString& dir) {
-        model->setRootPath(dir);
-        tree->setRootIndex(model->index(dir));
-        m_dock->showPanel(kPanelFolder);
-    };
-    connect(tree, &QTreeView::doubleClicked, this, [this, model](const QModelIndex& idx) {
-        if (!model->isDir(idx))
-            openFile(model->filePath(idx));
-    });
-    m_dock->addPanel({kPanelFolder, tr("Folder as Workspace"), {}, DockArea::Left, true, false}, tree);
     createExtraPanels();
 }
 
@@ -1276,6 +1256,7 @@ bool MainWindow::prepareExit()
 {
     if (!panelsPrepareExit())
         return false;
+    panelsSaveSettings();
     const bool snapshot = m_config.gui.snapshotMode && m_config.gui.rememberLastSession && !m_cmd.noSession;
     if (snapshot) {
         backupDirtyBuffers();

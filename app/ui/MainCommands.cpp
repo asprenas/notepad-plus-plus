@@ -6,6 +6,7 @@
 #include "editor/EditorPane.h"
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
+#include "panels/FolderAsWorkspacePanel.h"
 
 #include "core/encoding/EncodingMapper.h"
 #include "core/util/PathUtil.h"
@@ -40,7 +41,7 @@ using namespace cmd;
 namespace {
 
 QString q(const std::string& s) { return QString::fromStdString(s); }
-const std::string kPanelDocList = "npp.documentList", kPanelFolder = "npp.folderAsWorkspace";
+const std::string kPanelDocList = "npp.documentList";
 
 struct LangCmd {
     int id;
@@ -425,7 +426,19 @@ void MainWindow::registerViewCommands()
     }, {}, [this] { return bool(windowFlags() & Qt::WindowStaysOnTopHint); }});
     r->setHandler(IDM_VIEW_FULLSCREENTOGGLE, {[this] { isFullScreen() ? showNormal() : showFullScreen(); }, {}, [this] { return isFullScreen(); }});
     r->setHandler(IDM_VIEW_DOCLIST, {[this] { m_dock->isPanelVisible(kPanelDocList) ? m_dock->hidePanel(kPanelDocList) : m_dock->showPanel(kPanelDocList); }});
-    r->setHandler(IDM_VIEW_FILEBROWSER, {[this] { m_dock->isPanelVisible(kPanelFolder) ? m_dock->hidePanel(kPanelFolder) : m_dock->showPanel(kPanelFolder); }});
+    r->setHandler(IDM_VIEW_FILEBROWSER, {[this] {
+        if (m_dock->isPanelVisible(kPanelFolderAsWorkspace)) {
+            m_dock->hidePanel(kPanelFolderAsWorkspace);
+            return;
+        }
+        if (m_folderPanel->roots().isEmpty()) { // upstream asks for a folder first
+            const QString dir = QFileDialog::getExistingDirectory(this, tr("Select a folder to add in Folder as Workspace panel"));
+            if (dir.isEmpty())
+                return;
+            m_folderPanel->addRoot(dir);
+        }
+        m_dock->showPanel(kPanelFolderAsWorkspace);
+    }, {}, [this] { return m_dock->isPanelVisible(kPanelFolderAsWorkspace); }});
 
     // Tabs / split view
     auto tabCount = [this] { return currentPane()->count(); };

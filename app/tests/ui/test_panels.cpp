@@ -6,6 +6,7 @@
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
 #include "panels/DocumentMapPanel.h"
+#include "panels/FolderAsWorkspacePanel.h"
 #include "panels/FunctionListPanel.h"
 #include "panels/ProjectPanel.h"
 
@@ -42,7 +43,8 @@ class TestPanels : public QObject {
     {
         const QString p = QDir(m_files.path()).filePath(name);
         QFile f(p);
-        f.open(QIODevice::WriteOnly);
+        if (!f.open(QIODevice::WriteOnly))
+            return {};
         f.write(content);
         return p;
     }
@@ -189,6 +191,43 @@ private slots:
         QCOMPARE(QFileInfo(again->workspacePath()), QFileInfo(ws));
         QCOMPARE(again->allFiles().size(), 2);
         QVERIFY(m_w->projectPanel(0)->workspacePath().isEmpty());
+    }
+
+    void folderAsWorkspaceRootsAndRestore()
+    {
+        QDir(m_files.path()).mkpath(QStringLiteral("faw/deep/er"));
+        const QString target = writeFile(QStringLiteral("faw/deep/er/t.txt"), "t");
+        writeFile(QStringLiteral("faw/z.txt"), "z");
+        const QString root = QDir(m_files.path()).filePath(QStringLiteral("faw"));
+        FolderAsWorkspacePanel* fw = m_w->folderAsWorkspace();
+        QVERIFY(fw->roots().isEmpty());
+        fw->addRoot(root);
+        fw->addRoot(QDir(root).filePath(QStringLiteral("deep"))); // inside an existing root: no new root
+        QCOMPARE(fw->roots().size(), 1);
+        QTreeWidgetItem* r = fw->tree()->topLevelItem(0);
+        QCOMPARE(r->childCount(), 2);
+        QCOMPARE(r->child(0)->text(0), QStringLiteral("deep")); // folders first
+        QCOMPARE(r->child(1)->text(0), QStringLiteral("z.txt"));
+
+        QVERIFY(fw->locate(target));
+        QCOMPARE(QFileInfo(FolderAsWorkspacePanel::pathOf(fw->tree()->currentItem())), QFileInfo(target));
+        emit fw->tree()->itemActivated(fw->tree()->currentItem(), 0);
+        QVERIFY(m_w->currentBuffer()->path.find("t.txt") != std::string::npos);
+
+        // file system changes are picked up
+        writeFile(QStringLiteral("faw/new.txt"), "n");
+        QTRY_COMPARE_WITH_TIMEOUT(r->childCount(), 3, 5000);
+
+        // roots, expanded folders and selection are saved in config.xml and restored
+        m_w->shutdownForTest();
+        makeWindow();
+        fw = m_w->folderAsWorkspace();
+        QCOMPARE(fw->roots().size(), 1);
+        QVERIFY(m_w->dockManager()->isPanelVisible(MainWindow::kPanelFolderAsWorkspace));
+        QVERIFY(fw->tree()->currentItem());
+        QCOMPARE(QFileInfo(FolderAsWorkspacePanel::pathOf(fw->tree()->currentItem())), QFileInfo(target));
+        fw->removeAllRoots();
+        QVERIFY(fw->roots().isEmpty());
     }
 };
 

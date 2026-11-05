@@ -60,6 +60,7 @@ class SearchResultsPanel;
 class FunctionListPanel;
 class DocumentMapPanel;
 class ProjectPanel;
+class FolderAsWorkspacePanel;
 class PreferencesDialog;
 
 // Command line options of upstream CmdLineParams handled by the MVP
@@ -121,6 +122,8 @@ public:
     DocumentMapPanel* documentMap() const noexcept { return m_docMap; }
     static std::string projectPanelId(int i) { return "npp.project" + std::to_string(i + 1); }
     ProjectPanel* projectPanel(int i) const { return m_projectPanels[static_cast<size_t>(i)]; }
+    static const char* const kPanelFolderAsWorkspace;
+    FolderAsWorkspacePanel* folderAsWorkspace() const noexcept { return m_folderPanel; }
     FunctionListPanel* functionList() const noexcept { return m_funcList; }
     DockManager* dockManager() const noexcept { return m_dock.get(); }
     void reloadFunctionList();
@@ -228,6 +231,8 @@ private:
     void panelsOnBufferChanged();
     void panelsOnStylesChanged();
     bool panelsPrepareExit(); // asks to save modified workspaces
+    void panelsSaveSettings(); // panel states to m_config
+    void panelsAfterRestore(); // after the dock layout was restored
     void markFunctionListEntry();
     // --- small dialogs (ToolDialogs.cpp)
     void registerToolDialogs();
@@ -298,6 +303,7 @@ private:
     int                          m_activeView = 0;
     QListWidget*                 m_docList = nullptr;
     std::function<void(const QString&)> m_setWorkspaceRoot; // Folder as Workspace panel
+    FolderAsWorkspacePanel*      m_folderPanel = nullptr;
     QMenu*                       m_recentMenu = nullptr;
     std::deque<std::string>      m_lastClosed;
     QFileSystemWatcher*          m_watcher = nullptr;

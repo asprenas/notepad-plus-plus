@@ -7,6 +7,8 @@
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
 #include "panels/DocumentMapPanel.h"
+#include "panels/FolderAsWorkspacePanel.h"
+#include "search/FindReplaceDialog.h"
 #include "panels/FunctionListPanel.h"
 #include "panels/ProjectPanel.h"
 
@@ -16,6 +18,7 @@
 #include <Scintilla.h>
 #include <ScintillaEditBase.h>
 
+#include <QDir>
 #include <QTimer>
 
 #include <array>
@@ -34,9 +37,25 @@ QString q(const std::string& s) { return QString::fromStdString(s); }
 
 const char* const MainWindow::kPanelFunctionList = "npp.functionList";
 const char* const MainWindow::kPanelDocumentMap = "npp.documentMap";
+const char* const MainWindow::kPanelFolderAsWorkspace = "npp.folderAsWorkspace";
 
 void MainWindow::createExtraPanels()
 {
+    // --- Folder as Workspace
+    m_folderPanel = new FolderAsWorkspacePanel;
+    connect(m_folderPanel, &FolderAsWorkspacePanel::openFileRequested, this, [this](const QString& f) { openFile(f); });
+    connect(m_folderPanel, &FolderAsWorkspacePanel::findInFilesRequested, this, [this](const QString& dir) {
+        findDialog()->showTab(FindReplaceDialog::FindInFilesTab);
+        findDialog()->setDirectory(QDir::toNativeSeparators(dir));
+    });
+    m_dock->addPanel({kPanelFolderAsWorkspace, miscString("panel-folderAsWorkspace", "Folder as Workspace"), {}, DockArea::Left, true, false},
+                     m_folderPanel);
+    m_setWorkspaceRoot = [this](const QString& dir) {
+        m_folderPanel->addRoot(dir);
+        m_dock->showPanel(kPanelFolderAsWorkspace);
+    };
+    m_folderPanel->restore(m_config.fileBrowser);
+
     // --- Function List
     m_funcParsers = std::make_unique<FunctionParsersManager>();
     m_funcParsers->init(pathAppend(m_paths.userDir(), "functionList"), pathAppend(m_dataDir, "functionList"));
@@ -117,6 +136,19 @@ void MainWindow::panelsOnBufferChanged()
         Buffer* b = currentBuffer();
         m_docMap->setSource(currentPane()->editor(), b ? b->document : 0);
     }
+}
+
+void MainWindow::panelsAfterRestore()
+{
+    // upstream launches the Folder as Workspace panel when roots were saved
+    if (m_folderPanel && !m_folderPanel->roots().isEmpty())
+        m_dock->showPanel(kPanelFolderAsWorkspace, false);
+}
+
+void MainWindow::panelsSaveSettings()
+{
+    if (m_folderPanel)
+        m_config.fileBrowser = m_folderPanel->settings();
 }
 
 bool MainWindow::panelsPrepareExit()
