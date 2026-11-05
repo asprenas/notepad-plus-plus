@@ -1,6 +1,6 @@
 ; Inno Setup script of the Windows installer (docs/phase-6-packaging-stabilization.md 3.1).
 ; Built by ci/package-windows.ps1:
-;   ISCC /DAppVersion=0.1.0 /DStageDir=<staged app folder> /DOutputDir=<dist> notepadpp-qt.iss
+;   ISCC /DAppVersion=0.2.0 /DStageDir=<staged app folder> /DOutputDir=<dist> notepadpp-qt.iss
 ;
 ; - per-user (no UAC) or all-users install, chosen in the first page / on the command line
 ; - optional: desktop icon, Explorer "Edit with Notepad++ Qt" menu, file associations
