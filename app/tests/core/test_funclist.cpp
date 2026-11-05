@@ -9,6 +9,7 @@
 #include <ScintillaEditBase.h>
 
 #include <QApplication>
+#include <QElapsedTimer>
 #include <QTest>
 
 #include <fstream>
@@ -167,6 +168,26 @@ private slots:
         QVERIFY(mgr.parse(found, *m_e, L_CPP));
         QCOMPARE(functionListJson(found, "a"),
                  std::string("{\"leaves\":[\"top\",\"alpha\"],\"nodes\":[{\"leaves\":[\"bar\",\"baz\",\"qux\"],\"name\":\"Foo\"}],\"root\":\"a\"}"));
+    }
+
+    void largeFileParseTime()
+    {
+        // upstream Notepad_plus.cpp (~9000 lines, C++ mix parser): parsed on the UI thread after a
+        // 1 s pause in typing, so it has to stay well below a second
+        FunctionParsersManager mgr;
+        QVERIFY(mgr.init(m_rulesDir, {}));
+        const std::string text = readAll(pathFromUtf8(NPP_ROOT_DIR "/PowerEditor/src/Notepad_plus.cpp"));
+        QVERIFY(text.size() > 200000);
+        m_e->send(SCI_SETCODEPAGE, SC_CP_UTF8);
+        m_e->send(SCI_SETTEXT, 0, reinterpret_cast<intptr_t>(text.c_str()));
+        QElapsedTimer t;
+        t.start();
+        std::vector<FoundFunction> found;
+        QVERIFY(mgr.parse(found, *m_e, L_CPP));
+        const auto ms = t.elapsed();
+        qInfo("Notepad_plus.cpp: %d functions in %lld ms", static_cast<int>(found.size()), static_cast<long long>(ms));
+        QVERIFY(found.size() > 100);
+        QVERIFY2(ms < 3000, qPrintable(QString::number(ms)));
     }
 
     void jsonEscapesLikeNlohmann()
