@@ -288,6 +288,65 @@ private slots:
         QCOMPARE(e.send(SCI_GETLEXER), sptr_t(SCLEX_USER));
         QVERIFY(e.send(SCI_GETSTYLEAT, 0) != 0); // the heading is styled by the UDL
     }
+
+    void udlDialogListEncoding()
+    {
+        const std::string comments = udlEncodeFields({"//", "", "", "/*", "*/"});
+        QCOMPARE(comments, std::string("00// 01 02 03/* 04*/"));
+        QCOMPARE(udlFieldOf(comments, 0), std::string("//"));
+        QCOMPARE(udlFieldOf(comments, 1), std::string());
+        QCOMPARE(udlFieldOf(comments, 4), std::string("*/"));
+        // several words, groups kept together
+        const std::string d = udlEncodeFields({"\"", "\\", "\"", "' ((EOL x))", "", "'"});
+        QCOMPARE(d, std::string("00\" 01\\ 02\" 03' 03((EOL x)) 04 05'"));
+        QCOMPARE(udlFieldOf(d, 3), std::string("' ((EOL x))"));
+        QCOMPARE(udlFieldOf(d, 5), std::string("'"));
+        std::vector<std::string> delims(kUdlDelimiterFields);
+        delims[12] = "<";
+        delims[14] = ">";
+        const std::string e = udlEncodeFields(delims);
+        QVERIFY(e.find(" 12< ") != std::string::npos);
+        QCOMPARE(udlFieldOf(e, 14), std::string(">"));
+
+        // the lists of the shipped UDL files survive decode + encode
+        UserLanguageRegistry reg;
+        QVERIFY(reg.loadAll({}, NPP_ROOT_DIR "/PowerEditor/bin/userDefineLangs") > 0);
+        for (const UserLanguage& u : reg.languages()) {
+            std::vector<std::string> f;
+            for (int i = 0; i < kUdlCommentFields; ++i)
+                f.push_back(udlFieldOf(u.keywordLists[0], i));
+            const std::string again = udlEncodeFields(f);
+            std::vector<std::string> g;
+            for (int i = 0; i < kUdlCommentFields; ++i)
+                g.push_back(udlFieldOf(again, i));
+            QCOMPARE(g, f);
+        }
+    }
+
+    void udlRegistryEditing()
+    {
+        UserLanguageRegistry reg;
+        UserLanguage a;
+        a.name = "A";
+        QVERIFY(reg.add(a));
+        QVERIFY(!reg.add(a)); // same name
+        QVERIFY(reg.rename("A", "B"));
+        QVERIFY(!reg.find("A"));
+        QVERIFY(reg.findMutable("B"));
+        reg.findMutable("B")->ext = "bbb";
+        const std::string dir = utf8FromPath(fs::temp_directory_path()) + "/npp-udl-" + std::to_string(QCoreApplication::applicationPid());
+        fs::remove_all(pathFromUtf8(dir));
+        fs::create_directories(pathFromUtf8(dir));
+        QVERIFY(reg.saveAll(dir + "/userDefineLang.xml", dir + "/userDefineLangs", dir));
+        UserLanguageRegistry again;
+        QCOMPARE(again.loadAll(dir + "/userDefineLang.xml", dir + "/userDefineLangs"), 1);
+        QCOMPARE(again.languages()[0].ext, std::string("bbb"));
+        QVERIFY(reg.remove("B"));
+        QVERIFY(reg.saveAll(dir + "/userDefineLang.xml", dir + "/userDefineLangs", dir));
+        UserLanguageRegistry empty;
+        QCOMPARE(empty.loadAll(dir + "/userDefineLang.xml", dir + "/userDefineLangs"), 0);
+        fs::remove_all(pathFromUtf8(dir));
+    }
 };
 
 int main(int argc, char** argv)

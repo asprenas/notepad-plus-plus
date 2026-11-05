@@ -11,9 +11,11 @@
 #include "panels/FunctionListPanel.h"
 #include "panels/ProjectPanel.h"
 #include "panels/SmallPanels.h"
+#include "panels/UdlPanel.h"
 #include "search/FindReplaceDialog.h"
 #include "search/SearchResultsPanel.h"
 
+#include <SciLexer.h>
 #include <Scintilla.h>
 #include <ScintillaEditBase.h>
 
@@ -708,6 +710,121 @@ private slots:
         QVERIFY2(!results.contains("c.cpp") && !results.contains("b.txt"), results.constData()); // not in the project / filtered
         QVERIFY2(results.contains("2 hits") || results.contains("(2 hits"), results.constData());
         d->hide();
+    }
+
+    void udlDialogCreatesAndHighlights()
+    {
+        QVERIFY(m_w->actions()->trigger(IDM_LANG_USER_DLG));
+        QVERIFY(m_w->dockManager()->isPanelVisible(MainWindow::kPanelUdl));
+        UdlPanel* u = m_w->udlPanel();
+        QVERIFY(u->createLanguage(QStringLiteral("MyLang"), false));
+        QVERIFY(!u->createLanguage(QStringLiteral("MyLang"), false)); // name in use
+        QCOMPARE(u->currentName(), QStringLiteral("MyLang"));
+        auto setField = [u](int id, const QString& t) {
+            auto* e = qobject_cast<QPlainTextEdit*>(u->control(id));
+            QVERIFY(e);
+            e->setPlainText(t);
+        };
+        auto* ext = u->findChild<QLineEdit*>(QStringLiteral("20008"));
+        QVERIFY(ext);
+        ext->setText(QStringLiteral("mylang"));
+        emit ext->textEdited(ext->text());
+        setField(22120, QStringLiteral("foo baz"));  // Keywords1
+        setField(23320, QStringLiteral("#"));        // comment line open
+        setField(24217, QStringLiteral("\""));       // delimiter 1 open
+        setField(24219, QStringLiteral("\""));       // delimiter 1 close
+        const UserLanguage* ul = m_w->userLanguages().find("MyLang");
+        QVERIFY(ul);
+        QCOMPARE(ul->ext, std::string("mylang"));
+        QCOMPARE(ul->keywordLists[19], std::string("foo baz"));
+        QCOMPARE(ul->keywordLists[0], std::string("00# 01 02 03 04"));
+        QVERIFY(ul->keywordLists[27].find("00\"") == 0);
+
+        // Styler: bold red keywords
+        u->execStyler = [](QWidget* dlg) {
+            qobject_cast<QCheckBox*>(dlg->findChild<QWidget*>(QStringLiteral("25001")))->setChecked(true);
+            return true;
+        };
+        u->editStyle(4);
+        QCOMPARE(m_w->userLanguages().find("MyLang")->style(4)->fontStyle & 1, 1);
+
+        // the Language menu lists it; a file with its extension gets it
+        bool inMenu = false;
+        for (QObject* o : m_w->actions()->action(IDM_LANG_USER)->associatedObjects())
+            if (auto* menu = qobject_cast<QMenu*>(o))
+                for (QAction* a : menu->actions())
+                    inMenu |= a->text() == QStringLiteral("MyLang");
+        QVERIFY(inMenu);
+        QVERIFY(m_w->openFile(writeFile(QStringLiteral("t.mylang"), "foo bar # note\n\"str\"\n")));
+        QCOMPARE(m_w->currentBuffer()->lang, L_USER);
+        QCOMPARE(m_w->currentBuffer()->userLangName, std::string("MyLang"));
+        editor()->send(SCI_COLOURISE, 0, -1);
+        QCOMPARE(editor()->send(SCI_GETSTYLEAT, 0), SCE_USER_STYLE_KEYWORD1);
+        QCOMPARE(editor()->send(SCI_GETSTYLEAT, 9), SCE_USER_STYLE_COMMENTLINE);
+        QCOMPARE(editor()->send(SCI_GETSTYLEAT, 16), SCE_USER_STYLE_DELIMITER1);
+        QVERIFY(editor()->send(SCI_STYLEGETBOLD, SCE_USER_STYLE_KEYWORD1));
+
+        // saved in userDefineLang.xml
+        const QString xml = QDir(m_user.path()).filePath(QStringLiteral("userDefineLang.xml"));
+        QTRY_VERIFY_WITH_TIMEOUT(QFileInfo(xml).exists(), 3000);
+        auto fileText = [](const QString& f) {
+            QFile x(f);
+            return x.open(QIODevice::ReadOnly) ? x.readAll() : QByteArray();
+        };
+        QTRY_VERIFY_WITH_TIMEOUT(fileText(xml).contains("name=\"MyLang\""), 3000);
+
+        // export / import (a second copy gets a new name), rename, remove
+        const QString exported = QDir(m_files.path()).filePath(QStringLiteral("mylang.xml"));
+        QVERIFY(u->exportCurrent(exported));
+        QVERIFY(u->importFile(exported));
+        QCOMPARE(u->currentName(), QStringLiteral("MyLang (2)"));
+        QVERIFY(u->removeCurrent());
+        u->selectLanguage(QStringLiteral("MyLang"));
+        QVERIFY(u->renameCurrent(QStringLiteral("Other")));
+        QCOMPARE(m_w->currentBuffer()->lang, L_TEXT); // its documents become normal text (upstream)
+        QVERIFY(u->removeCurrent());
+        QTRY_VERIFY_WITH_TIMEOUT(!fileText(xml).contains("name=\"Other\""), 3000);
+    }
+
+    void udlFilesImportAndHighlight()
+    {
+        // shipped UDLs + the test UDLs: import, apply, screenshot (results in the build tree)
+        const QString out = QCoreApplication::applicationDirPath() + QStringLiteral("/udl-screenshots");
+        QDir().mkpath(out);
+        QStringList files;
+        for (const QString& dir : {QStringLiteral(NPP_ROOT_DIR "/PowerEditor/bin/userDefineLangs"), QStringLiteral(NPP_TEST_DATA_DIR "/udl")})
+            for (const QFileInfo& fi : QDir(dir).entryInfoList({QStringLiteral("*.xml")}, QDir::Files))
+                files << fi.absoluteFilePath();
+        QVERIFY2(files.size() >= 10, qPrintable(QString::number(files.size())));
+        m_w->resize(900, 600);
+        m_w->show();
+        QVERIFY(QTest::qWaitForWindowExposed(m_w.get()));
+        UdlPanel* u = m_w->udlPanel();
+        int done = 0;
+        for (const QString& f : files) {
+            const auto before = m_w->userLanguages().languages().size();
+            QVERIFY2(u->importFile(f), qPrintable(f));
+            QVERIFY(m_w->userLanguages().languages().size() > before);
+            const UserLanguage& l = m_w->userLanguages().languages().back();
+            // sample text: the first words of each keyword group, comments, a number
+            QByteArray sample;
+            for (int k = 19; k < 27; ++k)
+                if (!l.keywordLists[static_cast<size_t>(k)].empty())
+                    sample += QByteArray::fromStdString(l.keywordLists[static_cast<size_t>(k)]).simplified().split(' ').value(0) + " ";
+            sample += "\n" + QByteArray::fromStdString(udlFieldOf(l.keywordLists[0], 0)).split(' ').value(0) + " a comment\n12345\n";
+            QVERIFY(m_w->openFile(writeFile(QStringLiteral("udl%1.txt").arg(done), sample)));
+            QVERIFY(m_w->actions()->trigger(IDM_LANG_USER + static_cast<int>(m_w->userLanguages().languages().size())));
+            QCOMPARE(m_w->currentBuffer()->userLangName, l.name);
+            editor()->send(SCI_COLOURISE, 0, -1);
+            // something is styled with a non default style
+            bool styled = false;
+            for (intptr_t p = 0; p < editor()->send(SCI_GETLENGTH); ++p)
+                styled |= editor()->send(SCI_GETSTYLEAT, p) != SCE_USER_STYLE_DEFAULT;
+            QVERIFY2(styled, qPrintable(f));
+            m_w->grab().save(QDir(out).filePath(QStringLiteral("%1.png").arg(QFileInfo(f).completeBaseName())));
+            ++done;
+        }
+        QVERIFY(done >= 10);
     }
 };
 

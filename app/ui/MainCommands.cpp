@@ -78,6 +78,8 @@ void MainWindow::buildMenus()
     m_userCommandObjects.clear(); // owned by the previous menus
     rebuildRunMenu();
     addPrintPreviewAction();
+    m_udlMenuActions.clear(); // the new menus do not contain them yet
+    refreshUdlMenu();
 }
 
 void MainWindow::rebuildMenus()
@@ -659,15 +661,41 @@ void MainWindow::registerLanguageCommands()
         m_actions->setHandler(lc.id, {[this, lang] { setLanguage(currentBuffer(), lang); }, {},
                                       [this, lang] { const Buffer* b = currentBuffer(); return b && b->lang == lang; }});
     }
-    // User defined languages: IDM_LANG_USER + 1 + n (upstream order of the UDL list)
+}
+
+// User defined languages in the Language menu: IDM_LANG_USER + 1 + n after "User-Defined"
+// (upstream order of the UDL list); rebuilt when the UDL dialog changes the list.
+void MainWindow::refreshUdlMenu()
+{
+    for (const QPointer<QAction>& a : m_udlMenuActions)
+        if (a)
+            for (QObject* o : a->associatedObjects())
+                if (auto* m = qobject_cast<QMenu*>(o))
+                    m->removeAction(a);
+    m_udlMenuActions.clear();
     const auto& udls = m_udls.languages();
-    for (size_t i = 0; i < udls.size() && i < static_cast<size_t>(IDM_LANG_USER_LIMIT - IDM_LANG_USER); ++i) {
+    QAction* anchor = m_actions->action(IDM_LANG_USER);
+    std::vector<QMenu*> menus;
+    for (QObject* o : anchor->associatedObjects())
+        if (auto* m = qobject_cast<QMenu*>(o))
+            menus.push_back(m);
+    for (size_t i = 0; i < udls.size() && i < static_cast<size_t>(IDM_LANG_USER_LIMIT - IDM_LANG_USER - 1); ++i) {
         const std::string name = udls[i].name;
-        QAction* a = m_actions->action(IDM_LANG_USER + 1 + static_cast<int>(i));
+        const int id = IDM_LANG_USER + 1 + static_cast<int>(i);
+        QAction* a = m_actions->action(id);
         a->setText(q(name));
-        m_actions->setHandler(IDM_LANG_USER + 1 + static_cast<int>(i), {[this, name] { setLanguage(currentBuffer(), L_USER, name); }, {},
+        m_actions->setHandler(id, {[this, name] { setLanguage(currentBuffer(), L_USER, name); }, {},
             [this, name] { const Buffer* b = currentBuffer(); return b && b->lang == L_USER && b->userLangName == name; }});
+        m_udlMenuActions.emplace_back(a);
     }
+    for (QMenu* m : menus) {
+        const QList<QAction*> acts = m->actions();
+        const int at = static_cast<int>(acts.indexOf(anchor));
+        QAction* before = at + 1 < acts.size() ? acts[at + 1] : nullptr;
+        for (const QPointer<QAction>& a : m_udlMenuActions)
+            m->insertAction(before, a);
+    }
+    m_actions->updateStates();
 }
 
 // ------------------------------------------------------------------------------------------------

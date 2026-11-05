@@ -30,6 +30,8 @@ qt_add_library(npp_ui STATIC
     panels/SmallPanels.h
     panels/SmallPanels.cpp
     panels/HtmlCharNames.inc
+    panels/UdlPanel.h
+    panels/UdlPanel.cpp
     PlatformShell.h
     DialogTranslator.h
     DialogTranslator.cpp

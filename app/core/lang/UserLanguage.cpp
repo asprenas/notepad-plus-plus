@@ -297,6 +297,133 @@ const UserLanguage* UserLanguageRegistry::find(std::string_view name) const
     return nullptr;
 }
 
+UserLanguage* UserLanguageRegistry::findMutable(std::string_view name)
+{
+    for (auto& u : m_langs)
+        if (u.name == name)
+            return &u;
+    return nullptr;
+}
+
+bool UserLanguageRegistry::add(UserLanguage udl)
+{
+    if (udl.name.empty() || find(udl.name))
+        return false;
+    m_langs.push_back(std::move(udl));
+    return true;
+}
+
+bool UserLanguageRegistry::rename(std::string_view from, std::string_view to)
+{
+    UserLanguage* u = findMutable(from);
+    if (!u || to.empty() || find(to))
+        return false;
+    u->name = std::string(to);
+    return true;
+}
+
+bool UserLanguageRegistry::remove(std::string_view name)
+{
+    for (auto it = m_langs.begin(); it != m_langs.end(); ++it)
+        if (it->name == name) {
+            m_langs.erase(it);
+            return true;
+        }
+    return false;
+}
+
+bool UserLanguageRegistry::saveAll(std::string_view userDefineLangXml, std::string_view userDefineLangsDir,
+                                   std::string_view userDir)
+{
+    // group by file, keeping the order of the languages
+    std::vector<std::pair<std::string, std::vector<UserLanguage>>> files;
+    auto group = [&files](const std::string& f) -> std::vector<UserLanguage>& {
+        for (auto& g : files)
+            if (samePath(g.first, f))
+                return g.second;
+        files.emplace_back(f, std::vector<UserLanguage>{});
+        return files.back().second;
+    };
+    group(std::string(userDefineLangXml)); // always written (removing the last UDL of it empties it)
+    for (UserLanguage& u : m_langs) {
+        std::string target = u.sourceFile.empty() ? std::string(userDefineLangXml) : u.sourceFile;
+        const std::string ud = std::string(userDir);
+        const bool inUserDir = !ud.empty() && target.size() > ud.size() && samePath(target.substr(0, ud.size()), ud);
+        if (!inUserDir)
+            target = pathAppend(userDefineLangsDir, fileNameOf(target));
+        u.sourceFile = target;
+        group(target).push_back(u);
+    }
+    bool ok = true;
+    std::error_code ec;
+    fs::create_directories(pathFromUtf8(userDefineLangsDir), ec);
+    for (const auto& [file, langs] : files)
+        ok &= saveUserLanguages(langs, file);
+    return ok;
+}
+
+std::string udlEncodeFields(const std::vector<std::string>& fields)
+{
+    std::string dest;
+    for (size_t f = 0; f < fields.size(); ++f) {
+        const std::string prefix = f < 10 ? "0" + std::to_string(f) : std::to_string(f);
+        const std::string& in = fields[f];
+        if (!dest.empty())
+            dest += ' ';
+        dest += prefix;
+        bool inGroup = false;
+        auto at = [&in](size_t i) { return i < in.size() ? in[i] : '\0'; };
+        for (size_t i = 0; i < in.size(); ++i) {
+            if (i == 0 && at(0) == '(' && at(1) == '(') {
+                inGroup = true;
+            } else if (in[i] == ' ' && at(i + 1) == '(' && at(i + 2) == '(') {
+                inGroup = true;
+                dest += ' ';
+                dest += prefix;
+                ++i; // skip the space
+            }
+            if (inGroup && i >= 2 && in[i - 1] == ')' && in[i - 2] == ')')
+                inGroup = false;
+            if (in[i] == ' ') {
+                if (at(i + 1) != ' ' && at(i + 1) != '\0') {
+                    dest += ' ';
+                    if (!inGroup)
+                        dest += prefix;
+                }
+            } else {
+                dest += in[i];
+            }
+        }
+    }
+    return dest;
+}
+
+std::string udlFieldOf(std::string_view list, int index)
+{
+    const std::string prefix = index < 10 ? "0" + std::to_string(index) : std::to_string(index);
+    std::string dest;
+    bool begin2Copy = false, inGroup = false;
+    auto at = [&list](size_t i) { return i < list.size() ? list[i] : '\0'; };
+    for (size_t i = 0; i < list.size(); ++i) {
+        if ((i == 0 || list[i - 1] == ' ') && list[i] == prefix[0] && at(i + 1) == prefix[1]) {
+            if (!dest.empty())
+                dest += ' ';
+            begin2Copy = true;
+            ++i;
+            continue;
+        }
+        if (list[i] == '(' && at(i + 1) == '(' && !inGroup && begin2Copy)
+            inGroup = true;
+        if (list[i] != ')' && i >= 2 && list[i - 1] == ')' && list[i - 2] == ')' && inGroup)
+            inGroup = false;
+        if (list[i] == ' ' && begin2Copy)
+            begin2Copy = false;
+        if (begin2Copy || inGroup)
+            dest += list[i];
+    }
+    return dest;
+}
+
 const UserLanguage* UserLanguageRegistry::findForFile(std::string_view utf8Path) const
 {
     const std::string ext = extensionOf(utf8Path);

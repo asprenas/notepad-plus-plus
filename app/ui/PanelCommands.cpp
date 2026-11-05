@@ -13,6 +13,7 @@
 #include "panels/FunctionListPanel.h"
 #include "panels/ProjectPanel.h"
 #include "panels/SmallPanels.h"
+#include "panels/UdlPanel.h"
 
 #include "core/funclist/FunctionParser.h"
 #include "core/util/PathUtil.h"
@@ -131,6 +132,7 @@ const char* const MainWindow::kPanelFolderAsWorkspace = "npp.folderAsWorkspace";
 const char* const MainWindow::kPanelDocumentList = "npp.documentList";
 const char* const MainWindow::kPanelCharacter = "npp.charPanel";
 const char* const MainWindow::kPanelClipboardHistory = "npp.clipboardHistory";
+const char* const MainWindow::kPanelUdl = "npp.userDefinedLanguage";
 
 void MainWindow::createExtraPanels()
 {
@@ -234,6 +236,31 @@ void MainWindow::createExtraPanels()
             [insertText](const QString& t) { insertText(t.toUtf8()); });
     m_dock->addPanel({kPanelClipboardHistory, miscString("panel-clipboardHistory", "Clipboard History"), {}, DockArea::Right, true, false},
                      m_clipboardPanel);
+
+    // --- User Defined Language dialog (docked panel, floating by default as upstream)
+    m_udlPanel = new UdlPanel(m_udls);
+    m_udlPanel->setNativeLanguage(dialogLanguage());
+    m_udlSaveTimer = new QTimer(this);
+    m_udlSaveTimer->setSingleShot(true);
+    m_udlSaveTimer->setInterval(500);
+    connect(m_udlSaveTimer, &QTimer::timeout, this, [this] {
+        m_udls.saveAll(m_paths.userDefineLangXml(), m_paths.userDefineLangsDir(), m_paths.userDir());
+    });
+    connect(m_udlPanel, &UdlPanel::saveRequested, m_udlSaveTimer, qOverload<>(&QTimer::start));
+    connect(m_udlPanel, &UdlPanel::languageChanged, this, [this](const QString& name) {
+        for (EditorPane* p : m_panes)
+            if (Buffer* b = buffer(p->current()); b && b->lang == L_USER && q(b->userLangName) == name)
+                applyLanguageToPane(p, b);
+        panelsOnStylesChanged();
+    });
+    connect(m_udlPanel, &UdlPanel::languagesChanged, this, [this] {
+        // documents of a renamed / removed UDL become normal text (upstream)
+        for (const auto& b : m_files->buffers())
+            if (b->lang == L_USER && !m_udls.find(b->userLangName))
+                setLanguage(b.get(), L_TEXT);
+        refreshUdlMenu();
+    });
+    m_dock->addPanel({kPanelUdl, tr("User Defined Language"), {}, DockArea::Floating, true, false}, m_udlPanel);
 
     m_panelTimer = new QTimer(this);
     m_panelTimer->setSingleShot(true);
@@ -400,6 +427,15 @@ void MainWindow::registerPanelCommands()
         r->setHandler(IDM_VIEW_SWITCHTO_PROJECT_PANEL_1 + i,
                       {focusPanel(id, [this, i]() -> QWidget* { return m_projectPanels[static_cast<size_t>(i)]->tree(); })});
     }
+    r->setHandler(IDM_LANG_USER_DLG, {[this] {
+        if (m_dock->isPanelVisible(kPanelUdl)) {
+            m_dock->hidePanel(kPanelUdl);
+            return;
+        }
+        if (Buffer* b = currentBuffer(); b && b->lang == L_USER) // upstream: opens on the current UDL
+            m_udlPanel->selectLanguage(q(b->userLangName));
+        m_dock->showPanel(kPanelUdl);
+    }, {}, visible(kPanelUdl)});
     r->setHandler(IDM_EDIT_CHAR_PANEL, {toggle(kPanelCharacter), {}, visible(kPanelCharacter)});
     r->setHandler(IDM_EDIT_CLIPBOARDHISTORY_PANEL, {toggle(kPanelClipboardHistory), {}, visible(kPanelClipboardHistory)});
     r->setHandler(IDM_VIEW_DOC_MAP, {toggle(kPanelDocumentMap), {}, visible(kPanelDocumentMap)});

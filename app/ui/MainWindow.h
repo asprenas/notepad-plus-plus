@@ -67,6 +67,7 @@ class FolderAsWorkspacePanel;
 class DocumentListPanel;
 class CharacterPanel;
 class ClipboardHistoryPanel;
+class UdlPanel;
 class TaskListPopup;
 class PreferencesDialog;
 
@@ -142,6 +143,10 @@ public:
     static const char* const kPanelClipboardHistory;
     CharacterPanel* characterPanel() const noexcept { return m_charPanel; }
     ClipboardHistoryPanel* clipboardHistory() const noexcept { return m_clipboardPanel; }
+    static const char* const kPanelUdl;
+    UdlPanel* udlPanel() const noexcept { return m_udlPanel; }
+    const core::UserLanguageRegistry& userLanguages() const noexcept { return m_udls; }
+    void refreshUdlMenu(); // Language menu entries of the UDLs
     // --- Window menu, Ctrl+Tab switcher (WindowCommands.cpp)
     void switchDocument(bool next);
     std::vector<std::pair<core::BufferId, int>> switcherOrder() const; // MRU or tab order
@@ -369,6 +374,9 @@ private:
     bool                         m_dockStateRestored = false; // dockLayout-<backend>.bin was applied
     CharacterPanel*              m_charPanel = nullptr;
     ClipboardHistoryPanel*       m_clipboardPanel = nullptr;
+    UdlPanel*                    m_udlPanel = nullptr;
+    QTimer*                      m_udlSaveTimer = nullptr;
+    std::vector<QPointer<QAction>> m_udlMenuActions;
     std::deque<std::pair<core::BufferId, int>> m_mru; // activated documents, most recent first
     TaskListPopup*               m_taskList = nullptr;
     bool                         m_taskListKeepOpen = false;
