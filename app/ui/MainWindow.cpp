@@ -552,7 +552,7 @@ void MainWindow::restoreWindowState()
         setWindowState(windowState() | Qt::WindowMaximized);
     // Panel layout is kept by the docking backend next to config.xml
     if (const auto st = readFileContent(pathAppend(m_paths.userDir(), "dockLayout-" + m_dock->backendName().toStdString() + ".bin")))
-        m_dock->restoreNativeState(QByteArray::fromStdString(*st));
+        m_dockStateRestored = m_dock->restoreNativeState(QByteArray::fromStdString(*st));
 }
 
 void MainWindow::saveSettings()

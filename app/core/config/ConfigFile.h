@@ -60,6 +60,31 @@ struct FileBrowserSettings {
     bool operator==(const FileBrowserSettings&) const = default;
 };
 
+// <GUIConfig name="DockingManager" leftWidth=".." ...><FloatingWindow/><PluginDlg/><ActiveTabs/></GUIConfig>
+// (upstream DockingManagerData). Containers: 0 left, 1 right, 2 top, 3 bottom, >= 4 floating.
+struct DockingData {
+    struct Floating {
+        int cont = 4, x = 0, y = 0, width = 200, height = 200;
+        bool operator==(const Floating&) const = default;
+    };
+    struct PluginDlg {
+        std::string name; // "Notepad++::InternalFunction" for the built-in panels
+        int id = -1;      // built-in panels: the IDM_* command toggling them
+        int curr = 0, prev = 0;
+        bool visible = false;
+        bool operator==(const PluginDlg&) const = default;
+    };
+    struct ActiveTab {
+        int cont = 0, activeTab = -1;
+        bool operator==(const ActiveTab&) const = default;
+    };
+    int leftWidth = 200, rightWidth = 200, topHeight = 200, bottomHeight = 200;
+    std::vector<Floating> floating;
+    std::vector<PluginDlg> plugins;
+    std::vector<ActiveTab> activeTabs;
+    bool operator==(const DockingData&) const = default;
+};
+
 class ConfigFile {
 public:
     ConfigFile();
@@ -80,12 +105,14 @@ public:
     // <ProjectPanels><ProjectPanel id="0..2" workSpaceFile=".."/></ProjectPanels>
     std::array<std::string, 3> projectPanelFiles;
     FileBrowserSettings fileBrowser;
+    DockingData docking;
 
 private:
     void parse();
     void writeBack();
     std::array<std::string, 3> m_loadedProjectPanelFiles; // written back only when changed
     FileBrowserSettings m_loadedFileBrowser;
+    DockingData m_loadedDocking;
 
     struct Impl;
     std::unique_ptr<Impl> d;

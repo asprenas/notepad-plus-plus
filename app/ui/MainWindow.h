@@ -81,6 +81,11 @@ struct CommandLine {
 };
 CommandLine parseCommandLine(const QStringList& args);
 
+// DockManager layout <-> config.xml <GUIConfig name="DockingManager"> (PanelCommands.cpp)
+struct DockLayout;
+void layoutToDockingData(const DockLayout& layout, core::DockingData& d);
+DockLayout dockingDataToLayout(const core::DockingData& d);
+
 class MainWindow final : public QMainWindow {
     Q_OBJECT
 public:
@@ -314,6 +319,7 @@ private:
     DocumentListPanel*           m_docList = nullptr;
     std::function<void(const QString&)> m_setWorkspaceRoot; // Folder as Workspace panel
     FolderAsWorkspacePanel*      m_folderPanel = nullptr;
+    bool                         m_dockStateRestored = false; // dockLayout-<backend>.bin was applied
     CharacterPanel*              m_charPanel = nullptr;
     ClipboardHistoryPanel*       m_clipboardPanel = nullptr;
     QMenu*                       m_recentMenu = nullptr;

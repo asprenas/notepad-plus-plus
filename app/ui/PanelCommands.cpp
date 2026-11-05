@@ -23,6 +23,7 @@
 #include <QDir>
 #include <QTimer>
 
+#include <algorithm>
 #include <array>
 #include <QTreeWidget>
 
@@ -35,7 +36,94 @@ namespace {
 
 QString q(const std::string& s) { return QString::fromStdString(s); }
 
+constexpr char kInternalFunction[] = "Notepad++::InternalFunction"; // upstream NPP_INTERNAL_FUNCTION_STR
+
+// Built-in panels in config.xml <GUIConfig name="DockingManager"><PluginDlg pluginName=kInternalFunction id=..>:
+// upstream uses the command id that toggles the panel (0 for the search results).
+struct InternalPanel {
+    const char* panelId;
+    int dlgId;
+};
+const InternalPanel kInternalPanels[] = {
+    {"npp.searchResults", 0},
+    {"npp.clipboardHistory", IDM_EDIT_CLIPBOARDHISTORY_PANEL},
+    {"npp.documentList", IDM_VIEW_DOCLIST},
+    {"npp.charPanel", IDM_EDIT_CHAR_PANEL},
+    {"npp.folderAsWorkspace", IDM_VIEW_FILEBROWSER},
+    {"npp.project1", IDM_VIEW_PROJECT_PANEL_1},
+    {"npp.project2", IDM_VIEW_PROJECT_PANEL_2},
+    {"npp.project3", IDM_VIEW_PROJECT_PANEL_3},
+    {"npp.documentMap", IDM_VIEW_DOC_MAP},
+    {"npp.functionList", IDM_VIEW_FUNC_LIST},
+};
+
+int containerOf(DockArea a)
+{
+    switch (a) {
+    case DockArea::Left: return 0;
+    case DockArea::Right: return 1;
+    case DockArea::Top: return 2;
+    case DockArea::Bottom: return 3;
+    case DockArea::Floating: return 4;
+    }
+    return 1;
+}
+
+DockArea areaOf(int cont)
+{
+    switch (cont) {
+    case 0: return DockArea::Left;
+    case 1: return DockArea::Right;
+    case 2: return DockArea::Top;
+    case 3: return DockArea::Bottom;
+    default: return DockArea::Floating;
+    }
+}
+
 } // namespace
+
+// Backend independent panel layout -> config.xml DockingManager (upstream format, kept for plugins'
+// entries); the exact backend state stays in dockLayout-<backend>.bin.
+void layoutToDockingData(const DockLayout& layout, DockingData& d)
+{
+    for (const PanelLayout& pl : layout.panels) {
+        const auto ip = std::find_if(std::begin(kInternalPanels), std::end(kInternalPanels),
+                                     [&](const InternalPanel& p) { return pl.id == p.panelId; });
+        if (ip == std::end(kInternalPanels))
+            continue;
+        auto it = std::find_if(d.plugins.begin(), d.plugins.end(), [&](const DockingData::PluginDlg& p) {
+            return p.name == kInternalFunction && p.id == ip->dlgId;
+        });
+        if (it == d.plugins.end()) {
+            if (!pl.visible)
+                continue; // upstream lists panels once they were created
+            it = d.plugins.insert(d.plugins.end(), DockingData::PluginDlg{kInternalFunction, ip->dlgId, 0, 0, false});
+        }
+        int cont = containerOf(pl.area);
+        if (cont == 4) { // keep the floating container already used by this panel
+            cont = it->curr >= 4 ? it->curr : 4;
+            if (std::none_of(d.floating.begin(), d.floating.end(), [cont](const DockingData::Floating& f) { return f.cont == cont; }))
+                d.floating.push_back({cont, 0, 0, 200, 300});
+        }
+        if (cont != it->curr)
+            it->prev = it->curr;
+        it->curr = cont;
+        it->visible = pl.visible;
+    }
+}
+
+DockLayout dockingDataToLayout(const DockingData& d)
+{
+    DockLayout layout;
+    for (const DockingData::PluginDlg& p : d.plugins) {
+        if (p.name != kInternalFunction)
+            continue;
+        for (const InternalPanel& ip : kInternalPanels)
+            if (ip.dlgId == p.id)
+                layout.panels.push_back({ip.panelId, p.visible, areaOf(p.curr)});
+    }
+    return layout;
+}
 
 const char* const MainWindow::kPanelFunctionList = "npp.functionList";
 const char* const MainWindow::kPanelDocumentMap = "npp.documentMap";
@@ -193,6 +281,10 @@ void MainWindow::panelsOnBufferChanged()
 
 void MainWindow::panelsAfterRestore()
 {
+    // No exact backend state (first start, settings of the original Notepad++, other backend):
+    // panels from config.xml DockingManager.
+    if (!m_dockStateRestored)
+        m_dock->applyLayout(dockingDataToLayout(m_config.docking));
     // upstream launches the Folder as Workspace panel when roots were saved
     if (m_folderPanel && !m_folderPanel->roots().isEmpty())
         m_dock->showPanel(kPanelFolderAsWorkspace, false);
@@ -215,6 +307,7 @@ void MainWindow::updateDocumentList()
 
 void MainWindow::panelsSaveSettings()
 {
+    layoutToDockingData(m_dock->layout(), m_config.docking);
     if (m_docList) {
         const DocumentListPanel::Columns c = m_docList->columns();
         GuiConfig& g = m_config.gui;

@@ -334,6 +334,61 @@ private slots:
         emit ch->list()->itemActivated(ch->list()->item(2));
         QCOMPARE(docText(), QByteArray("second\nline"));
     }
+
+    void panelLayoutInConfigDockingManager()
+    {
+        QVERIFY(m_w->actions()->trigger(IDM_VIEW_FUNC_LIST));
+        QVERIFY(m_w->actions()->trigger(IDM_VIEW_PROJECT_PANEL_3));
+        QVERIFY(m_w->actions()->trigger(IDM_VIEW_PROJECT_PANEL_3)); // shown then hidden
+        m_w->shutdownForTest();
+        const DockingData& d = m_w->config().docking;
+        auto find = [&d](int id) -> const DockingData::PluginDlg* {
+            for (const auto& p : d.plugins)
+                if (p.name == "Notepad++::InternalFunction" && p.id == id)
+                    return &p;
+            return nullptr;
+        };
+        QVERIFY(find(IDM_VIEW_FUNC_LIST));
+        QVERIFY(find(IDM_VIEW_FUNC_LIST)->visible);
+        QCOMPARE(find(IDM_VIEW_FUNC_LIST)->curr, 1); // right
+        QVERIFY(!find(IDM_VIEW_PROJECT_PANEL_3) || !find(IDM_VIEW_PROJECT_PANEL_3)->visible);
+
+        // without the backend state file (settings from the original Notepad++): config.xml is used
+        m_w.reset();
+        for (const QString& f : QDir(m_user.path()).entryList({QStringLiteral("dockLayout-*.bin")}))
+            QVERIFY(QFile::remove(QDir(m_user.path()).filePath(f)));
+        makeWindow();
+        QVERIFY(m_w->dockManager()->isPanelVisible(MainWindow::kPanelFunctionList));
+        QVERIFY(!m_w->dockManager()->isPanelVisible(MainWindow::projectPanelId(2)));
+        m_w->actions()->trigger(IDM_VIEW_FUNC_LIST); // leave it hidden for the next tests
+        m_w->shutdownForTest();
+    }
+
+    void dockingDataMapping()
+    {
+        DockingData d;
+        d.plugins.push_back({"SomePlugin.dll", 7, 3, 0, true}); // kept untouched
+        DockLayout l;
+        l.panels.push_back({MainWindow::kPanelDocumentMap, true, DockArea::Floating});
+        l.panels.push_back({MainWindow::kPanelDocumentList, true, DockArea::Bottom});
+        l.panels.push_back({"npp.unknown", true, DockArea::Left});
+        layoutToDockingData(l, d);
+        QCOMPARE(d.plugins.size(), size_t(3));
+        QCOMPARE(d.plugins[0].name, std::string("SomePlugin.dll"));
+        QCOMPARE(d.plugins[1].id, IDM_VIEW_DOC_MAP);
+        QCOMPARE(d.plugins[1].curr, 4);
+        QCOMPARE(d.floating.size(), size_t(1));
+        QCOMPARE(d.plugins[2].curr, 3);
+        const DockLayout back = dockingDataToLayout(d);
+        QCOMPARE(back.panels.size(), size_t(2));
+        QCOMPARE(back.panels[0].area, DockArea::Floating);
+        QCOMPARE(back.panels[1].area, DockArea::Bottom);
+        // moving a panel keeps the previous container (upstream prev)
+        l.panels = {{MainWindow::kPanelDocumentList, true, DockArea::Left}};
+        layoutToDockingData(l, d);
+        QCOMPARE(d.plugins[2].curr, 0);
+        QCOMPARE(d.plugins[2].prev, 3);
+    }
 };
 
 QTEST_MAIN(TestPanels)
