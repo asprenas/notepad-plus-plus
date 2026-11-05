@@ -53,7 +53,8 @@ class TestLang : public QObject {
 private slots:
     void langTypeTable()
     {
-        QCOMPARE(kLangCount, 97);
+        QCOMPARE(kLangCount, 98); // L_STTXT added by upstream after 8.9.8.1 (merged master)
+        QCOMPARE(static_cast<int>(L_STTXT), 96);
         QCOMPARE(static_cast<int>(L_CPP), 3);       // values are persisted / plugin API
         QCOMPARE(static_cast<int>(L_JSON5), 86);
         QCOMPARE(std::string(langInfo(L_CPP).name), std::string("cpp"));

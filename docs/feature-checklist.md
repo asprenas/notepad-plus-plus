@@ -7,12 +7,12 @@
 
 | 단계 | 항목 | 구현 | 비율 |
 |---|---|---|---|
-| 2 | 226 | 225 | 99% |
+| 2 | 226 | 226 | 100% |
 | 3 | 185 | 185 | 100% |
 | 4 | 16 | 16 | 100% |
-| 5 | 52 | 25 | 48% |
+| 5 | 52 | 52 | 100% |
 | 7 | 1 | 1 | 100% |
-| 전체 | 480 | 452 | 94% |
+| 전체 | 480 | 480 | 100% |
 
 ## File
 
@@ -42,8 +42,8 @@
 | [x] | Move to Recycle Bin | `IDM_FILE_DELETE` | 2 |
 | [x] | Load Session... | `IDM_FILE_LOADSESSION` | 2 |
 | [x] | Save Session... | `IDM_FILE_SAVESESSION` | 2 |
-| [ ] | Print... | `IDM_FILE_PRINT` | 5 |
-| [ ] | Print Now | `IDM_FILE_PRINTNOW` | 5 |
+| [x] | Print... | `IDM_FILE_PRINT` | 5 |
+| [x] | Print Now | `IDM_FILE_PRINTNOW` | 5 |
 | [x] | Exit | `IDM_FILE_EXIT` | 2 |
 
 ## Edit
@@ -299,7 +299,7 @@
 | [x] | Unfold Level > 6 | `IDM_VIEW_UNFOLD_6` | 3 |
 | [x] | Unfold Level > 7 | `IDM_VIEW_UNFOLD_7` | 3 |
 | [x] | Unfold Level > 8 | `IDM_VIEW_UNFOLD_8` | 3 |
-| [ ] | Summary... | `IDM_VIEW_SUMMARY` | 5 |
+| [x] | Summary... | `IDM_VIEW_SUMMARY` | 5 |
 | [x] | Project Panels > Project Panel 1 | `IDM_VIEW_PROJECT_PANEL_1` | 5 |
 | [x] | Project Panels > Project Panel 2 | `IDM_VIEW_PROJECT_PANEL_2` | 5 |
 | [x] | Project Panels > Project Panel 3 | `IDM_VIEW_PROJECT_PANEL_3` | 5 |
@@ -311,7 +311,7 @@
 | [x] | Synchronize Horizontal Scrolling | `IDM_VIEW_SYNSCROLLH` | 3 |
 | [x] | Text Direction RTL | `IDM_EDIT_RTL` | 2 |
 | [x] | Text Direction LTR | `IDM_EDIT_LTR` | 2 |
-| [ ] | Monitoring (tail -f) | `IDM_VIEW_MONITORING` | 5 |
+| [x] | Monitoring (tail -f) | `IDM_VIEW_MONITORING` | 5 |
 
 ## Encoding
 
@@ -457,7 +457,7 @@
 | [x] | Smalltalk | `IDM_LANG_SMALLTALK` | 2 |
 | [x] | Spice | `IDM_LANG_SPICE` | 2 |
 | [x] | SQL | `IDM_LANG_SQL` | 2 |
-| [ ] | Structured Text | `IDM_LANG_STTXT` | 2 |
+| [x] | Structured Text | `IDM_LANG_STTXT` | 2 |
 | [x] | Swift | `IDM_LANG_SWIFT` | 2 |
 | [x] | S-Record | `IDM_LANG_SREC` | 2 |
 | [x] | TCL | `IDM_LANG_TCL` | 2 |
@@ -472,9 +472,9 @@
 | [x] | Visual Prolog | `IDM_LANG_VISUALPROLOG` | 2 |
 | [x] | XML | `IDM_LANG_XML` | 2 |
 | [x] | YAML | `IDM_LANG_YAML` | 2 |
-| [ ] | Define your language... | `IDM_LANG_USER_DLG` | 5 |
-| [ ] | Open User Defined Language folder... | `IDM_LANG_OPENUDLDIR` | 5 |
-| [ ] | Notepad++ User Defined Languages Collection | `IDM_LANG_UDLCOLLECTION_PROJECT_SITE` | 5 |
+| [x] | Define your language... | `IDM_LANG_USER_DLG` | 5 |
+| [x] | Open User Defined Language folder... | `IDM_LANG_OPENUDLDIR` | 5 |
+| [x] | Notepad++ User Defined Languages Collection | `IDM_LANG_UDLCOLLECTION_PROJECT_SITE` | 5 |
 | [x] | User-Defined | `IDM_LANG_USER` | 2 |
 
 ## Settings
@@ -492,18 +492,18 @@
 
 | | 메뉴 | ID | 단계 |
 |---|---|---|---|
-| [ ] | MD5 > Generate... | `IDM_TOOL_MD5_GENERATE` | 5 |
-| [ ] | MD5 > Generate from files... | `IDM_TOOL_MD5_GENERATEFROMFILE` | 5 |
-| [ ] | MD5 > Generate from selection into clipboard | `IDM_TOOL_MD5_GENERATEINTOCLIPBOARD` | 5 |
-| [ ] | SHA-1 > Generate... | `IDM_TOOL_SHA1_GENERATE` | 5 |
-| [ ] | SHA-1 > Generate from files... | `IDM_TOOL_SHA1_GENERATEFROMFILE` | 5 |
-| [ ] | SHA-1 > Generate from selection into clipboard | `IDM_TOOL_SHA1_GENERATEINTOCLIPBOARD` | 5 |
-| [ ] | SHA-256 > Generate... | `IDM_TOOL_SHA256_GENERATE` | 5 |
-| [ ] | SHA-256 > Generate from files... | `IDM_TOOL_SHA256_GENERATEFROMFILE` | 5 |
-| [ ] | SHA-256 > Generate from selection into clipboard | `IDM_TOOL_SHA256_GENERATEINTOCLIPBOARD` | 5 |
-| [ ] | SHA-512 > Generate... | `IDM_TOOL_SHA512_GENERATE` | 5 |
-| [ ] | SHA-512 > Generate from files... | `IDM_TOOL_SHA512_GENERATEFROMFILE` | 5 |
-| [ ] | SHA-512 > Generate from selection into clipboard | `IDM_TOOL_SHA512_GENERATEINTOCLIPBOARD` | 5 |
+| [x] | MD5 > Generate... | `IDM_TOOL_MD5_GENERATE` | 5 |
+| [x] | MD5 > Generate from files... | `IDM_TOOL_MD5_GENERATEFROMFILE` | 5 |
+| [x] | MD5 > Generate from selection into clipboard | `IDM_TOOL_MD5_GENERATEINTOCLIPBOARD` | 5 |
+| [x] | SHA-1 > Generate... | `IDM_TOOL_SHA1_GENERATE` | 5 |
+| [x] | SHA-1 > Generate from files... | `IDM_TOOL_SHA1_GENERATEFROMFILE` | 5 |
+| [x] | SHA-1 > Generate from selection into clipboard | `IDM_TOOL_SHA1_GENERATEINTOCLIPBOARD` | 5 |
+| [x] | SHA-256 > Generate... | `IDM_TOOL_SHA256_GENERATE` | 5 |
+| [x] | SHA-256 > Generate from files... | `IDM_TOOL_SHA256_GENERATEFROMFILE` | 5 |
+| [x] | SHA-256 > Generate from selection into clipboard | `IDM_TOOL_SHA256_GENERATEINTOCLIPBOARD` | 5 |
+| [x] | SHA-512 > Generate... | `IDM_TOOL_SHA512_GENERATE` | 5 |
+| [x] | SHA-512 > Generate from files... | `IDM_TOOL_SHA512_GENERATEFROMFILE` | 5 |
+| [x] | SHA-512 > Generate from selection into clipboard | `IDM_TOOL_SHA512_GENERATEINTOCLIPBOARD` | 5 |
 
 ## Macro
 
@@ -519,8 +519,8 @@
 
 | | 메뉴 | ID | 단계 |
 |---|---|---|---|
-| [ ] | Run... | `IDM_EXECUTE` | 5 |
-| [ ] | Validate shortcuts.xml | `IDM_EXECUTE_VALIDATE_SHORTCUTSXML` | 5 |
+| [x] | Run... | `IDM_EXECUTE` | 5 |
+| [x] | Validate shortcuts.xml | `IDM_EXECUTE_VALIDATE_SHORTCUTSXML` | 5 |
 
 ## Plugins
 
@@ -549,12 +549,12 @@
 
 | | 메뉴 | ID | 단계 |
 |---|---|---|---|
-| [ ] | Command Line Arguments... | `IDM_CMDLINEARGUMENTS` | 5 |
+| [x] | Command Line Arguments... | `IDM_CMDLINEARGUMENTS` | 5 |
 | [x] | Notepad++ Home | `IDM_HOMESWEETHOME` | 5 |
 | [x] | Notepad++ Project Page | `IDM_PROJECTPAGE` | 5 |
-| [ ] | Notepad++ Online User Manual | `IDM_ONLINEDOCUMENT` | 5 |
-| [ ] | Notepad++ Community (Forum) | `IDM_FORUM` | 5 |
-| [ ] | Update Notepad++ | `IDM_UPDATE_NPP` | 5 |
-| [ ] | Set Updater Proxy... | `IDM_CONFUPDATERPROXY` | 5 |
-| [ ] | Debug Info... | `IDM_DEBUGINFO` | 5 |
+| [x] | Notepad++ Online User Manual | `IDM_ONLINEDOCUMENT` | 5 |
+| [x] | Notepad++ Community (Forum) | `IDM_FORUM` | 5 |
+| [x] | Update Notepad++ | `IDM_UPDATE_NPP` | 5 |
+| [x] | Set Updater Proxy... | `IDM_CONFUPDATERPROXY` | 5 |
+| [x] | Debug Info... | `IDM_DEBUGINFO` | 5 |
 | [x] | About Notepad++ | `IDM_ABOUT` | 5 |
