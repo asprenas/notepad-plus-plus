@@ -33,6 +33,9 @@
 #include <QLineEdit>
 #include <QMenu>
 #include <QPushButton>
+#include <QMessageAuthenticationCode>
+#include <QSettings>
+#include <QSysInfo>
 #include <QTemporaryDir>
 #include <QTimer>
 #include <QTest>
@@ -570,6 +573,19 @@ private slots:
         f.write("\n");
         f.close();
         QVERIFY(!m_w->shortcutsXmlTrusted()); // modified outside: tampered
+#if defined(Q_OS_WIN)
+        // same key as upstream MISC/hmac/hmac.h: HKLM\SOFTWARE\Microsoft\Cryptography MachineGuid
+        // (a config.xml written by Notepad++ validates the same shortcuts.xml)
+        const QSettings crypto(QStringLiteral("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Cryptography"), QSettings::Registry64Format);
+        const QByteArray guid = crypto.value(QStringLiteral("MachineGuid")).toString().toLatin1();
+        QVERIFY(!guid.isEmpty());
+        QCOMPARE(QSysInfo::machineUniqueId(), guid);
+        QVERIFY(f.open(QIODevice::ReadOnly));
+        const QByteArray content = f.readAll();
+        f.close();
+        QCOMPARE(m_w->shortcutsXmlHmac(),
+                 QMessageAuthenticationCode::hash(content, guid, QCryptographicHash::Sha256).toHex().toStdString());
+#endif
         QFile::remove(sx);
     }
 
