@@ -7,12 +7,12 @@
 
 | 단계 | 항목 | 구현 | 비율 |
 |---|---|---|---|
-| 2 | 225 | 225 | 100% |
+| 2 | 226 | 225 | 99% |
 | 3 | 185 | 185 | 100% |
 | 4 | 16 | 16 | 100% |
-| 5 | 40 | 7 | 17% |
+| 5 | 52 | 25 | 48% |
 | 7 | 1 | 1 | 100% |
-| 전체 | 467 | 434 | 92% |
+| 전체 | 480 | 452 | 94% |
 
 ## File
 
@@ -42,7 +42,7 @@
 | [x] | Move to Recycle Bin | `IDM_FILE_DELETE` | 2 |
 | [x] | Load Session... | `IDM_FILE_LOADSESSION` | 2 |
 | [x] | Save Session... | `IDM_FILE_SAVESESSION` | 2 |
-| [x] | Print... | `IDM_FILE_PRINT` | 5 |
+| [ ] | Print... | `IDM_FILE_PRINT` | 5 |
 | [ ] | Print Now | `IDM_FILE_PRINTNOW` | 5 |
 | [x] | Exit | `IDM_FILE_EXIT` | 2 |
 
@@ -148,8 +148,8 @@
 | [x] | Skip Current  Go to Next Multi-select | `IDM_EDIT_MULTISELECTSSKIP` | 3 |
 | [x] | Column Mode... | `IDM_EDIT_COLUMNMODETIP` | 3 |
 | [x] | Column Editor... | `IDM_EDIT_COLUMNMODE` | 3 |
-| [ ] | Character Panel | `IDM_EDIT_CHAR_PANEL` | 5 |
-| [ ] | Clipboard History | `IDM_EDIT_CLIPBOARDHISTORY_PANEL` | 5 |
+| [x] | Character Panel | `IDM_EDIT_CHAR_PANEL` | 5 |
+| [x] | Clipboard History | `IDM_EDIT_CLIPBOARDHISTORY_PANEL` | 5 |
 | [x] | Read-Only in Notepad++ > Read-Only on Current Document | `IDM_EDIT_TOGGLEREADONLY` | 3 |
 | [x] | Read-Only in Notepad++ > Read-Only for All Documents | `IDM_EDIT_SETREADONLYFORALLDOCS` | 3 |
 | [x] | Read-Only in Notepad++ > Clear Read-Only for All Documents | `IDM_EDIT_CLEARREADONLYFORALLDOCS` | 3 |
@@ -300,13 +300,13 @@
 | [x] | Unfold Level > 7 | `IDM_VIEW_UNFOLD_7` | 3 |
 | [x] | Unfold Level > 8 | `IDM_VIEW_UNFOLD_8` | 3 |
 | [ ] | Summary... | `IDM_VIEW_SUMMARY` | 5 |
-| [ ] | Project Panels > Project Panel 1 | `IDM_VIEW_PROJECT_PANEL_1` | 5 |
-| [ ] | Project Panels > Project Panel 2 | `IDM_VIEW_PROJECT_PANEL_2` | 5 |
-| [ ] | Project Panels > Project Panel 3 | `IDM_VIEW_PROJECT_PANEL_3` | 5 |
+| [x] | Project Panels > Project Panel 1 | `IDM_VIEW_PROJECT_PANEL_1` | 5 |
+| [x] | Project Panels > Project Panel 2 | `IDM_VIEW_PROJECT_PANEL_2` | 5 |
+| [x] | Project Panels > Project Panel 3 | `IDM_VIEW_PROJECT_PANEL_3` | 5 |
 | [x] | Folder as Workspace | `IDM_VIEW_FILEBROWSER` | 5 |
-| [ ] | Document Map | `IDM_VIEW_DOC_MAP` | 5 |
+| [x] | Document Map | `IDM_VIEW_DOC_MAP` | 5 |
 | [x] | Document List | `IDM_VIEW_DOCLIST` | 5 |
-| [ ] | Function List | `IDM_VIEW_FUNC_LIST` | 5 |
+| [x] | Function List | `IDM_VIEW_FUNC_LIST` | 5 |
 | [x] | Synchronize Vertical Scrolling | `IDM_VIEW_SYNSCROLLV` | 3 |
 | [x] | Synchronize Horizontal Scrolling | `IDM_VIEW_SYNSCROLLH` | 3 |
 | [x] | Text Direction RTL | `IDM_EDIT_RTL` | 2 |
@@ -457,6 +457,7 @@
 | [x] | Smalltalk | `IDM_LANG_SMALLTALK` | 2 |
 | [x] | Spice | `IDM_LANG_SPICE` | 2 |
 | [x] | SQL | `IDM_LANG_SQL` | 2 |
+| [ ] | Structured Text | `IDM_LANG_STTXT` | 2 |
 | [x] | Swift | `IDM_LANG_SWIFT` | 2 |
 | [x] | S-Record | `IDM_LANG_SREC` | 2 |
 | [x] | TCL | `IDM_LANG_TCL` | 2 |
@@ -526,6 +527,23 @@
 | | 메뉴 | ID | 단계 |
 |---|---|---|---|
 | [x] | Open Plugins Folder... | `IDM_SETTING_OPENPLUGINSDIR` | 7 |
+
+## Window
+
+| | 메뉴 | ID | 단계 |
+|---|---|---|---|
+| [x] | Sort By > Name A to Z | `IDM_WINDOW_SORT_FN_ASC` | 5 |
+| [x] | Sort By > Name Z to A | `IDM_WINDOW_SORT_FN_DSC` | 5 |
+| [x] | Sort By > Path A to Z | `IDM_WINDOW_SORT_FP_ASC` | 5 |
+| [x] | Sort By > Path Z to A | `IDM_WINDOW_SORT_FP_DSC` | 5 |
+| [x] | Sort By > Type A to Z | `IDM_WINDOW_SORT_FT_ASC` | 5 |
+| [x] | Sort By > Type Z to A | `IDM_WINDOW_SORT_FT_DSC` | 5 |
+| [x] | Sort By > Content Length Ascending | `IDM_WINDOW_SORT_FS_ASC` | 5 |
+| [x] | Sort By > Content Length Descending | `IDM_WINDOW_SORT_FS_DSC` | 5 |
+| [x] | Sort By > Modified Time Ascending | `IDM_WINDOW_SORT_FD_ASC` | 5 |
+| [x] | Sort By > Modified Time Descending | `IDM_WINDOW_SORT_FD_DSC` | 5 |
+| [x] | Windows... | `IDM_WINDOW_WINDOWS` | 5 |
+| [x] | Recent Window | `IDM_WINDOW_MRU_FIRST` | 5 |
 
 ## ?
 
