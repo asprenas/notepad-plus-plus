@@ -826,6 +826,29 @@ private slots:
         }
         QVERIFY(done >= 10);
     }
+
+    void trayIconMinimizeAndClose()
+    {
+        m_w->setForceTray(true);
+        m_w->show();
+        QVERIFY(QTest::qWaitForWindowExposed(m_w.get()));
+        m_w->mutableConfig().gui.minimizeToTray = 1; // minimize to tray
+        m_w->showMinimized();
+        QTRY_VERIFY(!m_w->isVisible());
+        QVERIFY(m_w->trayIcon());
+        QVERIFY(m_w->actions()->trigger(IDM_SYSTRAYPOPUP_ACTIVATE));
+        QVERIFY(m_w->isVisible());
+
+        m_w->mutableConfig().gui.minimizeToTray = 2; // close to tray: the close button hides
+        m_w->close();
+        QVERIFY(!m_w->isVisible());
+        QVERIFY(m_w->actions()->trigger(IDM_SYSTRAYPOPUP_NEWDOC));
+        QVERIFY(m_w->isVisible());
+        const int tabs = m_w->currentPane()->count();
+        QVERIFY(tabs >= 1);
+        m_w->mutableConfig().gui.minimizeToTray = 0;
+        m_w->setForceTray(false);
+    }
 };
 
 QTEST_MAIN(TestPanels)

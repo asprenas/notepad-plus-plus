@@ -33,6 +33,7 @@
 
 class QAction;
 class QPrinter;
+class QSystemTrayIcon;
 class QMenu;
 class QTranslator;
 class QCheckBox;
@@ -83,6 +84,7 @@ struct CommandLine {
     bool noSession = false;
     bool readOnly = false;
     bool alwaysOnTop = false;
+    bool systemTray = false;   // -systemtray
 };
 CommandLine parseCommandLine(const QStringList& args);
 
@@ -176,6 +178,11 @@ public:
     int printDocument(QPrinter& printer, bool selectionOnly); // pages printed, -1 if the printer cannot start
     QString expandPrintVariables(const std::string& text);
     void showPrintPreview();
+    // --- tray icon (TrayCommands.cpp)
+    void hideToTray();
+    void restoreFromTray();
+    QSystemTrayIcon* trayIcon() const noexcept { return m_tray; }
+    void setForceTray(bool on) noexcept { m_forceTray = on; } // tests: headless platforms have no tray
     FunctionListPanel* functionList() const noexcept { return m_funcList; }
     DockManager* dockManager() const noexcept { return m_dock.get(); }
     void reloadFunctionList();
@@ -197,6 +204,7 @@ protected:
     void dragEnterEvent(QDragEnterEvent* event) override;
     void dropEvent(QDropEvent* event) override;
     bool eventFilter(QObject* o, QEvent* ev) override;
+    void changeEvent(QEvent* e) override;
 
 private:
     // --- setup (MainWindow.cpp)
@@ -300,6 +308,8 @@ private:
     void rebuildRunMenu();
     void registerPrintCommands();
     void addPrintPreviewAction();
+    void registerTrayCommands();
+    bool closeToTray(QCloseEvent* event);
     void markFunctionListEntry();
     // --- small dialogs (ToolDialogs.cpp)
     void registerToolDialogs();
@@ -387,6 +397,9 @@ private:
     bool                         m_quietSecurityWarnings = false;
     QPointer<QDialog>            m_openedDialog;
     QPointer<QDialog>            m_runDialog;
+    QSystemTrayIcon*             m_tray = nullptr;
+    bool                         m_forceTray = false;
+    bool                         m_exitRequested = false; // File > Exit (not the close button)
     QStringList                  m_runHistory;
     std::vector<QPointer<QObject>> m_userCommandObjects; // Run menu entries of shortcuts.xml commands
     QMenu*                       m_recentMenu = nullptr;

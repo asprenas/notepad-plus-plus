@@ -111,6 +111,7 @@ void MainWindow::registerCommands()
     registerToolCommands();
     registerRunCommands();
     registerPrintCommands();
+    registerTrayCommands();
 
     registerMacroCommands();
     registerSettingsCommands();
@@ -307,7 +308,11 @@ void MainWindow::registerFileCommands()
         m_config.history.files.clear();
         updateRecentMenu();
     }, [this] { return !m_config.history.files.empty(); }});
-    r->setHandler(IDM_FILE_EXIT, {[this] { close(); }});
+    r->setHandler(IDM_FILE_EXIT, {[this] {
+        m_exitRequested = true; // not to the tray (upstream: WM_CLOSE, not SC_CLOSE)
+        close();
+        m_exitRequested = false;
+    }});
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -17,6 +17,7 @@ qt_add_library(npp_ui STATIC
     ToolCommands.cpp
     RunCommands.cpp
     PrintCommands.cpp
+    TrayCommands.cpp
     panels/FunctionListPanel.h
     panels/FunctionListPanel.cpp
     panels/DocumentMapPanel.h

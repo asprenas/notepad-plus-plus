@@ -175,6 +175,7 @@ CommandLine parseCommandLine(const QStringList& args)
         else if (a == QLatin1String("-nosession")) c.noSession = true;
         else if (a == QLatin1String("-ro")) c.readOnly = true;
         else if (a == QLatin1String("-alwaysOnTop")) c.alwaysOnTop = true;
+        else if (a == QLatin1String("-systemtray")) c.systemTray = true;
         else if (a == QLatin1String("-openSession") && i + 1 < args.size()) c.sessionFile = args[++i];
         else if (a.startsWith(QLatin1String("-settingsDir="))) c.settingsDir = a.mid(13);
         else if (a.startsWith(QLatin1Char('-')) && !QFileInfo::exists(a)) continue; // unknown / unsupported option
@@ -1269,7 +1270,10 @@ void MainWindow::shutdownForTest()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
+    if (closeToTray(event))
+        return;
     if (!m_exiting && !prepareExit()) {
+        m_exitRequested = false;
         event->ignore();
         return;
     }
