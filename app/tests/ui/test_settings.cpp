@@ -29,6 +29,7 @@
 #include <QImage>
 #include <QToolBar>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QDir>
 #include <QGroupBox>
 #include <QLabel>
@@ -474,6 +475,66 @@ private slots:
         QCOMPARE(f->findChild<QAbstractButton*>(QStringLiteral("1609"))->text(), QStringLiteral("Replace &All"));
     }
 
+    void koreanMenus()
+    {
+        // every main menu command and sub menu that korean.xml translates shows the translation
+        m_w->setUiLanguage("korean.xml");
+        const NativeLanguage& nl = m_w->nativeLanguage();
+        QStringList issues;
+        QSet<QString> titles;
+        int commands = 0;
+        std::function<void(QMenu*)> walk = [&](QMenu* m) {
+            titles.insert(m->title());
+            for (QAction* a : m->actions()) {
+                if (a->menu()) {
+                    walk(a->menu());
+                    continue;
+                }
+                bool ok = false;
+                const int id = a->data().toInt(&ok);
+                if (a->isSeparator() || !ok)
+                    continue;
+                const QString want = QString::fromStdString(nl.menuCommand(id));
+                if (want.isEmpty())
+                    continue;
+                ++commands;
+                if (a->text() != want)
+                    issues << QStringLiteral("command %1: \"%2\" instead of \"%3\"").arg(id).arg(a->text(), want);
+            }
+        };
+        for (QAction* a : m_w->menuBar()->actions())
+            if (a->menu())
+                walk(a->menu());
+        QVERIFY2(commands > 300, qPrintable(QString::number(commands)));
+
+        QFile f(QCoreApplication::applicationDirPath() + QStringLiteral("/data/localization/korean.xml"));
+        QVERIFY(f.open(QIODevice::ReadOnly));
+        const QString xml = QString::fromUtf8(f.readAll());
+        int subMenus = 0;
+        for (const auto& match : QRegularExpression(QStringLiteral("subMenuId=\"([^\"]+)\"")).globalMatch(xml)) {
+            const std::string id = match.captured(1).toStdString();
+            ++subMenus;
+            const QString want = QString::fromStdString(nl.subMenuEntry(id));
+            if (!titles.contains(want))
+                issues << QStringLiteral("sub menu %1: \"%2\" not found").arg(match.captured(1), want);
+        }
+        QVERIFY2(subMenus > 40, qPrintable(QString::number(subMenus)));
+        QVERIFY2(issues.isEmpty(), qPrintable(issues.join(QLatin1Char('\n'))));
+    }
+
+    void rtlLanguage()
+    {
+        // Arabic: right-to-left application layout (upstream RTL="yes"), back to left-to-right in English
+        m_w->setUiLanguage("arabic.xml");
+        QCOMPARE(QApplication::layoutDirection(), Qt::RightToLeft);
+        QCOMPARE(m_w->preferencesDialog()->layoutDirection(), Qt::RightToLeft);
+        auto* combo = qobject_cast<QComboBox*>(m_w->preferencesDialog()->control(QStringLiteral("Global"), 6124));
+        QVERIFY(combo);
+        QCOMPARE(combo->currentData().toString(), QStringLiteral("arabic.xml"));
+        m_w->setUiLanguage("english.xml");
+        QCOMPARE(QApplication::layoutDirection(), Qt::LeftToRight);
+    }
+
     void importPlugin()
     {
         QTemporaryDir dir;
@@ -543,14 +604,22 @@ private slots:
         const QString out = qEnvironmentVariable("NPP_SCREENSHOT_DIR");
         if (out.isEmpty())
             QSKIP("set NPP_SCREENSHOT_DIR to write the page screenshots");
-        m_w->setUiLanguage("korean.xml");
-        PreferencesDialog* d = m_w->preferencesDialog();
-        d->translate();
-        for (const QString& tag : d->pageTags()) {
-            d->showPage(tag);
-            QCoreApplication::processEvents();
-            d->grab().save(QDir(out).filePath(QStringLiteral("pref-%1.png").arg(tag)));
+        // Korean, Japanese, German (long strings), Arabic (RTL): checked for clipped texts by eye
+        for (const char* lang : {"korean", "japanese", "german", "arabic"}) {
+            m_w->setUiLanguage(std::string(lang) + ".xml");
+            PreferencesDialog* d = m_w->preferencesDialog();
+            d->translate();
+            for (const QString& tag : d->pageTags()) {
+                d->showPage(tag);
+                QCoreApplication::processEvents();
+                d->grab().save(QDir(out).filePath(QStringLiteral("%1-pref-%2.png").arg(QLatin1String(lang), tag)));
+            }
+            QVERIFY(m_w->actions()->trigger(IDM_LANGSTYLE_CONFIG_DLG));
+            m_w->styleConfigurator()->grab().save(QDir(out).filePath(QStringLiteral("%1-styleconfig.png").arg(QLatin1String(lang))));
+            m_w->styleConfigurator()->reject();
+            m_w->findDialog()->grab().save(QDir(out).filePath(QStringLiteral("%1-find.png").arg(QLatin1String(lang))));
         }
+        m_w->setUiLanguage("english.xml");
     }
 };
 

@@ -61,6 +61,46 @@ const std::vector<DefKey>& defaultKeys()
 const char* const kTopLevelIds[] = {"file", "edit", "search", "view", "encoding", "language", "language",
                                     "settings", "tools", "macro", "run", "Plugins", "Window", "?", ""};
 
+// Sub menus translated from Menu/Main/SubEntries by position (upstream localization.cpp
+// g_menuFolderPositions: top-level index after the unused Language menu is removed, position in
+// the popup counting separators, position in the sub popup).
+struct SubMenuPosition {
+    int x, y, z;
+    const char* id;
+};
+constexpr SubMenuPosition kSubMenuPositions[] = {
+    {0, 2, -1, "file-openFolder"}, {0, 13, -1, "file-closeMore"}, {0, 22, -1, "file-recentFiles"},
+    {1, 11, -1, "edit-insert"}, {1, 12, -1, "edit-copyToClipboard"}, {1, 13, -1, "edit-indent"},
+    {1, 14, -1, "edit-convertCaseTo"}, {1, 15, -1, "edit-lineOperations"}, {1, 16, -1, "edit-comment"},
+    {1, 17, -1, "edit-autoCompletion"}, {1, 18, -1, "edit-eolConversion"}, {1, 19, -1, "edit-blankOperations"},
+    {1, 20, -1, "edit-pasteSpecial"}, {1, 21, -1, "edit-onSelection"}, {1, 23, -1, "edit-multiSelectALL"},
+    {1, 24, -1, "edit-multiSelectNext"}, {1, 33, -1, "edit-readonlyInNotepad++"},
+    {2, 18, -1, "search-changeHistory"}, {2, 20, -1, "search-markAll"}, {2, 21, -1, "search-markOne"},
+    {2, 22, -1, "search-unmarkAll"}, {2, 23, -1, "search-jumpUp"}, {2, 24, -1, "search-jumpDown"},
+    {2, 25, -1, "search-copyStyledText"}, {2, 27, -1, "search-bookmark"},
+    {3, 5, -1, "view-currentFileIn"}, {3, 7, -1, "view-showSymbol"}, {3, 8, -1, "view-zoom"},
+    {3, 9, -1, "view-moveCloneDocument"}, {3, 10, -1, "view-tab"}, {3, 19, -1, "view-collapseLevel"},
+    {3, 20, -1, "view-uncollapseLevel"}, {3, 24, -1, "view-project"},
+    {4, 5, -1, "encoding-characterSets"}, {4, 5, 0, "encoding-arabic"}, {4, 5, 1, "encoding-baltic"},
+    {4, 5, 2, "encoding-celtic"}, {4, 5, 3, "encoding-cyrillic"}, {4, 5, 4, "encoding-centralEuropean"},
+    {4, 5, 5, "encoding-chinese"}, {4, 5, 6, "encoding-easternEuropean"}, {4, 5, 7, "encoding-greek"},
+    {4, 5, 8, "encoding-hebrew"}, {4, 5, 9, "encoding-japanese"}, {4, 5, 10, "encoding-korean"},
+    {4, 5, 11, "encoding-northEuropean"}, {4, 5, 12, "encoding-thai"}, {4, 5, 13, "encoding-turkish"},
+    {4, 5, 14, "encoding-westernEuropean"}, {4, 5, 15, "encoding-vietnamese"},
+    {5, 25, -1, "language-userDefinedLanguage"},
+    {6, 4, -1, "settings-import"},
+    {7, 0, -1, "tools-md5"}, {7, 1, -1, "tools-sha1"}, {7, 2, -1, "tools-sha256"}, {7, 3, -1, "tools-sha512"},
+    {11, 0, -1, "window-sortby"},
+};
+
+const char* subMenuId(int x, int y, int z)
+{
+    for (const SubMenuPosition& p : kSubMenuPositions)
+        if (p.x == x && p.y == y && p.z == z)
+            return p.id;
+    return nullptr;
+}
+
 QKeySequence toSequence(const core::KeyCombo& k)
 {
     const auto q = core::toQtKey(k);
@@ -109,6 +149,8 @@ std::map<std::string, QMenu*> ActionRegistry::buildMenuBar(QMenuBar* bar, const 
 {
     std::map<std::string, QMenu*> top;
     std::vector<QMenu*> stack;
+    std::vector<int> path;     // position of each open popup (top-level index after the Language variant removal)
+    std::vector<int> children; // children added so far to each open popup (separators included, like Win32)
     int topIndex = -1;
     bool skip = false; // inside the Language menu variant not used
     int skipDepth = 0;
@@ -139,20 +181,32 @@ std::map<std::string, QMenu*> ActionRegistry::buildMenuBar(QMenuBar* bar, const 
                 m->setObjectName(QString::fromLatin1(menuId));
                 top[menuId] = m;
                 stack.push_back(m);
+                path.push_back(topIndex > 6 ? topIndex - 1 : std::min(topIndex, 5));
             } else {
+                path.push_back(children.back()++);
+                if (lang && lang->isLoaded() && path.size() <= 3) {
+                    if (const char* id = subMenuId(path[0], path[1], path.size() == 3 ? path[2] : -1))
+                        text = QString::fromStdString(lang->subMenuEntry(id, n.text));
+                }
                 QMenu* m = stack.back()->addMenu(text);
                 stack.push_back(m);
             }
+            children.push_back(0);
             connect(stack.back(), &QMenu::aboutToShow, this, &ActionRegistry::updateStates);
             break;
         }
         case Node::End:
-            if (!stack.empty())
+            if (!stack.empty()) {
                 stack.pop_back();
+                path.pop_back();
+                children.pop_back();
+            }
             break;
         case Node::Separator:
-            if (!stack.empty())
+            if (!stack.empty()) {
                 stack.back()->addSeparator();
+                ++children.back();
+            }
             break;
         case Node::Item: {
             QAction* a = action(n.id);
@@ -168,8 +222,10 @@ std::map<std::string, QMenu*> ActionRegistry::buildMenuBar(QMenuBar* bar, const 
                 a->setMenuRole(QAction::PreferencesRole);
             else
                 a->setMenuRole(QAction::NoRole);
-            if (!stack.empty())
+            if (!stack.empty()) {
                 stack.back()->addAction(a);
+                ++children.back();
+            }
             m_menuCommands.push_back(n.id);
             break;
         }

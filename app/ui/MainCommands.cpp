@@ -62,7 +62,12 @@ void MainWindow::buildMenus()
     for (const auto& [id, menu] : menus)
         connect(menu, &QMenu::aboutToShow, m_actions, &ActionRegistry::updateStates);
     if (const auto it = menus.find("file"); it != menus.end()) {
-        m_recentMenu = new QMenu(miscString("recent-files", "Recent Files"), this);
+        // upstream lastRecentFileList.cpp: sub menu and its commands named from nativeLang
+        m_recentMenu = new QMenu(QString::fromStdString(m_nativeLang.subMenuEntry("file-recentFiles", "&Recent Files")), this);
+        m_actions->action(IDM_OPEN_ALL_RECENT_FILE)
+            ->setText(QString::fromStdString(m_nativeLang.menuCommand(IDM_OPEN_ALL_RECENT_FILE, "Open All Recent Files")));
+        m_actions->action(IDM_CLEAN_RECENT_FILE_LIST)
+            ->setText(QString::fromStdString(m_nativeLang.menuCommand(IDM_CLEAN_RECENT_FILE_LIST, "Empty Recent Files List")));
         QAction* exitAction = m_actions->action(IDM_FILE_EXIT);
         it->second->insertMenu(exitAction, m_recentMenu);
         it->second->insertSeparator(exitAction);

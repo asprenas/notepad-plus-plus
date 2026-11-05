@@ -500,7 +500,7 @@ void MainWindow::applyEditorSettings(EditorPane* pane)
     e->send(SCI_SETVIEWWS, g.whiteSpaceShow ? SCWS_VISIBLEALWAYS : SCWS_INVISIBLE);
     e->send(SCI_SETVIEWEOL, g.eolShow);
     e->send(SCI_SETINDENTATIONGUIDES, g.indentGuideLine ? SC_IV_LOOKBOTH : SC_IV_NONE);
-    e->send(SCI_SETZOOM, static_cast<uptr_t>(pane->viewIndex() == 0 ? g.zoom : g.zoom2));
+    e->send(SCI_SETZOOM, static_cast<uptr_t>(pane->viewIndex() == 0 || g.zoomSync ? g.zoom : g.zoom2));
     e->send(SCI_SETCARETWIDTH, static_cast<uptr_t>(g.caretWidth));
     e->send(SCI_SETCARETPERIOD, static_cast<uptr_t>(g.caretBlinkRate));
     e->send(SCI_SETVIRTUALSPACEOPTIONS, g.virtualSpace ? SCVS_RECTANGULARSELECTION | SCVS_USERACCESSIBLE : SCVS_RECTANGULARSELECTION);
@@ -595,7 +595,8 @@ void MainWindow::saveSettings()
     g.appMaximized = isMaximized();
     g.splitterVertical = m_splitter->orientation() == Qt::Horizontal;
     g.zoom = static_cast<int>(m_panes[0]->editor()->send(SCI_GETZOOM));
-    g.zoom2 = static_cast<int>(m_panes[1]->editor()->send(SCI_GETZOOM));
+    // upstream Notepad_plus.cpp saveGUIParams: with zoom sync the second view stores the main view zoom
+    g.zoom2 = g.zoomSync ? g.zoom : static_cast<int>(m_panes[1]->editor()->send(SCI_GETZOOM));
     g.statusBarShow = statusBar()->isVisible();
     g.menuBarShow = menuBar()->isVisible();
     if (m_findDialog)

@@ -9,10 +9,10 @@
 |---|---|---|---|
 | 2 | 225 | 225 | 100% |
 | 3 | 185 | 185 | 100% |
-| 4 | 16 | 1 | 6% |
-| 5 | 40 | 6 | 15% |
-| 7 | 1 | 0 | 0% |
-| 전체 | 467 | 417 | 89% |
+| 4 | 16 | 16 | 100% |
+| 5 | 40 | 7 | 17% |
+| 7 | 1 | 1 | 100% |
+| 전체 | 467 | 434 | 92% |
 
 ## File
 
@@ -35,14 +35,14 @@
 | [x] | Close | `IDM_FILE_CLOSE` | 2 |
 | [x] | Close All | `IDM_FILE_CLOSEALL` | 2 |
 | [x] | Close Multiple Documents > Close All but Active Document | `IDM_FILE_CLOSEALL_BUT_CURRENT` | 2 |
-| [ ] | Close Multiple Documents > Close All but Pinned Documents | `IDM_FILE_CLOSEALL_BUT_PINNED` | 4 |
+| [x] | Close Multiple Documents > Close All but Pinned Documents | `IDM_FILE_CLOSEALL_BUT_PINNED` | 4 |
 | [x] | Close Multiple Documents > Close All to the Left | `IDM_FILE_CLOSEALL_TOLEFT` | 2 |
 | [x] | Close Multiple Documents > Close All to the Right | `IDM_FILE_CLOSEALL_TORIGHT` | 2 |
 | [x] | Close Multiple Documents > Close All Unchanged | `IDM_FILE_CLOSEALL_UNCHANGED` | 2 |
 | [x] | Move to Recycle Bin | `IDM_FILE_DELETE` | 2 |
 | [x] | Load Session... | `IDM_FILE_LOADSESSION` | 2 |
 | [x] | Save Session... | `IDM_FILE_SAVESESSION` | 2 |
-| [ ] | Print... | `IDM_FILE_PRINT` | 5 |
+| [x] | Print... | `IDM_FILE_PRINT` | 5 |
 | [ ] | Print Now | `IDM_FILE_PRINTNOW` | 5 |
 | [x] | Exit | `IDM_FILE_EXIT` | 2 |
 
@@ -135,7 +135,7 @@
 | [x] | On Selection > Open Containing Folder in Explorer | `IDM_EDIT_OPENSELECTEDFILEFOLDERINEXPLORER` | 3 |
 | [x] | On Selection > Redact Selection █ (Shift: ●) | `IDM_EDIT_REDACT_SELECTION` | 3 |
 | [x] | On Selection > Search on Internet | `IDM_EDIT_SEARCHONINTERNET` | 3 |
-| [ ] | On Selection > Change Search Engine... | `IDM_EDIT_CHANGESEARCHENGINE` | 4 |
+| [x] | On Selection > Change Search Engine... | `IDM_EDIT_CHANGESEARCHENGINE` | 4 |
 | [x] | Multi-select All > Ignore Case  Whole Word | `IDM_EDIT_MULTISELECTALL` | 3 |
 | [x] | Multi-select All > Match Case Only | `IDM_EDIT_MULTISELECTALLMATCHCASE` | 3 |
 | [x] | Multi-select All > Match Whole Word Only | `IDM_EDIT_MULTISELECTALLWHOLEWORD` | 3 |
@@ -240,8 +240,8 @@
 | [x] | View Current File in > IE | `IDM_VIEW_IN_IE` | 2 |
 | [x] | Show Symbol > Show Space and Tab | `IDM_VIEW_TAB_SPACE` | 2 |
 | [x] | Show Symbol > Show End of Line | `IDM_VIEW_EOL` | 2 |
-| [ ] | Show Symbol > Show Non-Printing Characters | `IDM_VIEW_NPC` | 4 |
-| [ ] | Show Symbol > Show Control Characters  Unicode EOL | `IDM_VIEW_NPC_CCUNIEOL` | 4 |
+| [x] | Show Symbol > Show Non-Printing Characters | `IDM_VIEW_NPC` | 4 |
+| [x] | Show Symbol > Show Control Characters  Unicode EOL | `IDM_VIEW_NPC_CCUNIEOL` | 4 |
 | [x] | Show Symbol > Show All Characters | `IDM_VIEW_ALL_CHARACTERS` | 2 |
 | [x] | Show Symbol > Show Indent Guide | `IDM_VIEW_INDENT_GUIDE` | 2 |
 | [x] | Show Symbol > Show Wrap Symbol | `IDM_VIEW_WRAP_SYMBOL` | 2 |
@@ -270,12 +270,12 @@
 | [x] | Tab > Move to End | `IDM_VIEW_GOTO_END` | 2 |
 | [x] | Tab > Move Tab Forward | `IDM_VIEW_TAB_MOVEFORWARD` | 2 |
 | [x] | Tab > Move Tab Backward | `IDM_VIEW_TAB_MOVEBACKWARD` | 2 |
-| [ ] | Tab > Apply Color 1 | `IDM_VIEW_TAB_COLOUR_1` | 4 |
-| [ ] | Tab > Apply Color 2 | `IDM_VIEW_TAB_COLOUR_2` | 4 |
-| [ ] | Tab > Apply Color 3 | `IDM_VIEW_TAB_COLOUR_3` | 4 |
-| [ ] | Tab > Apply Color 4 | `IDM_VIEW_TAB_COLOUR_4` | 4 |
-| [ ] | Tab > Apply Color 5 | `IDM_VIEW_TAB_COLOUR_5` | 4 |
-| [ ] | Tab > Remove Color | `IDM_VIEW_TAB_COLOUR_NONE` | 4 |
+| [x] | Tab > Apply Color 1 | `IDM_VIEW_TAB_COLOUR_1` | 4 |
+| [x] | Tab > Apply Color 2 | `IDM_VIEW_TAB_COLOUR_2` | 4 |
+| [x] | Tab > Apply Color 3 | `IDM_VIEW_TAB_COLOUR_3` | 4 |
+| [x] | Tab > Apply Color 4 | `IDM_VIEW_TAB_COLOUR_4` | 4 |
+| [x] | Tab > Apply Color 5 | `IDM_VIEW_TAB_COLOUR_5` | 4 |
+| [x] | Tab > Remove Color | `IDM_VIEW_TAB_COLOUR_NONE` | 4 |
 | [x] | Word wrap | `IDM_VIEW_WRAP` | 2 |
 | [x] | Focus on Another View | `IDM_VIEW_SWITCHTO_OTHER_VIEW` | 5 |
 | [x] | Hide Lines | `IDM_VIEW_HIDELINES` | 3 |
@@ -480,11 +480,11 @@
 
 | | 메뉴 | ID | 단계 |
 |---|---|---|---|
-| [ ] | Preferences... | `IDM_SETTING_PREFERENCE` | 4 |
-| [ ] | Style Configurator... | `IDM_LANGSTYLE_CONFIG_DLG` | 4 |
-| [ ] | Shortcut Mapper... | `IDM_SETTING_SHORTCUT_MAPPER` | 4 |
-| [ ] | Import > Import plugin(s)... | `IDM_SETTING_IMPORTPLUGIN` | 4 |
-| [ ] | Import > Import style theme(s)... | `IDM_SETTING_IMPORTSTYLETHEMES` | 4 |
+| [x] | Preferences... | `IDM_SETTING_PREFERENCE` | 4 |
+| [x] | Style Configurator... | `IDM_LANGSTYLE_CONFIG_DLG` | 4 |
+| [x] | Shortcut Mapper... | `IDM_SETTING_SHORTCUT_MAPPER` | 4 |
+| [x] | Import > Import plugin(s)... | `IDM_SETTING_IMPORTPLUGIN` | 4 |
+| [x] | Import > Import style theme(s)... | `IDM_SETTING_IMPORTSTYLETHEMES` | 4 |
 | [x] | Edit Popup ContextMenu | `IDM_SETTING_EDITCONTEXTMENU` | 4 |
 
 ## Tools
@@ -525,7 +525,7 @@
 
 | | 메뉴 | ID | 단계 |
 |---|---|---|---|
-| [ ] | Open Plugins Folder... | `IDM_SETTING_OPENPLUGINSDIR` | 7 |
+| [x] | Open Plugins Folder... | `IDM_SETTING_OPENPLUGINSDIR` | 7 |
 
 ## ?
 

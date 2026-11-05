@@ -119,11 +119,11 @@
 
 ## 6. 완료 기준
 
-- [ ] 환경설정 23개 페이지, 스타일 설정, 단축키 매퍼 동작
-- [ ] 설정이 원본 Notepad++와 양방향으로 호환
-- [ ] 밝게/어둡게/시스템 모드가 Windows·Linux에서 동작
-- [ ] 한국어 UI에서 모든 메뉴·다이얼로그 번역 적용
-- [ ] 로컬 CI 통과
+- [x] 환경설정 23개 페이지, 스타일 설정, 단축키 매퍼 동작 — 원본 `preference.rc`에서 생성한 24개 페이지(원본 8.9.8.1은 "편집 2"가 추가되어 24개), 컨트롤은 `config.xml` 필드에 바인딩(`ui.settings`: `allPagesExist`, `preferenceCheckboxesRoundTrip`, `styleConfiguratorSaves`, `shortcutMapperConflictsAndResult`). [feature-checklist.md](feature-checklist.md) 4단계 16/16
+- [x] 설정이 원본 Notepad++와 양방향으로 호환 — `tools/settings-compat/run-with-npp.ps1`로 이 저장소의 원본 소스를 빌드한 Notepad++ 8.9.8.1(MSVC Release x64)과 비교: NPP → 포트 다시 저장 시 376줄 중 손실·추가 0, 포트 → NPP(모든 `GUIConfig` 필드를 기본값이 아닌 값으로 바꾸고 `shortcuts.xml`에 단축키·매크로·Scintilla 키 추가) 다시 저장 시 차이 0. 기본값 차이 4개는 원본이 직접 쓰는 값(업데이트 날짜, `shortcutsXmlHmac`, 강조색으로 풀린 Fluent 사용자 색). 결과: `app/tests/data/settings-compat/report.txt`. 이전 8.8.8 대상 실행에서는 8.9.x에만 있는 설정 5개만 빠짐
+- [x] 밝게/어둡게/시스템 모드가 Windows·Linux에서 동작 — `ui.settings`: `lightDarkMode`(원본 다크 톤·테마 자동 전환), `systemModeFollowsColorScheme`(Windows는 실제 플랫폼 `QT_QPA_PLATFORM=windows`, Linux는 Docker 안 Xvfb + xcb + GTK 플랫폼 테마), `allThemesApply`(22개 테마 순회)
+- [x] 한국어 UI에서 모든 메뉴·다이얼로그 번역 적용 — `ui.settings`: `koreanMenus`(korean.xml이 번역하는 모든 메뉴 명령과 `SubEntries` 하위 메뉴 전부), `koreanDialogs`(찾기·바꾸기, 이동, 문자 범위 찾기, 열 편집기, 증분 검색, 결과 내 찾기, 단축키 매퍼, 매크로 대화상자, 환경설정 24페이지, 스타일 설정에서 미번역 컨트롤 0), `uiLanguageSwitch`, `rtlLanguage`(아랍어 RTL). 한국어·일본어·독일어·아랍어 스크린샷(`screenshots`, `NPP_SCREENSHOT_DIR` 설정 시)으로 잘림 없음 확인
+- [x] 로컬 CI 통과 — Windows MinGW/MSVC, Linux Docker × ADS/QT
 
 ## 7. 리스크
 
@@ -132,3 +132,24 @@
 | 페이지 수가 많아 공수 큼 | 바인딩 공통 코드(위젯 ↔ 모델 필드 매핑 테이블)로 페이지당 코드 최소화 |
 | 원본 다크 모드와 색감 차이 | 원본 기본 색값을 팔레트 기본값으로 사용, 스크린샷 비교 |
 | 긴 번역 문자열로 레이아웃 깨짐 | 레이아웃 매니저 사용(고정 좌표 금지), 다국어 스크린샷 점검 |
+
+## 8. 진행 현황
+
+| ID | 상태 | 구현 위치 / 비고 |
+|---|---|---|
+| P4-01, P4-02 | 완료 | `ui/prefs/PreferencesDialog`, 페이지는 `tools/gen-pref-pages.py`로 `preference.rc`에서 생성, `PreferenceBindings.cpp`(위젯 ↔ `GuiConfig` 매핑 테이블). 플러그인 가져오기·플러그인 폴더 열기 |
+| P4-03 | 완료 | `ui/StyleConfigurator`(원본 `WordStyleDlg`: 테마 전환·미리보기·취소 복원, 스타일별 색·글꼴, 확장자, 키워드, 전역 재정의, 사용자 stylers/테마 저장) |
+| P4-04 | 완료 | `ui/ShortcutMapper`(메인 메뉴·매크로·실행·플러그인·Scintilla 탭, 충돌 표시, 수정/삭제, 원본 형식 `shortcuts.xml`) |
+| P4-05 | 완료 | `ui/Theme.cpp`: Fusion + 팔레트(원본 다크 톤), 시스템 따라가기, 모드별 테마·툴바 설정(원본과 같이 모드별 저장), ADS 스타일 |
+| P4-06 | 완료 | `ui/DialogTranslator`(원본 컨트롤 ID로 번역, english.xml 복귀), `qtbase_<lang>.qm`, 하위 메뉴 번역(원본 `g_menuFolderPositions` 표), RTL 레이아웃 |
+| P4-07 | 완료 | `ui/ContextMenus.cpp`(`contextMenu.xml`, `tabContextMenu.xml`), `ui/Toolbar.cpp`(41개 버튼, 아이콘 세트, `toolbarButtonsConf.xml`), 탭 색·고정 탭, NPC/CC Uni EOL 표시 |
+| P4-08 | 완료 | `tools/settings-compat`(원본과 양방향 교차 확인), 이 문서 6장 |
+
+교차 확인으로 고친 점:
+- 자동 들여쓰기 값: 원본 `config.xml`은 0 없음, 1 고급, 2 기본(`AutoIndentMode`)인데 포트가 1·2를 반대로 해석했다. 원본 값으로 통일(기본값 1).
+- 줌 동기화가 켜져 있으면 두 번째 보기 줌을 첫 번째 보기 값으로 저장·적용한다(원본 `saveGUIParams`).
+- 하위 메뉴(편집 > 클립보드에 복사 등)와 최근 파일 메뉴 항목이 번역되지 않던 문제 수정.
+
+계획과 다르게 한 점:
+- 환경설정 페이지는 Qt Designer `.ui` 대신 원본 `preference.rc`에서 생성한 코드로 만든다(컨트롤 ID·순서를 원본과 같게 유지하고 번역 파일을 그대로 적용).
+- 파일 연결 페이지는 6단계(`platform/win`)에서 동작을 붙인다. 이 단계에서는 페이지만 있다.

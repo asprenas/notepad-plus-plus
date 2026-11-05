@@ -35,7 +35,6 @@ $newerThan888 = @("zoomSync", "disableSelectedTextDragDrop", "isFawSymlinkAllowe
                   "shortcutsXmlHMAC", "ColorPickerCustomColors")
 function Note([string]$line) {
     foreach ($n in $newerThan888) { if ($line -match "\b$n\b") { return "$line   (8.9.x setting, unknown to 8.8.8)" } }
-    if ($line -match "maintainIndent") { return "$line   (8.9.8.1 default is 2 = advanced)" }
     if ($line -match "FluentCustomColor") { return "$line   (0 = accent colour; Notepad++ stores the resolved accent)" }
     if ($line -match "autoUpdateNextDate") { return "$line   (written by Notepad++'s updater)" }
     return $line

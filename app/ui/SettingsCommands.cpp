@@ -62,8 +62,10 @@ void MainWindow::setUiLanguage(const std::string& fileName)
     rebuildMenus();
     if (m_findDialog)
         m_findDialog->translate(dialogLanguage());
-    if (m_prefs)
+    if (m_prefs) {
         m_prefs->translate();
+        m_prefs->reload(); // language selector shows the new language
+    }
     updateTitleAndStatus();
 }
 

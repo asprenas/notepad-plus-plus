@@ -67,7 +67,7 @@ NPP_INT_ATTR (autoUpdateMode,         "noUpdate", "autoUpdateMode", 1)
 // simple text entries
 NPP_BOOL_TEXT(checkHistoryFiles,      "CheckHistoryFiles", false)
 NPP_INT_TEXT (minimizeToTray,         "TrayIcon", 0)
-NPP_INT_TEXT (maintainIndent,         "MaintainIndent", 2)               // 0 none, 1 basic, 2 advanced
+NPP_INT_TEXT (maintainIndent,         "MaintainIndent", 1)               // upstream AutoIndentMode: 0 none, 1 advanced, 2 basic
 NPP_BOOL_TEXT(tagsMatchHighlight,     "TagsMatchHighLight", true)
 NPP_BOOL_ATTR(tagAttrHighlight,       "TagsMatchHighLight", "TagAttrHighLight", true)
 NPP_BOOL_ATTR(highlightNonHtmlZone,   "TagsMatchHighLight", "HighLightNonHtmlZone", false)

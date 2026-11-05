@@ -390,7 +390,7 @@ void PreferencesDialog::setupBindings()
         p.editInt(6513, &GuiConfig::tabSize, 1, 32);
         p.radios<bool>(&GuiConfig::tabReplacedBySpace, {{6311, false}, {6302, true}});
         p.check(6512, &GuiConfig::backspaceUnindent);
-        p.radios<int>(&GuiConfig::maintainIndent, {{7162, 0}, {7163, 1}, {7164, 2}});
+        p.radios<int>(&GuiConfig::maintainIndent, {{7162, 0}, {7163, 2}, {7164, 1}});
         if (auto* list = p.w<QListWidget>(6509)) { // "[Default]" + languages: per language tab settings are in langs.xml
             list->addItem(tr("[Default]"));
             list->setCurrentRow(0);

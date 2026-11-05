@@ -66,7 +66,7 @@ const std::map<std::string, int> kInts = {
     {"multiInstSetting", 2}, {"searchEngineChoice", 1}, {"darkModeColorTone", 2}, {"darkToolBarIconSet", 1},
     {"lightToolBarIconSet", 2}, {"darkTabIconSet", 1}, {"lightTabIconSet", 1}, {"changeHistory", 3},
     {"currentLineIndicator", 2}, {"currentLineFrameWidth", 3}, {"eolMode", 3}, {"npcMode", 2}, {"zoom", 2},
-    {"zoom2", -1}, {"maintainIndent", 1}, {"styleUrl", 1}, {"minimizeToTray", 1}, {"autoUpdateMode", 0},
+    {"zoom2", -1}, {"maintainIndent", 2}, {"styleUrl", 1}, {"minimizeToTray", 1}, {"autoUpdateMode", 0},
     {"writeTechnologyEngine", 0}, {"largeFileSizeMB", 300}, {"snapshotBackupTiming", 9000},
     {"appX", 40}, {"appY", 50}, {"appWidth", 900}, {"appHeight", 640}, {"distractionFreeDivPart", 5},
 };
@@ -104,6 +104,9 @@ void mutate(GuiConfig& g)
                   const auto it = kStrings.find(n);
                   v = it != kStrings.end() ? it->second : std::string("compat-") + n;
               }});
+    // zoomSync is flipped on: Notepad++ (and the port) then save zoom2 = zoom (Notepad_plus.cpp saveGUIParams)
+    if (g.zoomSync)
+        g.zoom2 = g.zoom;
 }
 
 std::map<std::string, std::string> values(GuiConfig g)
