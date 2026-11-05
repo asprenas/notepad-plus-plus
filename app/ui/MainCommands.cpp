@@ -75,6 +75,8 @@ void MainWindow::buildMenus()
     }
     rebuildMacroMenu();
     connectWindowMenu();
+    m_userCommandObjects.clear(); // owned by the previous menus
+    rebuildRunMenu();
 }
 
 void MainWindow::rebuildMenus()
@@ -104,6 +106,7 @@ void MainWindow::registerCommands()
     registerPanelCommands();
     registerWindowCommands();
     registerToolCommands();
+    registerRunCommands();
 
     registerMacroCommands();
     registerSettingsCommands();

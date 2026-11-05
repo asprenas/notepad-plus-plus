@@ -7,6 +7,7 @@
 #include "core/config/ConfigFile.h"
 #include "core/editor/EditorLanguage.h"
 #include "core/funclist/FunctionParser.h"
+#include "core/run/RunCommand.h"
 #include "core/search/Search.h"
 #include "core/i18n/NativeLanguage.h"
 #include "core/lang/LanguageRegistry.h"
@@ -159,6 +160,12 @@ public:
     static QString commandLineHelpText();
     QString debugInfoText() const;
     QDialog* openedDialog() const { return m_openedDialog; }
+    // --- Run (RunCommands.cpp)
+    core::RunVariables runVariables();
+    QString expandRunCommand(const QString& command);
+    bool runCommandLine(const QString& command);
+    void addUserCommand(const QString& name, const QString& command);
+    QDialog* runDialog() const { return m_runDialog; }
     FunctionListPanel* functionList() const noexcept { return m_funcList; }
     DockManager* dockManager() const noexcept { return m_dock.get(); }
     void reloadFunctionList();
@@ -277,6 +284,9 @@ private:
     void recordShortcutsXmlHmac();
     void showCommandLineHelp();
     void showDebugInfo();
+    void registerRunCommands();
+    void showRunDialog();
+    void rebuildRunMenu();
     void markFunctionListEntry();
     // --- small dialogs (ToolDialogs.cpp)
     void registerToolDialogs();
@@ -360,6 +370,9 @@ private:
     QTimer*                      m_monitorTimer = nullptr;
     bool                         m_quietSecurityWarnings = false;
     QPointer<QDialog>            m_openedDialog;
+    QPointer<QDialog>            m_runDialog;
+    QStringList                  m_runHistory;
+    std::vector<QPointer<QObject>> m_userCommandObjects; // Run menu entries of shortcuts.xml commands
     QMenu*                       m_recentMenu = nullptr;
     std::deque<std::string>      m_lastClosed;
     QFileSystemWatcher*          m_watcher = nullptr;

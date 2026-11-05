@@ -566,6 +566,51 @@ private slots:
         QVERIFY(!m_w->shortcutsXmlTrusted()); // modified outside: tampered
         QFile::remove(sx);
     }
+
+    void runCommandsAndUserCommandsMenu()
+    {
+        const QString f = writeFile(QStringLiteral("run me.txt"), "hello world\n");
+        QVERIFY(m_w->openFile(f));
+        editor()->send(SCI_GOTOPOS, 2);
+        QCOMPARE(m_w->expandRunCommand(QStringLiteral("x $(FILE_NAME) $(CURRENT_WORD) $(CURRENT_LINE)")),
+                 QStringLiteral("x run me.txt hello 0"));
+
+        // Save... adds a user command to shortcuts.xml and the Run menu (HMAC recorded: trusted)
+        m_w->setQuietSecurityWarnings(true);
+        m_w->addUserCommand(QStringLiteral("My Command"), QStringLiteral("cmd /c echo $(FILE_NAME)"));
+        QMenu* run = nullptr;
+        for (QObject* o : m_w->actions()->action(IDM_EXECUTE)->associatedObjects())
+            if ((run = qobject_cast<QMenu*>(o)))
+                break;
+        QVERIFY(run);
+        QAction* mine = nullptr;
+        for (QAction* a : run->actions())
+            if (a->text() == QStringLiteral("My Command"))
+                mine = a;
+        QVERIFY(mine);
+        QVERIFY(m_w->shortcutsXmlTrusted());
+        QFile sx(QDir(m_user.path()).filePath(QStringLiteral("shortcuts.xml")));
+        QVERIFY(sx.open(QIODevice::ReadOnly));
+        QVERIFY(sx.readAll().contains("My Command"));
+        sx.close();
+
+#if defined(Q_OS_WIN)
+        // a real process with the expanded arguments
+        const QString out = QDir(m_files.path()).filePath(QStringLiteral("out.txt"));
+        QVERIFY(m_w->runCommandLine(QStringLiteral("cmd.exe /c echo $(NAME_PART)> \"%1\"").arg(QDir::toNativeSeparators(out))));
+        QTRY_VERIFY_WITH_TIMEOUT(QFileInfo(out).size() > 0, 10000);
+        QByteArray got;
+        QTRY_VERIFY_WITH_TIMEOUT([&] {
+            QFile o(out);
+            if (!o.open(QIODevice::ReadOnly))
+                return false;
+            got = o.readAll().trimmed();
+            return !got.isEmpty();
+        }(), 10000);
+        QCOMPARE(got, QByteArray("run me"));
+#endif
+        QFile::remove(QDir(m_user.path()).filePath(QStringLiteral("shortcuts.xml")));
+    }
 };
 
 QTEST_MAIN(TestPanels)

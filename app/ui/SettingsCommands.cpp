@@ -170,6 +170,7 @@ void MainWindow::setShortcuts(const ShortcutsFile& f)
     m_shortcuts.save(m_paths.shortcutsXml());
     recordShortcutsXmlHmac(); // written by Notepad++ itself: trusted
     m_actions->applyShortcuts(&m_shortcuts);
+    rebuildRunMenu();
     rebuildMacroMenu();
     for (EditorPane* p : m_panes)
         applyScintillaKeys(p->editor());

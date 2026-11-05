@@ -95,6 +95,9 @@ add_library(npp_core STATIC
 
     util/Hash.h
     util/Hash.cpp
+
+    run/RunCommand.h
+    run/RunCommand.cpp
 )
 
 if(WIN32)

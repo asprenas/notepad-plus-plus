@@ -1,3 +1,4 @@
+#include "core/run/RunCommand.h"
 #include "core/util/Hash.h"
 #include "core/util/PathUtil.h"
 #include "core/util/StringUtil.h"
@@ -163,6 +164,30 @@ private slots:
         QCOMPARE(hashFiles(HashType::Md5, {f, f + ".missing"}),
                  std::string("900150983cd24fb0d6963f7d28e17f72  npp-hash-test.txt\r\n"));
         fs::remove(pathFromUtf8(f));
+    }
+
+    void runVariables()
+    {
+        RunVariables v;
+        v.fullCurrentPath = "C:\\dir\\sub\\file.tar.gz";
+        v.currentWord = "word";
+        v.nppFullFilePath = "C:\\npp\\notepad++.exe";
+        v.currentLine = 4;
+        v.currentColumn = 2;
+        v.currentLineStr = "the line\r\n";
+        QCOMPARE(expandRunVariables("$(FULL_CURRENT_PATH)|$(CURRENT_DIRECTORY)|$(FILE_NAME)|$(NAME_PART)|$(EXT_PART)", v),
+                 std::string("C:\\dir\\sub\\file.tar.gz|C:\\dir\\sub|file.tar.gz|file.tar|.gz"));
+        QCOMPARE(expandRunVariables("$(CURRENT_WORD) $(NPP_DIRECTORY) $(NPP_FULL_FILE_PATH) $(CURRENT_LINE):$(CURRENT_COLUMN)", v),
+                 std::string("word C:\\npp C:\\npp\\notepad++.exe 4:2"));
+        QCOMPARE(expandRunVariables("a $(UNKNOWN) b $(", v), std::string("a $(UNKNOWN) b $("));
+        QCOMPARE(expandRunVariables("$(CURRENT_LINESTR)", v), std::string("the line\r\n"));
+
+        SplitCommand c = splitRunCommand("\"C:\\Program Files\\app.exe\" -a \"x y\"  ");
+        QCOMPARE(c.program, std::string("C:\\Program Files\\app.exe"));
+        QCOMPARE(c.args, std::string("-a \"x y\""));
+        c = splitRunCommand("notepad");
+        QCOMPARE(c.program, std::string("notepad"));
+        QCOMPARE(c.args, std::string());
     }
 };
 
