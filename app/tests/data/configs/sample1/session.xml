@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<NotepadPlus>
+    <Session activeView="1">
+        <mainView activeIndex="1">
+            <File firstVisibleLine="10" xOffset="0" scrollWidth="1200" startPos="345" endPos="350" selMode="0" offset="0" wrapCount="1" lang="C++" encoding="-1" userReadOnly="no" filename="C:\src\main.cpp" backupFilePath="" originalFileLastModifTimestamp="3254071808" originalFileLastModifTimestampHigh="31141234" tabColourId="2" RTL="no" tabPinned="yes" mapFirstVisibleDisplayLine="-1" mapFirstVisibleDocLine="-1" mapLastVisibleDocLine="-1" mapNbLine="-1" mapHigherPos="-1" mapWidth="-1" mapHeight="-1" mapKByteInDoc="512" mapWrapIndentMode="-1" mapIsWrap="no" futureAttr="x">
+                <Mark line="3" />
+                <Mark line="42" />
+                <Fold line="7" />
+            </File>
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1" startPos="0" endPos="0" selMode="0" offset="0" wrapCount="1" lang="None (Normal Text)" encoding="949" userReadOnly="no" filename="new 1" backupFilePath="C:\Users\tester\AppData\Roaming\Notepad++\backup\new 1@2026-11-02_120000" originalFileLastModifTimestamp="0" originalFileLastModifTimestampHigh="0" tabColourId="-1" RTL="no" tabPinned="no" untitleTabRenamed="yes" />
+        </mainView>
+        <subView activeIndex="0">
+            <File firstVisibleLine="0" xOffset="0" scrollWidth="1" startPos="0" endPos="0" selMode="0" offset="0" wrapCount="1" lang="Python" encoding="-1" userReadOnly="yes" filename="/home/tester/한글 경로/script.py" backupFilePath="" originalFileLastModifTimestamp="1" originalFileLastModifTimestampHigh="2" tabColourId="-1" RTL="no" tabPinned="no" />
+        </subView>
+        <FileBrowser latestSelectedItem="C:\src\main.cpp">
+            <root foldername="C:\src">
+                <expanded path="C:\src\lib" />
+            </root>
+        </FileBrowser>
+    </Session>
+</NotepadPlus>

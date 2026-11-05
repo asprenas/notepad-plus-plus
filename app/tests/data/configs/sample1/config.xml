@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<NotepadPlus>
+    <History nbMaxFile="15" inSubMenu="no" customLength="-1">
+        <File filename="C:\Users\tester\Documents\노트.txt" />
+        <File filename="/home/tester/project/main.cpp" />
+    </History>
+    <FindHistory nbMaxFindHistoryPath="10" nbMaxFindHistoryFilter="10" nbMaxFindHistoryFind="10" nbMaxFindHistoryReplace="10" matchWord="no" matchCase="yes" wrap="yes" directionDown="yes" fifRecuisive="yes" fifInHiddenFolder="no" fifProjectPanel1="no" fifProjectPanel2="no" fifProjectPanel3="no" fifFilterFollowsDoc="no" searchMode="2" transparencyMode="1" transparency="150" dotMatchesNewline="no" isSearch2ButtonsMode="no" regexBackward4PowerUser="no" bookmarkLine="no" purge="no">
+        <Path name="C:\src" />
+        <Filter name="*.cpp *.h" />
+        <Find name="한글" />
+        <Find name="\d+(?=;)" />
+        <Replace name="$1" />
+    </FindHistory>
+    <GUIConfigs>
+        <GUIConfig name="ToolBar" visible="yes" fluentColor="0" fluentCustomColor="0" fluentMono="no">small</GUIConfig>
+        <GUIConfig name="StatusBar">hide</GUIConfig>
+        <GUIConfig name="TabBar" dragAndDrop="yes" drawTopBar="yes" drawInactiveTab="yes" reduce="yes" closeButton="yes" pinButton="yes" showOnlyPinnedButton="no" buttonsOninactiveTabs="no" doubleClick2Close="yes" vertical="no" multiLine="no" hide="no" quitOnEmpty="no" tabCompactLabelLen="0" />
+        <GUIConfig name="ScintillaViewsSplitter">horizontal</GUIConfig>
+        <GUIConfig name="UserDefineDlg" position="undocked">hide</GUIConfig>
+        <GUIConfig name="TabSetting" replaceBySpace="yes" size="2" backspaceUnindent="no" />
+        <GUIConfig name="AppPosition" x="100" y="50" width="1400" height="900" isMaximized="yes" />
+        <GUIConfig name="Auto-detection">autoUpdate2End</GUIConfig>
+        <GUIConfig name="CheckHistoryFiles">no</GUIConfig>
+        <GUIConfig name="TrayIcon">0</GUIConfig>
+        <GUIConfig name="MaintainIndent">1</GUIConfig>
+        <GUIConfig name="TagsMatchHighLight" TagAttrHighLight="yes" HighLightNonHtmlZone="no">yes</GUIConfig>
+        <GUIConfig name="RememberLastSession">yes</GUIConfig>
+        <GUIConfig name="DetectEncoding">yes</GUIConfig>
+        <GUIConfig name="NewDocDefaultSettings" format="2" encoding="4" lang="0" codepage="-1" openAnsiAsUTF8="yes" addNewDocumentOnStartup="no" useContentAsTabName="no" />
+        <GUIConfig name="Backup" action="0" useCustumDir="no" dir="" isSnapshotMode="yes" snapshotBackupTiming="7000" />
+        <GUIConfig name="auto-completion" autoCAction="3" triggerFromNbChar="3" autoCIgnoreNumbers="yes" insertSelectedItemUseENTER="yes" insertSelectedItemUseTAB="yes" autoCBrief="no" funcParams="yes" />
+        <GUIConfig name="auto-insert" parentheses="yes" brackets="no" curlyBrackets="yes" quotes="no" doubleQuotes="no" htmlXmlTag="yes">
+            <UserDefinePair open="60" close="62" />
+        </GUIConfig>
+        <GUIConfig name="largeFileRestriction" fileSizeMB="300" isEnabled="yes" allowAutoCompletion="no" allowBraceMatch="no" allowSmartHilite="no" allowClickableLink="no" deactivateWordWrap="yes" suppress2GBWarning="no" />
+        <GUIConfig name="DarkMode" enable="yes" colorTone="2" customColorTop="2105376" darkThemeName="Zenburn.xml" lightThemeName="" enableWindowsMode="yes" />
+        <GUIConfig name="ScintillaPrimaryView" lineNumberMargin="show" lineNumberDynamicWidth="yes" bookMarkMargin="hide" indentGuideLine="show" folderMarkStyle="circle" isChangeHistoryEnabled="3" lineWrapMethod="indent" currentLineIndicator="2" currentLineFrameWidth="2" virtualSpace="no" scrollBeyondLastLine="yes" Wrap="yes" edgeMultiColumnPos="80 120" zoom="2" whiteSpaceShow="show" eolShow="hide" borderWidth="2" multiSelection="yes" columnSel2MultiEdit="yes" />
+        <GUIConfig name="DockingManager" leftWidth="200" rightWidth="200" topHeight="200" bottomHeight="200">
+            <PluginDlg pluginName="dummy" id="0" curr="1" prev="-1" isVisible="no" />
+            <ActiveTabs cont="0" activeTab="-1" />
+        </GUIConfig>
+        <GUIConfig name="FutureFeatureNotKnownToday" someAttribute="keep me">keep this text</GUIConfig>
+        <GUIConfig name="ColorPickerCustomColors" color0="255" color1="65280" />
+    </GUIConfigs>
+    <ProjectPanels>
+        <ProjectPanel id="0" workSpaceFile="C:\work\proj.xml" />
+    </ProjectPanels>
+    <FileBrowser latestSelectedItem="C:\src" />
+    <UnknownTopLevelSection value="must survive a round trip" />
+</NotepadPlus>

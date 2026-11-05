@@ -1,0 +1,13 @@
+﻿Original Notepad++ 8.9.8.1 (D:\ProjectAI\notepad-plus-plus\PowerEditor\bin64\notepad++.exe)
+
+== 1. NPP -> port: Notepad++ default config.xml loaded and re-saved by the port
+  default-differs autoUpdateNextDate: expected "" got "20080426"   (written by Notepad++'s updater)
+  default-differs lightTbFluentCustomColor: expected "0" got "12873472"   (0 = accent colour; Notepad++ stores the resolved accent)
+  default-differs shortcutsXmlHmac: expected "" got "0b5afd09f091111b4a460b5456f1ebcc8421ce16943c08554b6d202b839b2355"   (8.9.x setting, unknown to 8.8.8)
+  default-differs toolbarFluentCustomColor: expected "0" got "12873472"   (0 = accent colour; Notepad++ stores the resolved accent)
+  4 field(s) of the Notepad++ default config differ from the port defaults
+  lines in NPP file: 384, lost by the port: 0, added by the port: 0
+
+== 2. port -> NPP: config.xml (all GUIConfig fields changed) + shortcuts.xml written by the port, loaded and re-saved by Notepad++
+  0 difference(s)
+  unexpected differences: 0

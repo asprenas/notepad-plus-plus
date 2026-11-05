@@ -10,6 +10,7 @@
 #define SCI_POSITION_H
 
 #include <stddef.h>
+#include <stdint.h> // [npp-qt] intptr_t below (Notepad++ change) needs this outside Windows
 
 // Basic signed type used throughout interface
 typedef ptrdiff_t Sci_Position;
