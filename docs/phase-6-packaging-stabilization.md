@@ -103,7 +103,7 @@ GitHub은 저장소로만 쓰므로 빌드·서명·업로드는 로컬에서 �
 - [x] Windows·Linux 배포본이 깨끗한 환경에서 설치·실행·제거됨 (8절: Windows 빈 PATH·무인 설치/제거 20항목, Linux 4개 배포판 새 컨테이너 — Windows 새 VM 대신, 8절 제한 참고)
 - [x] 성능 목표 충족 또는 차이 원인 문서화 ([performance.md](performance.md))
 - [x] 크래시 덤프 생성과 복구 안내 동작 (`app.crashrecovery`, Windows·Linux)
-- [x] `ci/release.sh`로 베타 릴리스 1회 수행 — 0.1.0 리허설(2026-11-05): 로컬 CI 8/8, 패키지 4종, 패키지 시험 전부 통과, `dist/SHA256SUMS.txt`·릴리스 노트 생성. 태그 push 와 GitHub 업로드(`--publish`)는 개발자 결정으로 보류
+- [ ] `ci/release.sh`로 베타 릴리스 1회 수행 — 미완료. 0.1.0 리허설(2026-11-05): 로컬 CI 8/8, 패키지 4종, 패키지 시험 전부 통과, `dist/SHA256SUMS.txt`·릴리스 노트 생성. 태그 push 와 GitHub 업로드(`--publish`)는 개발자 결정으로 보류
 
 ## 7. 리스크
 
