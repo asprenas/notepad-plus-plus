@@ -86,6 +86,9 @@ add_library(npp_core STATIC
 
     search/Search.h
     search/Search.cpp
+
+    funclist/FunctionParser.h
+    funclist/FunctionParser.cpp
 )
 
 if(WIN32)

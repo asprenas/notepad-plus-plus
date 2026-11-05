@@ -35,6 +35,7 @@ npp_core_add_test(search SOURCES core/test_search.cpp LIBS npp_scintilla Qt6::Wi
 npp_core_add_test(textops SOURCES core/test_textops.cpp LIBS npp_scintilla Qt6::Widgets)
 npp_core_add_test(regexcompat SOURCES core/test_regexcompat.cpp LIBS npp_scintilla Qt6::Widgets)
 npp_core_add_test(urldetect SOURCES core/test_urldetect.cpp)
+npp_core_add_test(funclist SOURCES core/test_funclist.cpp LIBS npp_scintilla Qt6::Widgets)
 npp_core_add_test(autocompletion SOURCES core/test_autocompletion.cpp LIBS npp_scintilla Qt6::Widgets)
 
 # --- UI tests (phase 2): MainWindow against a temporary user directory --------------------
