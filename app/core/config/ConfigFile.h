@@ -5,6 +5,7 @@
 
 #include "core/config/GuiConfig.h"
 
+#include <array>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -46,6 +47,19 @@ struct FindHistory {
     static void push(std::vector<std::string>& list, const std::string& value, int max);
 };
 
+// <FileBrowser latestSelectedItem=".."><root foldername=".."><expanded path=".."/></root></FileBrowser>
+// (Folder as Workspace, upstream writeFileBrowserSettings)
+struct FileBrowserSettings {
+    struct Root {
+        std::string folder;
+        std::vector<std::string> expanded;
+        bool operator==(const Root&) const = default;
+    };
+    std::string latestSelectedItem;
+    std::vector<Root> roots;
+    bool operator==(const FileBrowserSettings&) const = default;
+};
+
 class ConfigFile {
 public:
     ConfigFile();
@@ -63,10 +77,15 @@ public:
     GuiConfig   gui;
     RecentFiles history;
     FindHistory findHistory;
+    // <ProjectPanels><ProjectPanel id="0..2" workSpaceFile=".."/></ProjectPanels>
+    std::array<std::string, 3> projectPanelFiles;
+    FileBrowserSettings fileBrowser;
 
 private:
     void parse();
     void writeBack();
+    std::array<std::string, 3> m_loadedProjectPanelFiles; // written back only when changed
+    FileBrowserSettings m_loadedFileBrowser;
 
     struct Impl;
     std::unique_ptr<Impl> d;

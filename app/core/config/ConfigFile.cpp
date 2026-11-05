@@ -117,6 +117,28 @@ void ConfigFile::parse()
         readList("Find", h.finds, h.maxFind);
         readList("Replace", h.replaces, h.maxReplace);
     }
+
+    for (pugi::xml_node n = root.child("ProjectPanels").child("ProjectPanel"); n; n = n.next_sibling("ProjectPanel")) {
+        const int id = xml::getInt(n, "id", 0);
+        if (id >= 0 && id <= 2)
+            if (const char* f = n.attribute("workSpaceFile").value(); *f)
+                projectPanelFiles[static_cast<size_t>(id)] = f;
+    }
+
+    if (const pugi::xml_node fb = root.child("FileBrowser")) {
+        fileBrowser.latestSelectedItem = fb.attribute("latestSelectedItem").value();
+        for (pugi::xml_node r = fb.child("root"); r; r = r.next_sibling("root")) {
+            FileBrowserSettings::Root fr{r.attribute("foldername").value(), {}};
+            if (fr.folder.empty())
+                continue;
+            for (pugi::xml_node e = r.child("expanded"); e; e = e.next_sibling("expanded"))
+                if (const char* p = e.attribute("path").value(); *p)
+                    fr.expanded.emplace_back(p);
+            fileBrowser.roots.push_back(std::move(fr));
+        }
+    }
+    m_loadedProjectPanelFiles = projectPanelFiles;
+    m_loadedFileBrowser = fileBrowser;
 }
 
 void ConfigFile::writeBack()
@@ -178,6 +200,39 @@ void ConfigFile::writeBack()
     writeList("Filter", fhd.filters);
     writeList("Find", fhd.finds);
     writeList("Replace", fhd.replaces);
+
+    // Upstream recreates both at the end of <NotepadPlus> on every save; rewritten here only when
+    // changed (unchanged files keep their content, a new config.xml stays minimal).
+    if (projectPanelFiles != m_loadedProjectPanelFiles) {
+        pugi::xml_node old = root.child("ProjectPanels");
+        if (old)
+            root.remove_child(old);
+        pugi::xml_node pp = root.append_child("ProjectPanels");
+        for (int i = 0; i < 3; ++i) {
+            pugi::xml_node n = pp.append_child("ProjectPanel");
+            xml::setInt(n, "id", i);
+            xml::setString(n, "workSpaceFile", projectPanelFiles[static_cast<size_t>(i)]);
+        }
+    }
+    if (!(fileBrowser == m_loadedFileBrowser)) {
+        pugi::xml_node old = root.child("FileBrowser");
+        if (old)
+            root.remove_child(old);
+        pugi::xml_node fb = root.append_child("FileBrowser");
+        if (!fileBrowser.roots.empty()) {
+            xml::setString(fb, "latestSelectedItem", fileBrowser.latestSelectedItem);
+            for (const auto& r : fileBrowser.roots) {
+                pugi::xml_node rn = fb.append_child("root");
+                xml::setString(rn, "foldername", r.folder);
+                std::vector<std::string> expanded = r.expanded;
+                std::sort(expanded.begin(), expanded.end());
+                for (const auto& e : expanded)
+                    xml::setString(rn.append_child("expanded"), "path", e);
+            }
+        }
+    }
+    m_loadedProjectPanelFiles = projectPanelFiles;
+    m_loadedFileBrowser = fileBrowser;
 }
 
 bool ConfigFile::save(std::string_view utf8Path)

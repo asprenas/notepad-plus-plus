@@ -8,6 +8,7 @@
 #include "menu/CommandIds.h"
 #include "panels/DocumentMapPanel.h"
 #include "panels/FunctionListPanel.h"
+#include "panels/ProjectPanel.h"
 
 #include "core/funclist/FunctionParser.h"
 #include "core/util/PathUtil.h"
@@ -16,6 +17,8 @@
 #include <ScintillaEditBase.h>
 
 #include <QTimer>
+
+#include <array>
 #include <QTreeWidget>
 
 namespace npp::ui {
@@ -57,6 +60,18 @@ void MainWindow::createExtraPanels()
     m_docMap = new DocumentMapPanel;
     m_dock->addPanel({kPanelDocumentMap, miscString("document-map-title", "Document Map"), {}, DockArea::Right, true, false},
                      m_docMap);
+
+    // --- Project Panels 1-3
+    for (int i = 0; i < 3; ++i) {
+        auto* pp = new ProjectPanel(i);
+        m_projectPanels[static_cast<size_t>(i)] = pp;
+        if (const std::string& ws = m_config.projectPanelFiles[static_cast<size_t>(i)]; !ws.empty())
+            pp->openWorkspace(q(ws));
+        connect(pp, &ProjectPanel::openFileRequested, this, [this](const QString& f) { openFile(f); });
+        connect(pp, &ProjectPanel::workspaceChanged, this,
+                [this, i](const QString& f) { m_config.projectPanelFiles[static_cast<size_t>(i)] = f.toStdString(); });
+        m_dock->addPanel({projectPanelId(i), tr("Project Panel %1").arg(i + 1), {}, DockArea::Left, true, false}, pp);
+    }
 
     m_panelTimer = new QTimer(this);
     m_panelTimer->setSingleShot(true);
@@ -102,6 +117,14 @@ void MainWindow::panelsOnBufferChanged()
         Buffer* b = currentBuffer();
         m_docMap->setSource(currentPane()->editor(), b ? b->document : 0);
     }
+}
+
+bool MainWindow::panelsPrepareExit()
+{
+    for (ProjectPanel* pp : m_projectPanels)
+        if (pp && !pp->askToSave())
+            return false;
+    return true;
 }
 
 void MainWindow::panelsOnStylesChanged()
@@ -163,6 +186,13 @@ void MainWindow::registerPanelCommands()
         };
     };
     r->setHandler(IDM_VIEW_FUNC_LIST, {toggle(kPanelFunctionList), {}, visible(kPanelFunctionList)});
+    for (int i = 0; i < 3; ++i) {
+        static const std::array<std::string, 3> ids{projectPanelId(0), projectPanelId(1), projectPanelId(2)};
+        const char* id = ids[static_cast<size_t>(i)].c_str();
+        r->setHandler(IDM_VIEW_PROJECT_PANEL_1 + i, {toggle(id), {}, visible(id)});
+        r->setHandler(IDM_VIEW_SWITCHTO_PROJECT_PANEL_1 + i,
+                      {focusPanel(id, [this, i]() -> QWidget* { return m_projectPanels[static_cast<size_t>(i)]->tree(); })});
+    }
     r->setHandler(IDM_VIEW_DOC_MAP, {toggle(kPanelDocumentMap), {}, visible(kPanelDocumentMap)});
     r->setHandler(IDM_VIEW_SWITCHTO_FUNC_LIST,
                   {focusPanel(kPanelFunctionList, [this]() -> QWidget* { return m_funcList->tree(); })});

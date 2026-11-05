@@ -1274,6 +1274,8 @@ bool MainWindow::loadSessionFrom(const QString& path)
 
 bool MainWindow::prepareExit()
 {
+    if (!panelsPrepareExit())
+        return false;
     const bool snapshot = m_config.gui.snapshotMode && m_config.gui.rememberLastSession && !m_cmd.noSession;
     if (snapshot) {
         backupDirtyBuffers();

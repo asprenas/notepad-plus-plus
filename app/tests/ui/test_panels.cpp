@@ -7,6 +7,7 @@
 #include "menu/CommandIds.h"
 #include "panels/DocumentMapPanel.h"
 #include "panels/FunctionListPanel.h"
+#include "panels/ProjectPanel.h"
 
 #include <Scintilla.h>
 #include <ScintillaEditBase.h>
@@ -14,6 +15,7 @@
 #include <QApplication>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QLineEdit>
 #include <QTemporaryDir>
 #include <QTest>
@@ -144,6 +146,49 @@ private slots:
         m_w->documentMap()->sync();
         QCOMPARE(map->send(SCI_GETWRAPMODE), editor()->send(SCI_GETWRAPMODE));
         QVERIFY(m_w->actions()->trigger(IDM_VIEW_WRAP));
+    }
+
+    void projectPanelWorkspaceRoundTrip()
+    {
+        QDir(m_files.path()).mkpath(QStringLiteral("proj/sub"));
+        writeFile(QStringLiteral("proj/a.txt"), "a");
+        writeFile(QStringLiteral("proj/sub/b.txt"), "b");
+        QVERIFY(m_w->actions()->trigger(IDM_VIEW_PROJECT_PANEL_2));
+        QVERIFY(m_w->dockManager()->isPanelVisible(MainWindow::projectPanelId(1)));
+        ProjectPanel* pp = m_w->projectPanel(1);
+        QTreeWidgetItem* proj = pp->addProject(QStringLiteral("My Project"));
+        QTreeWidgetItem* folder = pp->addFolder(proj, QStringLiteral("Virtual"));
+        pp->addFilesFromDirectory(folder, QDir(m_files.path()).filePath(QStringLiteral("proj")), true);
+        QVERIFY(pp->isDirty());
+        QCOMPARE(pp->allFiles().size(), 2);
+        // folders first (as upstream), then files
+        QCOMPARE(folder->child(0)->text(0), QStringLiteral("sub"));
+        QCOMPARE(folder->child(1)->text(0), QStringLiteral("a.txt"));
+        pp->moveItem(folder->child(1), -1);
+        QCOMPARE(folder->child(0)->text(0), QStringLiteral("a.txt"));
+
+        const QString ws = QDir(m_files.path()).filePath(QStringLiteral("my.workspace"));
+        QVERIFY(pp->saveWorkspaceAs(ws));
+        QVERIFY(!pp->isDirty());
+        QCOMPARE(pp->root()->text(0), QStringLiteral("my.workspace"));
+        QFile f(ws);
+        QVERIFY(f.open(QIODevice::ReadOnly));
+        const QByteArray xml = f.readAll();
+        QVERIFY2(xml.contains("<Project name=\"My Project\">"), xml.constData());
+        QVERIFY2(xml.contains("<Folder name=\"Virtual\">"), xml.constData());
+        QVERIFY2(xml.contains("name=\"proj"), xml.constData()); // relative to the workspace folder
+
+        // activating a file opens it
+        emit pp->tree()->itemActivated(folder->child(0), 0);
+        QVERIFY(m_w->currentBuffer()->path.find("a.txt") != std::string::npos);
+
+        // the workspace is reopened in the next session (config.xml <ProjectPanels>)
+        m_w->shutdownForTest();
+        makeWindow();
+        ProjectPanel* again = m_w->projectPanel(1);
+        QCOMPARE(QFileInfo(again->workspacePath()), QFileInfo(ws));
+        QCOMPARE(again->allFiles().size(), 2);
+        QVERIFY(m_w->projectPanel(0)->workspacePath().isEmpty());
     }
 };
 

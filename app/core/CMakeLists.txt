@@ -89,6 +89,9 @@ add_library(npp_core STATIC
 
     funclist/FunctionParser.h
     funclist/FunctionParser.cpp
+
+    project/Workspace.h
+    project/Workspace.cpp
 )
 
 if(WIN32)

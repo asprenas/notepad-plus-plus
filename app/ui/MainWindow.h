@@ -59,6 +59,7 @@ class FindReplaceDialog;
 class SearchResultsPanel;
 class FunctionListPanel;
 class DocumentMapPanel;
+class ProjectPanel;
 class PreferencesDialog;
 
 // Command line options of upstream CmdLineParams handled by the MVP
@@ -118,6 +119,8 @@ public:
     static const char* const kPanelFunctionList;
     static const char* const kPanelDocumentMap;
     DocumentMapPanel* documentMap() const noexcept { return m_docMap; }
+    static std::string projectPanelId(int i) { return "npp.project" + std::to_string(i + 1); }
+    ProjectPanel* projectPanel(int i) const { return m_projectPanels[static_cast<size_t>(i)]; }
     FunctionListPanel* functionList() const noexcept { return m_funcList; }
     DockManager* dockManager() const noexcept { return m_dock.get(); }
     void reloadFunctionList();
@@ -224,6 +227,7 @@ private:
     void registerPanelCommands();
     void panelsOnBufferChanged();
     void panelsOnStylesChanged();
+    bool panelsPrepareExit(); // asks to save modified workspaces
     void markFunctionListEntry();
     // --- small dialogs (ToolDialogs.cpp)
     void registerToolDialogs();
@@ -330,6 +334,7 @@ private:
     SearchResultsPanel*          m_searchResults = nullptr;
     FunctionListPanel*           m_funcList = nullptr;
     DocumentMapPanel*            m_docMap = nullptr;
+    std::array<ProjectPanel*, 3> m_projectPanels{};
     std::unique_ptr<core::FunctionParsersManager> m_funcParsers;
     QTimer*                      m_panelTimer = nullptr;
     bool                         m_syncScrollV = false, m_syncScrollH = false, m_syncing = false;
