@@ -17,17 +17,23 @@ public:
     // Code page of the document (Windows code page number; the table and the inserted text follow it).
     void setCodePage(int codePage);
     int codePage() const noexcept { return m_codePage; }
-    QTableWidget* table() const noexcept { return m_table; }
+    QTableWidget* table() const { ensureFilled(); return m_table; }
     // UTF-8 text inserted for a cell (column 2 = the character itself, others = the cell text).
     QByteArray textFor(int row, int column) const;
 
 signals:
     void insertRequested(const QByteArray& utf8);
 
+protected:
+    void showEvent(QShowEvent* e) override;
+
 private:
+    // The 256 rows are filled when the panel is shown or read (start-up time: ~120 ms)
+    void ensureFilled() const;
     void fill();
     QTableWidget* m_table = nullptr;
     int m_codePage = -2;
+    int m_filledFor = -3;
 };
 
 class ClipboardHistoryPanel final : public QWidget {

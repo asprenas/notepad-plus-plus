@@ -8,6 +8,7 @@
 #include <QKeyEvent>
 #include <QListWidget>
 #include <QMimeData>
+#include <QShowEvent>
 #include <QTableWidget>
 #include <QVBoxLayout>
 
@@ -120,7 +121,20 @@ void CharacterPanel::setCodePage(int codePage)
     if (codePage == m_codePage)
         return;
     m_codePage = codePage;
-    fill();
+    if (m_filledFor != -3 || isVisible()) // filled once: kept in step
+        fill();
+}
+
+void CharacterPanel::ensureFilled() const
+{
+    if (m_filledFor != m_codePage)
+        const_cast<CharacterPanel*>(this)->fill();
+}
+
+void CharacterPanel::showEvent(QShowEvent* e)
+{
+    ensureFilled();
+    QWidget::showEvent(e);
 }
 
 QByteArray CharacterPanel::textFor(int row, int column) const
@@ -128,6 +142,7 @@ QByteArray CharacterPanel::textFor(int row, int column) const
     if (row < 0 || row > 255)
         return {};
     if (column != 2) {
+        ensureFilled();
         QTableWidgetItem* it = m_table->item(row, column);
         return it ? it->text().toUtf8() : QByteArray();
     }
@@ -142,6 +157,7 @@ QByteArray CharacterPanel::textFor(int row, int column) const
 
 void CharacterPanel::fill()
 {
+    m_filledFor = m_codePage;
     const bool html = m_codePage == -1 || m_codePage == 1252;
     for (int i = 0; i < 256; ++i) {
         QString ch;

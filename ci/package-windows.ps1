@@ -31,6 +31,22 @@ $Stage = Join-Path $Root 'build\package\stage-windows\Notepad++Qt'
 
 function Fail($msg) { Write-Host "package-windows: $msg" -ForegroundColor Red; exit 1 }
 
+# Zip a folder (with the folder itself, or -Contents only). Freshly written files can be held
+# for a moment by a virus scanner / the search indexer: retry instead of failing.
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+function New-Zip([string]$folder, [string]$zipPath, [switch]$Contents) {
+    for ($try = 1; ; $try++) {
+        try {
+            if (Test-Path $zipPath) { Remove-Item $zipPath }
+            [IO.Compression.ZipFile]::CreateFromDirectory($folder, $zipPath, [IO.Compression.CompressionLevel]::Optimal, -not $Contents)
+            return
+        } catch {
+            if ($try -ge 5) { Fail "zip $zipPath failed: $($_.Exception.Message)" }
+            Start-Sleep -Seconds 2
+        }
+    }
+}
+
 # --- version from the root CMakeLists.txt ------------------------------------------------------
 $m = Select-String -Path (Join-Path $Root 'CMakeLists.txt') -Pattern '^\s*VERSION\s+(\d+\.\d+\.\d+)' | Select-Object -First 1
 if (-not $m) { Fail 'project VERSION not found' }
@@ -96,7 +112,7 @@ Copy-Item -Recurse $Stage (Join-Path $portStage "Notepad++Qt")
 Set-Content -Path (Join-Path $portStage 'Notepad++Qt\doLocalConf.xml') -Value '' -Encoding ascii
 $zip = Join-Path $Dist "$base-portable.zip"
 if (Test-Path $zip) { Remove-Item $zip }
-Compress-Archive -Path (Join-Path $portStage 'Notepad++Qt') -DestinationPath $zip -CompressionLevel Optimal
+New-Zip (Join-Path $portStage 'Notepad++Qt') $zip
 Write-Host "  portable  $zip"
 
 # --- symbols for crash dumps ------------------------------------------------------------------
@@ -104,7 +120,13 @@ $pdb = Join-Path $Build 'bin\notepadpp-qt.pdb'
 if (Test-Path $pdb) {
     $sym = Join-Path $Dist "$base-symbols.zip"
     if (Test-Path $sym) { Remove-Item $sym }
-    Compress-Archive -Path $pdb -DestinationPath $sym
+    # the PDB may still be held by mspdbsrv after the build: copy it with shared read access
+    $pdbCopy = Join-Path $env:TEMP "npp-pdb-$PID\notepadpp-qt.pdb"
+    New-Item -ItemType Directory -Force (Split-Path $pdbCopy) | Out-Null
+    $in = [IO.File]::Open($pdb, 'Open', 'Read', 'ReadWrite'); $out = [IO.File]::Create($pdbCopy)
+    $in.CopyTo($out); $out.Close(); $in.Close()
+    New-Zip (Split-Path $pdbCopy) $sym -Contents
+    Remove-Item -Recurse -Force (Split-Path $pdbCopy)
     Write-Host "  symbols   $sym"
 }
 
