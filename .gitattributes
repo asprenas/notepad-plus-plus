@@ -1,2 +1,5 @@
 # Shell scripts must keep LF so they run in CI containers and Git Bash
 *.sh text eol=lf
+# Linux desktop integration files are installed as they are
+packaging/linux/* text eol=lf
+*.Dockerfile text eol=lf
