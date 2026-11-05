@@ -1,3 +1,4 @@
+#include "ElevatedSave.h"
 #include "MainWindow.h"
 
 #include "docking/DockManager.h"
@@ -17,6 +18,10 @@
 #include <ScintillaEditBase.h>
 
 #include <QApplication>
+#include <cstdio>
+#include <QUrl>
+#include <QPushButton>
+#include <QDesktopServices>
 #include <QCloseEvent>
 #include <QDir>
 #include <QDragEnterEvent>
@@ -943,8 +948,12 @@ bool MainWindow::saveBuffer(Buffer* b, bool saveAs, bool copy)
     const bool wasUntitled = b->isUntitled();
     const std::string oldPath = b->path;
     watchFile(b->path, false);
-    const SaveStatus st = m_files->save(*b, path.toStdString(), copy);
+    SaveStatus st = m_files->save(*b, path.toStdString(), copy);
+    if (st == SaveStatus::AccessDenied && !processIsElevated())
+        st = saveElevated(b, path, copy);
     watchFile(b->path, true);
+    if (st == SaveStatus::AccessDenied)
+        return false; // cancelled or reported by saveElevated
     if (st != SaveStatus::Ok) {
         const auto t = m_nativeLang.messageBox("FileLockedWarning",
                                                "Please check whether if this file is opened in another program", "Save failed");
@@ -969,6 +978,37 @@ bool MainWindow::saveBuffer(Buffer* b, bool saveAs, bool copy)
             p->editor()->send(SCI_SETSAVEPOINT);
     refreshBuffer(b);
     return true;
+}
+
+// Protected file (upstream asks to relaunch in Administrator mode): write it through the
+// elevated helper (UAC on Windows, polkit on Linux) and keep the session running.
+SaveStatus MainWindow::saveElevated(Buffer* b, const QString& path, bool copy)
+{
+    if (qEnvironmentVariableIsSet("NPP_QT_NO_ELEVATION")) // tests: never show a UAC / polkit prompt
+        return SaveStatus::AccessDenied;
+    const auto t = m_nativeLang.messageBox("OpenInAdminMode", "The file cannot be saved and it may be protected.\n"
+                                           "Do you want to launch Notepad++ in Administrator mode?", "Save failed");
+    const QString question = tr("The file cannot be saved and it may be protected.\n"
+                                "Do you want to save it with administrator rights?");
+    if (QMessageBox::question(this, q(t.title), question + QStringLiteral("\n\n") + path) != QMessageBox::Yes)
+        return SaveStatus::AccessDenied;
+    const std::string data = m_files->encodedContent(*b);
+    QString error;
+    switch (elevatedWrite(path, QByteArray::fromStdString(data), &error)) {
+    case ElevatedResult::Ok:
+        if (!copy)
+            m_files->markSaved(*b, path.toStdString(), data.size());
+        return SaveStatus::Ok;
+    case ElevatedResult::Cancelled:
+        return SaveStatus::AccessDenied;
+    case ElevatedResult::Failed:
+    case ElevatedResult::Unsupported:
+        break;
+    }
+    const auto f = m_nativeLang.messageBox("OpenInAdminModeFailed", "Notepad++ cannot be opened in Administrator mode.",
+                                           "Open in Administrator mode failed");
+    QMessageBox::warning(this, q(f.title), error.isEmpty() ? path : error + QStringLiteral("\n\n") + path);
+    return SaveStatus::AccessDenied;
 }
 
 void MainWindow::moveOrCloneToOtherView(bool clone)
@@ -1080,6 +1120,13 @@ void MainWindow::backupDirtyBuffers()
         return;
     for (const auto& b : m_files->buffers())
         m_files->backup(*b, m_paths.backupDir());
+    // Upstream keeps session.xml in step with the backups: after a crash the next start
+    // restores the tabs and their unsaved changes.
+    if (m_config.gui.rememberLastSession && !m_cmd.noSession && !m_exiting) {
+        std::error_code ec;
+        fs::create_directories(pathFromUtf8(m_paths.sessionDir()), ec);
+        saveSession(currentSession(true), m_paths.sessionXml());
+    }
 }
 
 void MainWindow::addToRecent(const std::string& path)
@@ -1266,6 +1313,41 @@ bool MainWindow::prepareExit()
 void MainWindow::shutdownForTest()
 {
     prepareExit();
+}
+
+void MainWindow::showCrashRecoveryNotice(const QString& crashDir)
+{
+    int dirty = 0;
+    for (const auto& b : m_files->buffers())
+        dirty += b->dirty ? 1 : 0;
+    QString text = tr("Notepad++ was not closed properly last time.");
+    if (m_config.gui.snapshotMode && m_config.gui.rememberLastSession && !m_cmd.noSession)
+        text += QLatin1Char('\n') + tr("The last session was restored from the backup, with %n unsaved document(s).", nullptr, dirty);
+    else
+        text += QLatin1Char('\n') + tr("Session snapshot and periodic backup is off: unsaved changes could not be kept "
+                                        "(Preferences > Backup).");
+    const QDir dir(crashDir);
+    const QStringList reports = dir.entryList({QStringLiteral("npp-*")}, QDir::Files, QDir::Time);
+    if (!reports.isEmpty())
+        text += QStringLiteral("\n\n") + tr("Crash report: %1").arg(QDir::toNativeSeparators(dir.filePath(reports.first())));
+    std::fprintf(stderr, "abnormal termination detected: %s\n", qPrintable(stateSummary()));
+
+    auto* box = new QMessageBox(QMessageBox::Information, QStringLiteral("Notepad++"), text, QMessageBox::Ok, this);
+    box->setAttribute(Qt::WA_DeleteOnClose);
+    if (!reports.isEmpty()) {
+        QPushButton* open = box->addButton(tr("Open Crash Folder"), QMessageBox::ActionRole);
+        connect(open, &QPushButton::clicked, this, [crashDir] { QDesktopServices::openUrl(QUrl::fromLocalFile(crashDir)); });
+    }
+    box->setModal(false);
+    box->show();
+}
+
+QString MainWindow::stateSummary() const
+{
+    int dirty = 0;
+    for (const auto& b : m_files->buffers())
+        dirty += b->dirty ? 1 : 0;
+    return QStringLiteral("tabs=%1 dirty=%2").arg(allTabs().size()).arg(dirty);
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)

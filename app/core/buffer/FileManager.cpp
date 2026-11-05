@@ -14,6 +14,8 @@
 #include <QDateTime>
 #include <QSaveFile>
 
+#include "core/platform/FileAccess.h"
+
 #include <algorithm>
 #include <ctime>
 #include <set>
@@ -378,23 +380,28 @@ SaveStatus FileManager::save(Buffer& b, std::string_view utf8PathIn, bool asCopy
     QSaveFile f(QString::fromStdString(utf8Path));
     f.setDirectWriteFallback(true); // directory not writable but file is
     if (!f.open(QIODevice::WriteOnly))
-        return SaveStatus::OpenFailed;
+        return writeAccessDenied(utf8Path) ? SaveStatus::AccessDenied : SaveStatus::OpenFailed;
     if (f.write(data.data(), static_cast<qint64>(data.size())) != static_cast<qint64>(data.size()) || !f.commit())
-        return SaveStatus::WriteFailed;
+        return writeAccessDenied(utf8Path) ? SaveStatus::AccessDenied : SaveStatus::WriteFailed;
 
-    if (!asCopy) {
-        b.path = utf8Path;
-        b.untitledName.clear();
-        b.status = DocStatus::Regular;
-        b.dirty = false;
-        b.timestamp = fileLastWriteTime(utf8Path);
-        b.fileReadOnly = false;
-        b.fileSize = data.size();
-        DocSwitch sw(m_scratch, b.document);
-        m_scratch.send(SCI_SETSAVEPOINT);
-        deleteBackup(b);
-    }
+    if (!asCopy)
+        markSaved(b, utf8Path, data.size());
     return SaveStatus::Ok;
+}
+
+void FileManager::markSaved(Buffer& b, std::string_view utf8PathIn, std::size_t size)
+{
+    const std::string utf8Path = absolutePath(utf8PathIn);
+    b.path = utf8Path;
+    b.untitledName.clear();
+    b.status = DocStatus::Regular;
+    b.dirty = false;
+    b.timestamp = fileLastWriteTime(utf8Path);
+    b.fileReadOnly = false;
+    b.fileSize = size;
+    DocSwitch sw(m_scratch, b.document);
+    m_scratch.send(SCI_SETSAVEPOINT);
+    deleteBackup(b);
 }
 
 FileChange FileManager::checkFileState(Buffer& b)

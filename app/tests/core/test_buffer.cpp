@@ -3,12 +3,15 @@
 #include "core/lang/LanguageRegistry.h"
 #include "core/lang/UserLanguage.h"
 #include "core/util/PathUtil.h"
+#include "core/platform/FileAccess.h"
 
 #include <Scintilla.h>
 #include <ScintillaEditBase.h>
 
 #include <QApplication>
+#include <QDir>
 #include <QFile>
+#include <QTemporaryDir>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -17,6 +20,14 @@
 #include <QThread>
 
 #include <thread>
+#if defined(_WIN32)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
 
 using namespace npp::core;
 
@@ -40,6 +51,20 @@ std::string tempDir()
     fs::create_directories(pathFromUtf8(d));
     return d;
 }
+
+#if defined(_WIN32)
+bool elevated()
+{
+    HANDLE token = nullptr;
+    if (!::OpenProcessToken(::GetCurrentProcess(), TOKEN_QUERY, &token))
+        return false;
+    TOKEN_ELEVATION e{};
+    DWORD size = 0;
+    const bool ok = ::GetTokenInformation(token, TokenElevation, &e, sizeof(e), &size);
+    ::CloseHandle(token);
+    return ok && e.TokenIsElevated;
+}
+#endif
 
 } // namespace
 
@@ -107,6 +132,42 @@ private slots:
         const std::string out = tempDir() + "/rt-" + file.toStdString();
         QCOMPARE(fm.save(*b, out, true), SaveStatus::Ok);
         QCOMPARE(readFileContent(out).value(), readFileContent(kEnc + file.toStdString()).value());
+    }
+
+    // Protected files: save reports AccessDenied (the UI then offers the elevated helper)
+    void saveToProtectedLocationIsAccessDenied()
+    {
+        QTemporaryDir tmp;
+        const std::string own = tmp.filePath(QStringLiteral("own.txt")).toStdString();
+        QVERIFY(!writeAccessDenied(own)); // new file in a writable folder
+        FileManager fm(*m_scratch, {}, &m_langs);
+        Buffer* b = fm.newDocument();
+        QCOMPARE(fm.save(*b, own), SaveStatus::Ok);
+        QVERIFY(!writeAccessDenied(own)); // existing writable file
+
+#if defined(_WIN32)
+        const QString windir = qEnvironmentVariable("WINDIR", QStringLiteral("C:/Windows"));
+        const std::string hosts = QDir(windir).filePath(QStringLiteral("System32/drivers/etc/hosts")).toStdString();
+        const std::string newInWindows = QDir(windir).filePath(QStringLiteral("npp-qt-test-%1.txt").arg(QCoreApplication::applicationPid())).toStdString();
+        if (elevated()) // nothing is protected for an elevated process
+            QSKIP("running with administrator rights");
+        QVERIFY(writeAccessDenied(hosts));
+        QVERIFY(writeAccessDenied(newInWindows));
+        QCOMPARE(fm.save(*b, newInWindows, true), SaveStatus::AccessDenied);
+#else
+        if (::geteuid() == 0)
+            QSKIP("running as root");
+        const QString ro = tmp.filePath(QStringLiteral("ro"));
+        QVERIFY(QDir().mkdir(ro));
+        QFile::setPermissions(ro, QFile::ReadOwner | QFile::ExeOwner);
+        const std::string inRo = QDir(ro).filePath(QStringLiteral("new.txt")).toStdString();
+        QVERIFY(writeAccessDenied(inRo));
+        QCOMPARE(fm.save(*b, inRo, true), SaveStatus::AccessDenied);
+        QFile::setPermissions(QString::fromStdString(own), QFile::ReadOwner);
+        QVERIFY(writeAccessDenied(own));
+        QCOMPARE(fm.save(*b, own, true), SaveStatus::AccessDenied);
+        QFile::setPermissions(ro, QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner);
+#endif
     }
 
     void detectionWithoutOverride()

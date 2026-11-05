@@ -198,6 +198,12 @@ public:
     bool loadSessionFrom(const QString& path);
     // Closes everything without asking (tests) and stores session/config like a normal exit.
     void shutdownForTest();
+    // Writes the snapshot backups and session.xml now (timer tick; crash test).
+    void backupNow() { backupDirtyBuffers(); }
+    // Previous run ended abnormally: tells what was restored and where the crash report is.
+    void showCrashRecoveryNotice(const QString& crashDir);
+    // "tabs=<n> dirty=<n>" for the hidden --quit-after test option
+    QString stateSummary() const;
 
 protected:
     void closeEvent(QCloseEvent* event) override;
@@ -231,6 +237,7 @@ private:
     bool closeBuffer(core::BufferId id, EditorPane* pane, bool askSave = true);
     bool closeBuffers(std::vector<std::pair<core::BufferId, EditorPane*>> list);
     bool saveBuffer(core::Buffer* b, bool saveAs, bool copy = false);
+    core::SaveStatus saveElevated(core::Buffer* b, const QString& path, bool copy);
     bool askToSave(core::Buffer* b); // false = cancel
     void moveOrCloneToOtherView(bool clone);
     void refreshBuffer(core::Buffer* b);

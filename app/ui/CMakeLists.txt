@@ -34,6 +34,10 @@ qt_add_library(npp_ui STATIC
     panels/UdlPanel.h
     panels/UdlPanel.cpp
     PlatformShell.h
+    ElevatedSave.h
+    ElevatedSave.cpp
+    CrashHandler.h
+    CrashHandler.cpp
     DialogTranslator.h
     DialogTranslator.cpp
     Toolbar.cpp
@@ -84,6 +88,10 @@ target_link_libraries(npp_ui PUBLIC
     Qt6::Widgets
     Qt6::PrintSupport
     Qt6::Network)
+
+if(WIN32)
+    target_link_libraries(npp_ui PRIVATE shell32 advapi32 dbghelp)
+endif()
 
 qt_add_executable(notepadpp-qt main.cpp)
 target_link_libraries(notepadpp-qt PRIVATE npp_ui)

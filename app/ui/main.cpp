@@ -1,6 +1,12 @@
+#include "CrashHandler.h"
+#include "ElevatedSave.h"
 #include "MainWindow.h"
 
 #include "core/search/Search.h"
+
+#include "editor/EditorPane.h"
+
+#include <Scintilla.h>
 
 #include <QApplication>
 #include <QDataStream>
@@ -10,6 +16,8 @@
 #include <QTimer>
 
 #include <cstdio>
+#include <cstring>
+#include <memory>
 
 namespace {
 
@@ -43,6 +51,10 @@ bool forwardToRunningInstance(const QStringList& args)
 
 int main(int argc, char* argv[])
 {
+    // Elevated save helper (started by the editor itself with administrator rights): no GUI
+    if (argc == 4 && std::strcmp(argv[1], npp::ui::kElevatedCopyOption) == 0)
+        return npp::ui::runElevatedCopy(QString::fromLocal8Bit(argv[2]), QString::fromLocal8Bit(argv[3]));
+
     QApplication app(argc, argv);
     QApplication::setApplicationName(QStringLiteral("Notepad++ Qt"));
     QApplication::setOrganizationName(QStringLiteral("NotepadPlusPlusQt"));
@@ -51,12 +63,22 @@ int main(int argc, char* argv[])
     // Upstream style options (-n, -l, -multiInst, ...) plus --screenshot for smoke tests
     QStringList args = QCoreApplication::arguments();
     QString screenshot;
-    for (int i = 1; i < args.size(); ++i)
+    bool crashTest = false; // hidden: crash after start (crash report / recovery test)
+    int quitAfterMs = -1;   // hidden: print the state and quit (recovery test)
+    for (int i = 1; i < args.size();) {
         if (args[i] == QLatin1String("--screenshot") && i + 1 < args.size()) {
             screenshot = args[i + 1];
             args.remove(i, 2);
-            break;
+        } else if (args[i] == QLatin1String("--crash-test")) {
+            crashTest = true;
+            args.remove(i);
+        } else if (args[i].startsWith(QLatin1String("--quit-after="))) {
+            quitAfterMs = args[i].mid(13).toInt();
+            args.remove(i);
+        } else {
+            ++i;
         }
+    }
     npp::ui::CommandLine cmd = npp::ui::parseCommandLine(args);
     if (!screenshot.isEmpty())
         cmd.noSession = true; // smoke test: do not touch the user's session
@@ -66,7 +88,32 @@ int main(int argc, char* argv[])
 
     npp::core::initRegexLocale();
     npp::ui::MainWindow window(cmd);
+    const QString crashDir = QDir(QString::fromStdString(window.paths().userDir())).filePath(QStringLiteral("crash"));
+    npp::ui::installCrashHandler(crashDir);
+    // Abnormal termination marker: only the first instance owns the session
+    std::unique_ptr<npp::ui::RunMarker> marker;
+    if (!cmd.multiInstance && screenshot.isEmpty())
+        marker = std::make_unique<npp::ui::RunMarker>(
+            QDir(QString::fromStdString(window.paths().sessionDir())).filePath(QStringLiteral("npp-running.marker")));
     window.show();
+    if (marker && marker->previousRunCrashed())
+        QTimer::singleShot(0, &window, [&window, crashDir] { window.showCrashRecoveryNotice(crashDir); });
+
+    if (crashTest)
+        QTimer::singleShot(1000, &window, [&window] {
+            if (npp::core::Buffer* b = window.currentBuffer()) {
+                window.currentPane()->editor()->send(SCI_APPENDTEXT, 23, reinterpret_cast<intptr_t>("crash test unsaved text"));
+                window.files().find(b->id)->dirty = true;
+            }
+            window.backupNow();
+            npp::ui::crashForTest();
+        });
+    if (quitAfterMs >= 0)
+        QTimer::singleShot(quitAfterMs, &window, [&window] {
+            std::fprintf(stderr, "state: %s\n", qPrintable(window.stateSummary()));
+            std::fflush(stderr);
+            QApplication::exit(0);
+        });
 
     QLocalServer server;
     if (!cmd.multiInstance && screenshot.isEmpty()) {

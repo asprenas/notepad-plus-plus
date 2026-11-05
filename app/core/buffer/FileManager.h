@@ -34,7 +34,8 @@ struct FileManagerSettings {
 };
 
 enum class LoadError { None, NotFound, CannotRead, TooBig, OutOfMemory };
-enum class SaveStatus { Ok, OpenFailed, WriteFailed, ReadOnlyForbidden };
+// AccessDenied: the file or its folder is protected (save again through the elevated helper)
+enum class SaveStatus { Ok, OpenFailed, WriteFailed, ReadOnlyForbidden, AccessDenied };
 
 struct LoadOptions {
     int encodingOverride = -1;              // forced code page (Encoding > Character sets), -1 = detect
@@ -76,6 +77,9 @@ public:
     // Writes the document to `utf8Path` in the buffer's encoding / Unicode mode. When asCopy is
     // false the buffer adopts the new path, becomes clean and its timestamp is refreshed.
     SaveStatus save(Buffer& buffer, std::string_view utf8Path, bool asCopy = false);
+    // The buffer was written to `utf8Path` by someone else (elevated save helper): adopt the
+    // path, become clean, refresh the timestamp (what save does after writing).
+    void markSaved(Buffer& buffer, std::string_view utf8Path, std::size_t size);
     // Bytes that would be written (encoding applied); used by save and tests.
     std::string encodedContent(const Buffer& buffer) const;
     std::string utf8Content(const Buffer& buffer) const;

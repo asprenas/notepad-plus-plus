@@ -104,3 +104,14 @@ if(WIN32)
     set_tests_properties(ui.panels.udlscreenshots PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=windows")
     npp_test_env(ui.panels.udlscreenshots)
 endif()
+
+# --- phase 6: crash report and recovery after an abnormal end ---------------------------
+add_test(NAME app.crashrecovery
+    COMMAND ${CMAKE_COMMAND} -DEXE=$<TARGET_FILE:notepadpp-qt> -DWORK=${CMAKE_CURRENT_BINARY_DIR}/crashrecovery
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/scripts/crash_recovery.cmake)
+set_tests_properties(app.crashrecovery PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 150)
+npp_test_env(app.crashrecovery)
+add_test(NAME app.elevatedcopy
+    COMMAND ${CMAKE_COMMAND} -DEXE=$<TARGET_FILE:notepadpp-qt> -DWORK=${CMAKE_CURRENT_BINARY_DIR}/elevatedcopy
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/scripts/elevated_copy.cmake)
+npp_test_env(app.elevatedcopy)
