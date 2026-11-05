@@ -10,11 +10,15 @@
 #include "panels/FolderAsWorkspacePanel.h"
 #include "panels/FunctionListPanel.h"
 #include "panels/ProjectPanel.h"
+#include "panels/SmallPanels.h"
 
 #include <Scintilla.h>
 #include <ScintillaEditBase.h>
 
 #include <QApplication>
+#include <QClipboard>
+#include <QListWidget>
+#include <QTableWidget>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -50,6 +54,10 @@ class TestPanels : public QObject {
         return p;
     }
     ScintillaEditBase* editor() const { return m_w->currentPane()->editor(); }
+    QByteArray docText() const
+    {
+        return QByteArray(reinterpret_cast<const char*>(editor()->send(SCI_GETCHARACTERPOINTER)));
+    }
 
 private slots:
     void initTestCase()
@@ -277,6 +285,54 @@ private slots:
         QCOMPARE(dl->tree()->topLevelItem(0)->text(1), QString());
         m_w->shutdownForTest();
         QVERIFY(m_w->config().gui.fileSwitcherWithoutExtColumn);
+    }
+
+    void characterPanelInsertsCharactersAndEntities()
+    {
+        m_w->ensureDocument();
+        QVERIFY(m_w->actions()->trigger(IDM_EDIT_CHAR_PANEL));
+        CharacterPanel* cp = m_w->characterPanel();
+        QVERIFY(m_w->dockManager()->isPanelVisible(MainWindow::kPanelCharacter));
+        QTableWidget* t = cp->table();
+        QCOMPARE(t->rowCount(), 256);
+        QCOMPARE(t->item(10, 2)->text(), QStringLiteral("LF"));
+        QCOMPARE(t->item(65, 1)->text(), QStringLiteral("41"));
+        QCOMPARE(t->item(38, 3)->text(), QStringLiteral("&amp;"));
+        QCOMPARE(t->item(128, 4)->text(), QStringLiteral("&#8364;")); // euro sign in Windows-1252
+
+        emit t->cellDoubleClicked(65, 2);
+        emit t->cellDoubleClicked(38, 3);
+        QCOMPARE(docText(), QByteArray("A&amp;"));
+
+        // Windows-1252 document: bytes above 127 are inserted as their Unicode characters (UTF-8 inside)
+        QVERIFY(m_w->actions()->trigger(IDM_FORMAT_WIN_1252));
+        QCOMPARE(cp->codePage(), 1252);
+        QCOMPARE(t->item(233, 2)->text(), QString(QChar(0xE9)));
+        emit t->cellDoubleClicked(233, 2);
+        QVERIFY(docText().endsWith("\xC3\xA9"));
+        // other code pages: no HTML columns
+        QVERIFY(m_w->actions()->trigger(IDM_FORMAT_WIN_1251));
+        QCOMPARE(t->item(38, 3)->text(), QString());
+        QCOMPARE(t->item(0xC0, 2)->text(), QString(QChar(0x0410))); // Cyrillic A
+    }
+
+    void clipboardHistoryKeepsDistinctEntries()
+    {
+        m_w->ensureDocument();
+        QVERIFY(m_w->actions()->trigger(IDM_EDIT_CLIPBOARDHISTORY_PANEL));
+        ClipboardHistoryPanel* ch = m_w->clipboardHistory();
+        QApplication::clipboard()->setText(QStringLiteral("first"));
+        QApplication::clipboard()->setText(QStringLiteral("second\nline"));
+        QTRY_COMPARE(ch->entries().size(), 2);
+        QApplication::clipboard()->setText(QStringLiteral("first"));
+        QTRY_COMPARE(ch->entries().first(), QStringLiteral("first"));
+        QCOMPARE(ch->entries().size(), 2);
+        QCOMPARE(ch->list()->item(1)->text(), QStringLiteral("second line"));
+        ch->addEntry(QString(100, QLatin1Char('x')));
+        QVERIFY(ch->list()->item(0)->text().endsWith(QStringLiteral("...")));
+        editor()->send(SCI_CLEARALL);
+        emit ch->list()->itemActivated(ch->list()->item(2));
+        QCOMPARE(docText(), QByteArray("second\nline"));
     }
 };
 

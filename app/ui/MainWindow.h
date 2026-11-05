@@ -62,6 +62,8 @@ class DocumentMapPanel;
 class ProjectPanel;
 class FolderAsWorkspacePanel;
 class DocumentListPanel;
+class CharacterPanel;
+class ClipboardHistoryPanel;
 class PreferencesDialog;
 
 // Command line options of upstream CmdLineParams handled by the MVP
@@ -127,6 +129,10 @@ public:
     FolderAsWorkspacePanel* folderAsWorkspace() const noexcept { return m_folderPanel; }
     static const char* const kPanelDocumentList;
     DocumentListPanel* documentList() const noexcept { return m_docList; }
+    static const char* const kPanelCharacter;
+    static const char* const kPanelClipboardHistory;
+    CharacterPanel* characterPanel() const noexcept { return m_charPanel; }
+    ClipboardHistoryPanel* clipboardHistory() const noexcept { return m_clipboardPanel; }
     FunctionListPanel* functionList() const noexcept { return m_funcList; }
     DockManager* dockManager() const noexcept { return m_dock.get(); }
     void reloadFunctionList();
@@ -308,6 +314,8 @@ private:
     DocumentListPanel*           m_docList = nullptr;
     std::function<void(const QString&)> m_setWorkspaceRoot; // Folder as Workspace panel
     FolderAsWorkspacePanel*      m_folderPanel = nullptr;
+    CharacterPanel*              m_charPanel = nullptr;
+    ClipboardHistoryPanel*       m_clipboardPanel = nullptr;
     QMenu*                       m_recentMenu = nullptr;
     std::deque<std::string>      m_lastClosed;
     QFileSystemWatcher*          m_watcher = nullptr;

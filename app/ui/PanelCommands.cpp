@@ -12,6 +12,7 @@
 #include "search/FindReplaceDialog.h"
 #include "panels/FunctionListPanel.h"
 #include "panels/ProjectPanel.h"
+#include "panels/SmallPanels.h"
 
 #include "core/funclist/FunctionParser.h"
 #include "core/util/PathUtil.h"
@@ -40,6 +41,8 @@ const char* const MainWindow::kPanelFunctionList = "npp.functionList";
 const char* const MainWindow::kPanelDocumentMap = "npp.documentMap";
 const char* const MainWindow::kPanelFolderAsWorkspace = "npp.folderAsWorkspace";
 const char* const MainWindow::kPanelDocumentList = "npp.documentList";
+const char* const MainWindow::kPanelCharacter = "npp.charPanel";
+const char* const MainWindow::kPanelClipboardHistory = "npp.clipboardHistory";
 
 void MainWindow::createExtraPanels()
 {
@@ -123,6 +126,22 @@ void MainWindow::createExtraPanels()
         m_dock->addPanel({projectPanelId(i), tr("Project Panel %1").arg(i + 1), {}, DockArea::Left, true, false}, pp);
     }
 
+    // --- Character Panel, Clipboard History
+    auto insertText = [this](const QByteArray& utf8) {
+        ScintillaEditBase* e = currentPane()->editor();
+        e->send(SCI_REPLACESEL, 0, reinterpret_cast<intptr_t>(utf8.constData()));
+        e->setFocus();
+    };
+    m_charPanel = new CharacterPanel;
+    connect(m_charPanel, &CharacterPanel::insertRequested, this, insertText);
+    m_dock->addPanel({kPanelCharacter, miscString("panel-asciiInsertion", "ASCII Codes Insertion Panel"), {}, DockArea::Right, true, false},
+                     m_charPanel);
+    m_clipboardPanel = new ClipboardHistoryPanel;
+    connect(m_clipboardPanel, &ClipboardHistoryPanel::insertRequested, this,
+            [insertText](const QString& t) { insertText(t.toUtf8()); });
+    m_dock->addPanel({kPanelClipboardHistory, miscString("panel-clipboardHistory", "Clipboard History"), {}, DockArea::Right, true, false},
+                     m_clipboardPanel);
+
     m_panelTimer = new QTimer(this);
     m_panelTimer->setSingleShot(true);
     m_panelTimer->setInterval(1000); // upstream reloads the list at most once per second after edits
@@ -163,6 +182,9 @@ void MainWindow::panelsOnBufferChanged()
 {
     if (m_funcList && m_dock->isPanelVisible(kPanelFunctionList))
         reloadFunctionList();
+    if (m_charPanel)
+        if (Buffer* b = currentBuffer())
+            m_charPanel->setCodePage(b->encoding);
     if (m_docMap && m_dock->isPanelVisible(kPanelDocumentMap)) {
         Buffer* b = currentBuffer();
         m_docMap->setSource(currentPane()->editor(), b ? b->document : 0);
@@ -186,6 +208,9 @@ void MainWindow::updateDocumentList()
             entries.push_back({id, p->viewIndex(), q(b->displayName()), b->isUntitled() ? QString() : QDir::toNativeSeparators(q(b->path)),
                                b->dirty, b->isReadOnly(), p == currentPane() && id == p->current()});
     m_docList->setEntries(entries);
+    if (m_charPanel) // encoding changes refresh the buffer too
+        if (Buffer* b = currentBuffer())
+            m_charPanel->setCodePage(b->encoding);
 }
 
 void MainWindow::panelsSaveSettings()
@@ -277,6 +302,8 @@ void MainWindow::registerPanelCommands()
         r->setHandler(IDM_VIEW_SWITCHTO_PROJECT_PANEL_1 + i,
                       {focusPanel(id, [this, i]() -> QWidget* { return m_projectPanels[static_cast<size_t>(i)]->tree(); })});
     }
+    r->setHandler(IDM_EDIT_CHAR_PANEL, {toggle(kPanelCharacter), {}, visible(kPanelCharacter)});
+    r->setHandler(IDM_EDIT_CLIPBOARDHISTORY_PANEL, {toggle(kPanelClipboardHistory), {}, visible(kPanelClipboardHistory)});
     r->setHandler(IDM_VIEW_DOC_MAP, {toggle(kPanelDocumentMap), {}, visible(kPanelDocumentMap)});
     r->setHandler(IDM_VIEW_SWITCHTO_FUNC_LIST,
                   {focusPanel(kPanelFunctionList, [this]() -> QWidget* { return m_funcList->tree(); })});

@@ -23,6 +23,9 @@ qt_add_library(npp_ui STATIC
     panels/FolderAsWorkspacePanel.cpp
     panels/DocumentListPanel.h
     panels/DocumentListPanel.cpp
+    panels/SmallPanels.h
+    panels/SmallPanels.cpp
+    panels/HtmlCharNames.inc
     PlatformShell.h
     DialogTranslator.h
     DialogTranslator.cpp
