@@ -11,6 +11,8 @@
 #include "panels/FunctionListPanel.h"
 #include "panels/ProjectPanel.h"
 #include "panels/SmallPanels.h"
+#include "search/FindReplaceDialog.h"
+#include "search/SearchResultsPanel.h"
 
 #include <Scintilla.h>
 #include <ScintillaEditBase.h>
@@ -677,6 +679,35 @@ private slots:
             QVERIFY(m_w->printDocument(printer, false) >= 4);
         }
         QCOMPARE(editor()->send(SCI_GETMARGINWIDTHN, 0), w);
+    }
+
+    void findInProjects()
+    {
+        QDir(m_files.path()).mkpath(QStringLiteral("fip"));
+        const QString a = writeFile(QStringLiteral("fip/a.cpp"), "int needle = 1;\nneedle++;\n");
+        const QString b = writeFile(QStringLiteral("fip/b.txt"), "needle\n");
+        writeFile(QStringLiteral("fip/c.cpp"), "needle not in the project\n");
+        ProjectPanel* pp = m_w->projectPanel(0);
+        QTreeWidgetItem* proj = pp->addProject(QStringLiteral("P"));
+        pp->addFile(proj, a);
+        pp->addFile(proj, b);
+        emit pp->findInProjectsRequested();
+        FindReplaceDialog* d = m_w->findDialog();
+        QCOMPARE(d->currentTab(), FindReplaceDialog::FindInProjectsTab);
+        QVERIFY(d->projectPanelChecked(0));
+        QVERIFY(!d->projectPanelChecked(1));
+        SearchOptions o;
+        o.findWhat = "needle";
+        d->setOptions(o);
+        d->setFilters(QStringLiteral("*.cpp"));
+        emit d->actionRequested(FindReplaceDialog::Action::FindInProjects);
+        SearchResultsPanel* r = m_w->searchResults(false);
+        QVERIFY(r);
+        const QByteArray results(reinterpret_cast<const char*>(r->view()->send(SCI_GETCHARACTERPOINTER)));
+        QVERIFY2(results.contains("a.cpp"), results.constData());
+        QVERIFY2(!results.contains("c.cpp") && !results.contains("b.txt"), results.constData()); // not in the project / filtered
+        QVERIFY2(results.contains("2 hits") || results.contains("(2 hits"), results.constData());
+        d->hide();
     }
 };
 

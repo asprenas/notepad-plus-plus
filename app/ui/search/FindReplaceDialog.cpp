@@ -65,7 +65,6 @@ FindReplaceDialog::FindReplaceDialog(QWidget* parent) : QDialog(parent)
     m_tabs = new QTabBar;
     for (const char* t : {"Find", "Replace", "Find in Files", "Find in Projects", "Mark"})
         m_tabs->addTab(tr(t));
-    m_tabs->setTabVisible(FindInProjectsTab, false); // Project panels arrive in phase 5
 
     m_find = historyCombo();
     m_replace = historyCombo();
@@ -104,11 +103,16 @@ FindReplaceDialog::FindReplaceDialog(QWidget* parent) : QDialog(parent)
     m_followDoc = new QCheckBox(tr("Follow current doc."));
     m_bookmarkLine = new QCheckBox(tr("Bookmark line"));
     m_purge = new QCheckBox(tr("Purge for each search"));
+    for (int i = 0; i < 3; ++i) {
+        m_projects[i] = new QCheckBox(tr("Project Panel %1").arg(i + 1));
+        setControlId(m_projects[i], 1662 + i); // IDD_FINDINFILES_PROJECT1_CHECK
+    }
     for (auto [w, id] : std::initializer_list<std::pair<QWidget*, int>>{
              {m_findLabel, 1620}, {m_replaceLabel, 1611}, {m_filtersLabel, 1654}, {m_dirLabel, 1655}, {m_backward, 1722}, {m_wholeWord, 1603}, {m_matchCase, 1604}, {m_wrap, 1606}, {m_inSelection, 1632}, {m_recursive, 1658}, {m_hidden, 1659}, {m_bookmarkLine, 1616}, {m_purge, 1618}})
         setControlId(w, id);
     auto* checks = new QVBoxLayout;
-    for (QCheckBox* c : {m_bookmarkLine, m_purge, m_backward, m_wholeWord, m_matchCase, m_wrap, m_inSelection, m_followDoc, m_recursive, m_hidden})
+    for (QCheckBox* c : {m_bookmarkLine, m_purge, m_backward, m_wholeWord, m_matchCase, m_wrap, m_inSelection, m_followDoc, m_recursive, m_hidden,
+                         m_projects[0], m_projects[1], m_projects[2]})
         checks->addWidget(c);
     checks->addStretch();
 
@@ -138,6 +142,7 @@ FindReplaceDialog::FindReplaceDialog(QWidget* parent) : QDialog(parent)
         {"Find All in Current Document", Action::FindAllCurrent, 1641}, {"Find All in All Opened Documents", Action::FindAllOpen, 1636},
         {"Replace", Action::Replace, 1608}, {"Replace All", Action::ReplaceAll, 1609}, {"Replace All in All Opened Documents", Action::ReplaceAllOpen, 1635},
         {"Find All", Action::FindInFiles, 1656}, {"Replace in Files", Action::ReplaceInFiles, 1660},
+        {"Find All", Action::FindInProjects, 1666}, {"Replace in Projects", Action::ReplaceInProjects, 1665},
         {"Mark All", Action::MarkAll, 1615}, {"Clear all marks", Action::ClearMarks, 1633}, {"Copy Marked Text", Action::CopyMarked, 1725},
     };
     for (auto [text, a, id] : defs) {
@@ -171,7 +176,8 @@ FindReplaceDialog::FindReplaceDialog(QWidget* parent) : QDialog(parent)
     connect(m_tabs, &QTabBar::currentChanged, this, &FindReplaceDialog::updateForTab);
     connect(m_find->lineEdit(), &QLineEdit::returnPressed, this, [this] {
         const Tab t = currentTab();
-        emit actionRequested(t == FindInFilesTab ? Action::FindInFiles : t == MarkTab ? Action::MarkAll : Action::FindNext);
+        emit actionRequested(t == FindInFilesTab ? Action::FindInFiles : t == FindInProjectsTab ? Action::FindInProjects
+                             : t == MarkTab ? Action::MarkAll : Action::FindNext);
     });
     updateForTab();
 }
@@ -188,18 +194,23 @@ QPushButton* FindReplaceDialog::button(const QString& text, Action a)
 void FindReplaceDialog::updateForTab()
 {
     const Tab t = currentTab();
-    const bool replace = t == ReplaceTab || t == FindInFilesTab;
+    const bool projects = t == FindInProjectsTab;
+    const bool replace = t == ReplaceTab || t == FindInFilesTab || projects;
     const bool files = t == FindInFilesTab;
     const bool mark = t == MarkTab;
     m_replaceLabel->setVisible(replace);
     m_replace->setVisible(replace);
-    for (QWidget* w : std::initializer_list<QWidget*>{m_filtersLabel, m_filters, m_dirLabel, m_dir, m_browse, m_recursive, m_hidden, m_followDoc})
+    for (QWidget* w : std::initializer_list<QWidget*>{m_dirLabel, m_dir, m_browse, m_recursive, m_hidden, m_followDoc})
         w->setVisible(files);
+    m_filtersLabel->setVisible(files || projects);
+    m_filters->setVisible(files || projects);
+    for (QCheckBox* c : m_projects)
+        c->setVisible(projects);
     m_bookmarkLine->setVisible(mark);
     m_purge->setVisible(mark);
-    m_backward->setVisible(!files && !mark);
-    m_wrap->setVisible(!files);
-    m_inSelection->setVisible(!files);
+    m_backward->setVisible(!files && !projects && !mark);
+    m_wrap->setVisible(!files && !projects);
+    m_inSelection->setVisible(!files && !projects);
     auto show = [this](Action a, bool on) { m_buttons[a]->setVisible(on); };
     show(Action::FindNext, t == FindTab || t == ReplaceTab);
     show(Action::Count, t == FindTab);
@@ -210,6 +221,8 @@ void FindReplaceDialog::updateForTab()
     show(Action::ReplaceAllOpen, t == ReplaceTab);
     show(Action::FindInFiles, files);
     show(Action::ReplaceInFiles, files);
+    show(Action::FindInProjects, projects);
+    show(Action::ReplaceInProjects, projects);
     show(Action::MarkAll, mark);
     show(Action::ClearMarks, mark);
     show(Action::CopyMarked, mark);
@@ -300,6 +313,9 @@ void FindReplaceDialog::loadHistory(const FindHistory& h)
     m_dotNewline->setChecked(h.dotMatchesNewline);
     m_bookmarkLine->setChecked(h.bookmarkLine);
     m_purge->setChecked(h.purge);
+    m_projects[0]->setChecked(h.fifProjectPanel1);
+    m_projects[1]->setChecked(h.fifProjectPanel2);
+    m_projects[2]->setChecked(h.fifProjectPanel3);
     if (m_filters->currentText().isEmpty())
         m_filters->setCurrentText(QStringLiteral("*.*"));
 }
@@ -327,7 +343,14 @@ void FindReplaceDialog::saveHistory(FindHistory& h) const
     h.dotMatchesNewline = m_dotNewline->isChecked();
     h.bookmarkLine = m_bookmarkLine->isChecked();
     h.purge = m_purge->isChecked();
+    h.fifProjectPanel1 = m_projects[0]->isChecked();
+    h.fifProjectPanel2 = m_projects[1]->isChecked();
+    h.fifProjectPanel3 = m_projects[2]->isChecked();
 }
+
+bool FindReplaceDialog::projectPanelChecked(int i) const { return m_projects[i]->isChecked(); }
+
+void FindReplaceDialog::setProjectPanelChecked(int i, bool on) { m_projects[i]->setChecked(on); }
 
 void FindReplaceDialog::addToHistory()
 {

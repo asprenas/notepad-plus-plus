@@ -255,7 +255,8 @@ private:
     void runFindAction(int action);
     bool findNextInCurrent(const core::SearchOptions& o, bool showStatus);
     int findAllToPanel(const core::SearchOptions& o, const std::vector<core::Buffer*>& buffers, bool inSelection);
-    int runFindInFiles(const core::FindInFilesOptions& fo, const core::SearchOptions& o, bool replacing);
+    int runFindInFiles(const core::FindInFilesOptions& fo, const core::SearchOptions& o, bool replacing,
+                       const std::vector<std::string>* fileList = nullptr); // fileList: Find in Projects
     bool runInSlices(size_t count, const std::function<void(size_t)>& work, QProgressDialog& progress,
                      const std::function<QString(size_t)>& label);
     void openSearchResult(const QString& file, intptr_t start, intptr_t end, int line, bool lineRelative);

@@ -50,6 +50,7 @@ signals:
     void openFileRequested(const QString& path);
     void workspaceChanged(const QString& path); // file name changed (config.xml)
     void dirtyChanged(bool dirty);
+    void findInProjectsRequested();
 
 private:
     void setDirty(bool dirty);

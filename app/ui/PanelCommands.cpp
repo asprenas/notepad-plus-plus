@@ -209,6 +209,11 @@ void MainWindow::createExtraPanels()
         if (const std::string& ws = m_config.projectPanelFiles[static_cast<size_t>(i)]; !ws.empty())
             pp->openWorkspace(q(ws));
         connect(pp, &ProjectPanel::openFileRequested, this, [this](const QString& f) { openFile(f); });
+        connect(pp, &ProjectPanel::findInProjectsRequested, this, [this, i] {
+            for (int k = 0; k < 3; ++k) // upstream: only the panel the command comes from
+                findDialog()->setProjectPanelChecked(k, k == i);
+            findDialog()->showTab(FindReplaceDialog::FindInProjectsTab);
+        });
         connect(pp, &ProjectPanel::workspaceChanged, this,
                 [this, i](const QString& f) { m_config.projectPanelFiles[static_cast<size_t>(i)] = f.toStdString(); });
         m_dock->addPanel({projectPanelId(i), tr("Project Panel %1").arg(i + 1), {}, DockArea::Left, true, false}, pp);

@@ -127,6 +127,8 @@ ProjectPanel::ProjectPanel(int index, QWidget* parent) : QWidget(parent), m_inde
             saveWorkspaceAs(f, true);
     });
     menu->addSeparator();
+    menu->addAction(tr("Find in Projects..."), this, &ProjectPanel::findInProjectsRequested);
+    menu->addSeparator();
     menu->addAction(tr("Add New Project"), this, [this] {
         const QString n = askName(tr("Add New Project"), tr("Project Name"));
         if (!n.isEmpty())

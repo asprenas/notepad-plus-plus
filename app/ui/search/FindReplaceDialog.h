@@ -29,6 +29,7 @@ public:
         FindNext, Count, FindAllCurrent, FindAllOpen,
         Replace, ReplaceAll, ReplaceAllOpen,
         FindInFiles, ReplaceInFiles,
+        FindInProjects, ReplaceInProjects,
         MarkAll, ClearMarks, CopyMarked,
     };
 
@@ -49,6 +50,9 @@ public:
     bool recursive() const;
     bool includeHidden() const;
     void setFifOptions(bool recursive, bool includeHidden);
+    // Find in Projects: Project Panel 1..3 check boxes (config.xml fifProjectPanel1..3)
+    bool projectPanelChecked(int i) const;
+    void setProjectPanelChecked(int i, bool on);
     bool bookmarkLine() const;
     bool purgeBeforeMark() const;
     void setMarkOptions(bool bookmarkLine, bool purge);
@@ -77,6 +81,7 @@ private:
     QLabel *m_findLabel = nullptr, *m_replaceLabel = nullptr, *m_filtersLabel = nullptr, *m_dirLabel = nullptr, *m_status = nullptr;
     QPushButton* m_browse = nullptr;
     QCheckBox *m_backward = nullptr, *m_wholeWord = nullptr, *m_matchCase = nullptr, *m_wrap = nullptr, *m_inSelection = nullptr;
+    QCheckBox* m_projects[3] = {};
     QCheckBox *m_recursive = nullptr, *m_hidden = nullptr, *m_followDoc = nullptr, *m_bookmarkLine = nullptr, *m_purge = nullptr;
     QCheckBox* m_dotNewline = nullptr;
     QRadioButton *m_normal = nullptr, *m_extended = nullptr, *m_regex = nullptr;

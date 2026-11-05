@@ -9,10 +9,12 @@
 #include "editor/EditorPane.h"
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
+#include "panels/ProjectPanel.h"
 #include "search/FindReplaceDialog.h"
 #include "search/SearchResultsPanel.h"
 
 #include "core/search/Search.h"
+#include "core/util/StringUtil.h"
 #include "core/util/PathUtil.h"
 
 #include <Scintilla.h>
@@ -330,6 +332,39 @@ void MainWindow::runFindAction(int actionValue)
                      total ? Status::Normal : Status::Failed);
         break;
     }
+    case Action::FindInProjects:
+    case Action::ReplaceInProjects: {
+        // upstream findInProjects: the files of the checked Project Panels, filtered by the filters
+        const bool replacing = a == Action::ReplaceInProjects;
+        std::vector<std::string> files;
+        std::vector<std::string> patterns = tokenize(replaceAll(d->filters().toStdString(), ";", " "), ' ');
+        if (patterns.empty() || allPatternsAreExclusion(patterns))
+            patterns.insert(patterns.begin(), "*.*");
+        for (int i = 0; i < 3; ++i)
+            if (d->projectPanelChecked(i))
+                for (const QString& f : m_projectPanels[static_cast<size_t>(i)]->allFiles())
+                    if (QFileInfo::exists(f) && matchInList(fileNameOf(f.toStdString()), patterns)
+                        && std::find(files.begin(), files.end(), f.toStdString()) == files.end())
+                        files.push_back(f.toStdString());
+        if (files.empty()) {
+            d->setStatus(tr("Find in Projects: no file to search (check a Project Panel with files)."), Status::Failed);
+            break;
+        }
+        if (replacing) {
+            const auto t = m_nativeLang.messageBox("ReplaceInProjects", "Are you sure you want to replace all occurrences in the selected projects?",
+                                                   "Are you sure?");
+            if (QMessageBox::question(this, q(t.title), q(t.message)) != QMessageBox::Yes)
+                break;
+        }
+        const int n = runFindInFiles({}, o, replacing, &files);
+        if (n >= 0)
+            d->setStatus(replacing ? tr("Replace in Projects: %1 occurrence%2 replaced.").arg(n).arg(n == 1 ? tr(" was") : tr("s were"))
+                                   : tr("Find in Projects: %1 hit%2").arg(n).arg(n == 1 ? QString() : QStringLiteral("s")),
+                         n ? Status::Normal : Status::Failed);
+        else
+            d->setStatus(tr("The search was cancelled."), Status::Warning);
+        break;
+    }
     case Action::FindInFiles:
     case Action::ReplaceInFiles: {
         const bool replacing = a == Action::ReplaceInFiles;
@@ -430,7 +465,8 @@ bool MainWindow::runInSlices(size_t count, const std::function<void(size_t)>& wo
 
 // Find / Replace in Files with a cancellable progress window; the UI keeps running.
 // Returns the hits / replacements, -1 if cancelled.
-int MainWindow::runFindInFiles(const FindInFilesOptions& fo, const SearchOptions& o, bool replacing)
+int MainWindow::runFindInFiles(const FindInFilesOptions& fo, const SearchOptions& o, bool replacing,
+                               const std::vector<std::string>* fileList)
 {
     QProgressDialog progress(replacing ? tr("Replace in Files progress...") : tr("Find in Files progress..."), tr("Cancel"), 0, 1, this);
     // determinate range from the start: a 0..0 range is a busy indicator, whose animation timer event
@@ -444,7 +480,7 @@ int MainWindow::runFindInFiles(const FindInFilesOptions& fo, const SearchOptions
     progress.setLabelText(tr("Collecting files..."));
     QElapsedTimer pump;
     pump.start();
-    const std::vector<std::string> files = listFilesToSearch(fo, [&](size_t found) {
+    const std::vector<std::string> files = fileList ? *fileList : listFilesToSearch(fo, [&](size_t found) {
         if (pump.elapsed() > 50) {
             progress.setLabelText(tr("Collecting files... %1").arg(found));
             QCoreApplication::processEvents();
