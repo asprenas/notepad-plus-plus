@@ -161,6 +161,8 @@ void QtDockManager::applyLayout(const DockLayout& layout)
         m_mainWindow->removeDockWidget(dock);
         dock->setFloating(false);
         placePanel(dock, pl.area);
+        if (pl.area != DockArea::Floating && dock->isFloating()) // a hidden floating dock keeps the flag
+            dock->setFloating(false);
         dock->setVisible(pl.visible);
     }
 }

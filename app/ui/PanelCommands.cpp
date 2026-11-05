@@ -260,7 +260,7 @@ void MainWindow::createExtraPanels()
                 setLanguage(b.get(), L_TEXT);
         refreshUdlMenu();
     });
-    m_dock->addPanel({kPanelUdl, tr("User Defined Language"), {}, DockArea::Floating, true, false}, m_udlPanel);
+    m_dock->addPanel({kPanelUdl, tr("User Defined Language"), {}, DockArea::Bottom, true, false}, m_udlPanel);
 
     m_panelTimer = new QTimer(this);
     m_panelTimer->setSingleShot(true);
@@ -315,8 +315,13 @@ void MainWindow::panelsAfterRestore()
 {
     // No exact backend state (first start, settings of the original Notepad++, other backend):
     // panels from config.xml DockingManager.
-    if (!m_dockStateRestored)
-        m_dock->applyLayout(dockingDataToLayout(m_config.docking));
+    if (!m_dockStateRestored) {
+        DockLayout l = dockingDataToLayout(m_config.docking);
+        // UDL dialog: <GUIConfig name="UserDefineDlg" position="docked|undocked">show|hide
+        l.panels.push_back({kPanelUdl, m_config.gui.userDefineDlgShow,
+                            m_config.gui.userDefineDlgDocked ? DockArea::Bottom : DockArea::Floating});
+        m_dock->applyLayout(l);
+    }
     // upstream launches the Folder as Workspace panel when roots were saved
     if (m_folderPanel && !m_folderPanel->roots().isEmpty())
         m_dock->showPanel(kPanelFolderAsWorkspace, false);
@@ -339,7 +344,13 @@ void MainWindow::updateDocumentList()
 
 void MainWindow::panelsSaveSettings()
 {
-    layoutToDockingData(m_dock->layout(), m_config.docking);
+    const DockLayout layout = m_dock->layout();
+    layoutToDockingData(layout, m_config.docking);
+    for (const PanelLayout& p : layout.panels)
+        if (p.id == kPanelUdl) {
+            m_config.gui.userDefineDlgShow = p.visible;
+            m_config.gui.userDefineDlgDocked = p.area != DockArea::Floating;
+        }
     if (m_docList) {
         const DocumentListPanel::Columns c = m_docList->columns();
         GuiConfig& g = m_config.gui;
@@ -409,12 +420,21 @@ void MainWindow::registerPanelCommands()
 {
     ActionRegistry* r = m_actions;
     auto toggle = [this](const char* id) {
-        return [this, id] { m_dock->isPanelVisible(id) ? m_dock->hidePanel(id) : m_dock->showPanel(id); };
+        return [this, id] {
+            if (m_dock->isPanelVisible(id)) {
+                m_dock->hidePanel(id);
+                return;
+            }
+            m_dock->showPanel(id);
+            // the QDockWidget backend reports the visibility only once the window is on screen
+            panelsOnBufferChanged();
+        };
     };
     auto visible = [this](const char* id) { return [this, id] { return m_dock->isPanelVisible(id); }; };
     auto focusPanel = [this](const char* id, std::function<QWidget*()> widget) {
         return [this, id, widget] {
             m_dock->showPanel(id);
+            panelsOnBufferChanged();
             if (QWidget* w = widget())
                 w->setFocus();
         };

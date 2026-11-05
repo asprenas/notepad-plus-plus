@@ -849,6 +849,65 @@ private slots:
         m_w->mutableConfig().gui.minimizeToTray = 0;
         m_w->setForceTray(false);
     }
+
+    void allPanelsOpenMoveCloseAndRestore()
+    {
+        // every phase 5 panel: open, move to another side, close / reopen, restart restores it
+        // (runs with both docking backends: ADS and QT builds)
+        const std::vector<std::string> ids = {MainWindow::kPanelFunctionList, MainWindow::kPanelDocumentMap,
+                                              MainWindow::kPanelFolderAsWorkspace, MainWindow::projectPanelId(0),
+                                              MainWindow::projectPanelId(1), MainWindow::projectPanelId(2),
+                                              MainWindow::kPanelDocumentList, MainWindow::kPanelCharacter,
+                                              MainWindow::kPanelClipboardHistory, MainWindow::kPanelUdl};
+        m_w->resize(1200, 800);
+        m_w->show();
+        QVERIFY(QTest::qWaitForWindowExposed(m_w.get()));
+        DockManager* dm = m_w->dockManager();
+        auto areaOf = [&dm](const std::string& id) {
+            for (const PanelLayout& p : dm->layout().panels)
+                if (p.id == id)
+                    return p.area;
+            return DockArea::Floating;
+        };
+        DockLayout moved;
+        for (const std::string& id : ids) {
+            QVERIFY2(std::find(dm->panelIds().begin(), dm->panelIds().end(), id) != dm->panelIds().end(), id.c_str());
+            dm->showPanel(id);
+            QVERIFY2(dm->isPanelVisible(id), id.c_str());
+            dm->hidePanel(id);
+            QVERIFY2(!dm->isPanelVisible(id), id.c_str());
+            moved.panels.push_back({id, true, DockArea::Bottom});
+        }
+        dm->applyLayout(moved);
+        QCoreApplication::processEvents();
+        for (const std::string& id : ids) {
+            QVERIFY2(dm->isPanelVisible(id), id.c_str());
+            QVERIFY2(areaOf(id) == DockArea::Bottom, id.c_str());
+        }
+        m_w->shutdownForTest();
+        makeWindow();
+        m_w->resize(1200, 800);
+        m_w->show();
+        QVERIFY(QTest::qWaitForWindowExposed(m_w.get()));
+        dm = m_w->dockManager();
+        for (const std::string& id : ids) {
+            QVERIFY2(dm->isPanelVisible(id), id.c_str());
+            QVERIFY2(areaOf(id) == DockArea::Bottom, id.c_str());
+        }
+        // the same layout from config.xml only (no backend state file, e.g. after a backend switch)
+        m_w->shutdownForTest();
+        m_w.reset();
+        for (const QString& f : QDir(m_user.path()).entryList({QStringLiteral("dockLayout-*.bin")}))
+            QVERIFY(QFile::remove(QDir(m_user.path()).filePath(f)));
+        makeWindow();
+        dm = m_w->dockManager();
+        for (const std::string& id : ids) {
+            QVERIFY2(dm->isPanelVisible(id), id.c_str());
+            QVERIFY2(areaOf(id) == DockArea::Bottom, id.c_str());
+            dm->hidePanel(id);
+        }
+        m_w->shutdownForTest();
+    }
 };
 
 QTEST_MAIN(TestPanels)
