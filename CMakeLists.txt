@@ -20,6 +20,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 if(MSVC)
     add_compile_options(/utf-8 /permissive- /Zc:__cplusplus)
+    # Release keeps a PDB next to the executable: crash dumps of packaged builds are readable
+    add_compile_options($<$<CONFIG:Release>:/Zi> $<$<CONFIG:Release>:/FS>)
+    add_link_options($<$<CONFIG:Release>:/DEBUG> $<$<CONFIG:Release>:/OPT:REF> $<$<CONFIG:Release>:/OPT:ICF>)
 endif()
 
 set(NPP_DOCKING_BACKEND "ADS" CACHE STRING "Docking backend implementation: ADS or QT")

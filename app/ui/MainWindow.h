@@ -204,6 +204,7 @@ public:
     void showCrashRecoveryNotice(const QString& crashDir);
     // "tabs=<n> dirty=<n>" for the hidden --quit-after test option
     QString stateSummary() const;
+    bool findNextInCurrentForTest(const core::SearchOptions& o) { return findNextInCurrent(o, false); }
 
 protected:
     void closeEvent(QCloseEvent* event) override;
@@ -367,6 +368,7 @@ private:
 
     CommandLine                 m_cmd;
     core::AppPaths              m_paths;
+    bool                        m_uiPaletteDark = false; // dark palette / Fusion applied by applyTheme
     std::string                 m_dataDir;
     core::ConfigFile            m_config;
     core::LanguageRegistry      m_langs;

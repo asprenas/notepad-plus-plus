@@ -38,6 +38,7 @@ qt_add_library(npp_ui STATIC
     ElevatedSave.cpp
     CrashHandler.h
     CrashHandler.cpp
+    StartupLog.h
     DialogTranslator.h
     DialogTranslator.cpp
     Toolbar.cpp
@@ -96,6 +97,19 @@ endif()
 qt_add_executable(notepadpp-qt main.cpp)
 target_link_libraries(notepadpp-qt PRIVATE npp_ui)
 
+# --- application icon: window icon (all platforms) + Explorer icon / version info (Windows)
+set(NPP_ICON_SIZES 16 32 48 64 128)
+set(NPP_ICON_FILES)
+foreach(size IN LISTS NPP_ICON_SIZES)
+    list(APPEND NPP_ICON_FILES resources/icons/notepadpp-qt-${size}.png)
+endforeach()
+qt_add_resources(notepadpp-qt "appicon" PREFIX "/" FILES ${NPP_ICON_FILES})
+if(WIN32)
+    set(NPP_ICO "${NPP_ROOT_DIR}/PowerEditor/src/icons/npp.ico")
+    configure_file(resources/notepadpp-qt.rc.in ${CMAKE_CURRENT_BINARY_DIR}/notepadpp-qt.rc @ONLY)
+    target_sources(notepadpp-qt PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/notepadpp-qt.rc)
+endif()
+
 set_target_properties(notepadpp-qt PROPERTIES
     WIN32_EXECUTABLE ON
     MACOSX_BUNDLE ON
@@ -144,3 +158,21 @@ add_custom_command(TARGET notepadpp-qt POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${NPP_LEGACY_SRC_DIR}/icons "${NPP_DATA_OUT}/icons"
     VERBATIM)
+
+# --- install layout (packaging: ci/package-windows.ps1, ci/package-linux.sh) ----------------
+#  Windows: <prefix>/notepadpp-qt.exe + <prefix>/data/   (Qt runtime added by windeployqt)
+#  Linux:   <prefix>/bin/notepadpp-qt + <prefix>/share/notepadpp-qt/data/ + desktop/icons
+if(WIN32)
+    install(TARGETS notepadpp-qt RUNTIME DESTINATION .)
+    install(DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/data/ DESTINATION data)
+elseif(UNIX AND NOT APPLE)
+    include(GNUInstallDirs)
+    install(TARGETS notepadpp-qt RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    install(DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/data/ DESTINATION ${CMAKE_INSTALL_DATADIR}/notepadpp-qt/data)
+    install(FILES ${NPP_ROOT_DIR}/packaging/linux/notepadpp-qt.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
+    install(FILES ${NPP_ROOT_DIR}/packaging/linux/notepadpp-qt.metainfo.xml DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo)
+    foreach(size IN LISTS NPP_ICON_SIZES)
+        install(FILES resources/icons/notepadpp-qt-${size}.png
+                DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/${size}x${size}/apps RENAME notepadpp-qt.png)
+    endforeach()
+endif()

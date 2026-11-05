@@ -109,9 +109,15 @@ void MainWindow::applyTheme()
             p.setColor(QPalette::Disabled, role, rgb(c.disabledText));
         QApplication::setPalette(p);
     } else {
-        QApplication::setStyle(QStyleFactory::create(m_defaultStyleName.isEmpty() ? QStringLiteral("Fusion") : m_defaultStyleName));
-        QApplication::setPalette(QApplication::style()->standardPalette());
+        // Light mode: a new style / palette re-polishes every widget, which costs most of the
+        // start-up time of this function; only change what differs (leaving dark mode)
+        const QString style = m_defaultStyleName.isEmpty() ? QStringLiteral("Fusion") : m_defaultStyleName;
+        if (QApplication::style()->name().compare(style, Qt::CaseInsensitive) != 0 || m_uiPaletteDark) {
+            QApplication::setStyle(QStyleFactory::create(style));
+            QApplication::setPalette(QApplication::style()->standardPalette());
+        }
     }
+    m_uiPaletteDark = dark;
     m_dock->applyPalette(QApplication::palette());
 
     // editor theme of the mode

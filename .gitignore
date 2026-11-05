@@ -176,3 +176,6 @@ CMakeUserPresets.json
 .qtcreator/
 .vscode/
 vcpkg_installed/
+
+# Qt port packages (ci/package-*.sh|ps1, ci/release.sh)
+/dist/

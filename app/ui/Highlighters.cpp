@@ -158,8 +158,13 @@ void MainWindow::updateHighlights(EditorPane* p)
     if (m_highlighting)
         return;
     m_highlighting = true;
-    braceMatch(p);
-    smartHighlight(p);
+    // Large file restrictions (upstream Buffer::allowBraceMatch / allowSmartHilite)
+    const Buffer* cur = buffer(p->current());
+    const bool restricted = cur && cur->largeFile && m_config.gui.largeFileEnabled;
+    if (!restricted || m_config.gui.largeFileAllowBraceMatch)
+        braceMatch(p);
+    if (!restricted || m_config.gui.largeFileAllowSmartHilite)
+        smartHighlight(p);
     if (const Buffer* b = buffer(p->current()); b && m_config.gui.tagsMatchHighlight)
         XmlTagMatcher(p->adapter(), b->lang, QFileInfo(QString::fromStdString(b->path)).suffix().compare(QLatin1String("xhtml"), Qt::CaseInsensitive) == 0)
             .tagMatch(m_config.gui.tagAttrHighlight);

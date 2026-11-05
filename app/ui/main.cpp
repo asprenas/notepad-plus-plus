@@ -1,6 +1,7 @@
 #include "CrashHandler.h"
 #include "ElevatedSave.h"
 #include "MainWindow.h"
+#include "StartupLog.h"
 
 #include "core/search/Search.h"
 
@@ -10,6 +11,8 @@
 
 #include <QApplication>
 #include <QDataStream>
+#include <QElapsedTimer>
+#include <QIcon>
 #include <QDir>
 #include <QLocalServer>
 #include <QLocalSocket>
@@ -55,10 +58,19 @@ int main(int argc, char* argv[])
     if (argc == 4 && std::strcmp(argv[1], npp::ui::kElevatedCopyOption) == 0)
         return npp::ui::runElevatedCopy(QString::fromLocal8Bit(argv[2]), QString::fromLocal8Bit(argv[3]));
 
+    npp::ui::startupTimer().start();
     QApplication app(argc, argv);
+    npp::ui::startupLog("QApplication");
     QApplication::setApplicationName(QStringLiteral("Notepad++ Qt"));
     QApplication::setOrganizationName(QStringLiteral("NotepadPlusPlusQt"));
     QApplication::setApplicationVersion(QStringLiteral(NPP_QT_VERSION));
+    QApplication::setDesktopFileName(QStringLiteral("notepadpp-qt")); // Wayland: icon / grouping from the .desktop file
+    {
+        QIcon icon;
+        for (int size : {16, 32, 48, 64, 128})
+            icon.addFile(QStringLiteral(":/resources/icons/notepadpp-qt-%1.png").arg(size), QSize(size, size));
+        QApplication::setWindowIcon(icon);
+    }
 
     // Upstream style options (-n, -l, -multiInst, ...) plus --screenshot for smoke tests
     QStringList args = QCoreApplication::arguments();
@@ -87,7 +99,9 @@ int main(int argc, char* argv[])
         return 0;
 
     npp::core::initRegexLocale();
+    npp::ui::startupLog("before MainWindow");
     npp::ui::MainWindow window(cmd);
+    npp::ui::startupLog("MainWindow constructed (settings, session)");
     const QString crashDir = QDir(QString::fromStdString(window.paths().userDir())).filePath(QStringLiteral("crash"));
     npp::ui::installCrashHandler(crashDir);
     // Abnormal termination marker: only the first instance owns the session
@@ -96,6 +110,8 @@ int main(int argc, char* argv[])
         marker = std::make_unique<npp::ui::RunMarker>(
             QDir(QString::fromStdString(window.paths().sessionDir())).filePath(QStringLiteral("npp-running.marker")));
     window.show();
+    npp::ui::startupLog("shown");
+    QTimer::singleShot(0, &window, [] { npp::ui::startupLog("first event loop pass (painted)"); });
     if (marker && marker->previousRunCrashed())
         QTimer::singleShot(0, &window, [&window, crashDir] { window.showCrashRecoveryNotice(crashDir); });
 
@@ -112,6 +128,7 @@ int main(int argc, char* argv[])
         QTimer::singleShot(quitAfterMs, &window, [&window] {
             std::fprintf(stderr, "state: %s\n", qPrintable(window.stateSummary()));
             std::fflush(stderr);
+            window.shutdownForTest(); // stores session / settings like a normal exit
             QApplication::exit(0);
         });
 

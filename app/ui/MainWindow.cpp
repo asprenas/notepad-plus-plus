@@ -1,5 +1,6 @@
 #include "ElevatedSave.h"
 #include "MainWindow.h"
+#include "StartupLog.h"
 
 #include "docking/DockManager.h"
 #include "editor/EditorPane.h"
@@ -197,12 +198,17 @@ MainWindow::MainWindow(const CommandLine& cmd, QWidget* parent) : QMainWindow(pa
 {
     setAcceptDrops(true);
     loadSettings();
+    startupLog("  loadSettings");
     createUi();
+    startupLog("  createUi");
     registerCommands();
+    startupLog("  registerCommands");
     restoreWindowState();
     panelsAfterRestore();
+    startupLog("  window state, panels");
     connectSystemTheme();
     applyTheme();
+    startupLog("  applyTheme");
 
     m_watcher = new QFileSystemWatcher(this);
     connect(m_watcher, &QFileSystemWatcher::fileChanged, this, [this](const QString&) {
@@ -225,6 +231,7 @@ MainWindow::MainWindow(const CommandLine& cmd, QWidget* parent) : QMainWindow(pa
             restoreSession(*s);
     if (cmd.alwaysOnTop)
         setWindowFlag(Qt::WindowStaysOnTopHint, true);
+    startupLog("  session restored");
     openFromCommandLine(cmd);
     ensureDocument();
 }
@@ -248,7 +255,10 @@ void MainWindow::loadSettings()
     QStringList candidates;
     if (const QString env = qEnvironmentVariable("NPP_DATA_DIR"); !env.isEmpty())
         candidates << env;
+    if (const QString appDir = qEnvironmentVariable("APPDIR"); !appDir.isEmpty()) // AppImage (AppRun at the image root)
+        candidates << appDir + QStringLiteral("/usr/share/notepadpp-qt/data");
     candidates << QCoreApplication::applicationDirPath() + QStringLiteral("/data")
+               << QCoreApplication::applicationDirPath() + QStringLiteral("/../share/notepadpp-qt/data") // Linux install / AppImage
                << QCoreApplication::applicationDirPath() + QStringLiteral("/../Resources/data");
     for (const QString& d : candidates)
         if (QFileInfo::exists(d + QStringLiteral("/langs.model.xml"))) {
@@ -305,6 +315,7 @@ void MainWindow::loadSettings()
     fs.newDocLang = langTypeFromName(langInfo(static_cast<LangType>(std::clamp(g.newDocLang, 0, kLangCount - 1))).name)
                         .value_or(L_TEXT);
     fs.largeFileSizeBytes = static_cast<uint64_t>(std::max(1, g.largeFileSizeMB)) * 1024 * 1024;
+    fs.largeFileRestriction = g.largeFileEnabled;
     fs.untitledPrefix = m_nativeLang.localizedString("tab-untitled-string", "new ");
     m_files = std::make_unique<FileManager>(*m_scratch, fs, &m_langs, &m_udls);
 }
@@ -799,6 +810,9 @@ Buffer* MainWindow::openFile(const QString& rawPath, const LoadOptions& o, bool 
     }
     LoadError err = LoadError::None;
     Buffer* b = m_files->loadFile(path, o, &err);
+    // upstream: word wrap is switched off for a large file (performance)
+    if (b && b->largeFile && m_config.gui.largeFileDeactivateWordWrap && m_config.gui.wrap)
+        m_actions->trigger(IDM_VIEW_WRAP);
     if (!b) {
         const auto t = m_nativeLang.messageBox("OpenFileError", "Can not open file \"$STR_REPLACE$\".", "ERROR", 0, path);
         QMessageBox::warning(this, q(t.title), q(t.message));
@@ -1255,13 +1269,18 @@ void MainWindow::restoreSession(const Session& s)
                 e->send(SCI_SETDOCPOINTER, 0, prev);
                 e->send(SCI_RELEASEDOCUMENT, 0, prev);
             }
-            refreshBuffer(b);
+            // tab only: title, status bar and document list once after the loop (startup time)
+            for (EditorPane* pane : m_panes)
+                pane->setTabText(b->id, tabText(*b), b->isUntitled() ? QString() : q(b->path));
+            refreshTabDecorations(*b);
         }
         if (p->count() > 0) {
             p->show();
             p->activate(activeId != kInvalidBuffer ? activeId : p->bufferAt(0));
         }
     }
+    updateTitleAndStatus();
+    updateDocumentList();
     setActivePane(m_panes[static_cast<size_t>(s.activeView == 1 && m_panes[1]->count() > 0 ? 1 : 0)]);
 }
 

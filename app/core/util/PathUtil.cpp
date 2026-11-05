@@ -198,10 +198,26 @@ bool allPatternsAreExclusion(const std::vector<std::string>& patterns)
 
 std::optional<std::string> readFileContent(std::string_view path)
 {
-    std::ifstream in(pathFromUtf8(path), std::ios::binary);
+    std::ifstream in(pathFromUtf8(path), std::ios::binary | std::ios::ate);
     if (!in)
         return std::nullopt;
-    return std::string(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
+    // One allocation and one block read (the byte-wise istreambuf_iterator copy took
+    // seconds for a 500 MB file with MSVC)
+    const std::streamoff size = in.tellg();
+    std::string data;
+    if (size > 0) {
+        data.resize(static_cast<size_t>(size));
+        in.seekg(0);
+        in.read(data.data(), static_cast<std::streamsize>(size));
+        data.resize(static_cast<size_t>(in.gcount()));
+    }
+    // files that report no size (pipes, /proc): read what is there
+    if (size <= 0) {
+        in.clear();
+        in.seekg(0);
+        data.assign(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
+    }
+    return data;
 }
 
 bool writeFileContent(std::string_view path, std::string_view content)

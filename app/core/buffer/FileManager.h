@@ -30,6 +30,9 @@ struct FileManagerSettings {
 #endif
     LangType newDocLang = L_TEXT;
     uint64_t largeFileSizeBytes = 200ull * 1024 * 1024; // GuiConfig::largeFileSizeMB
+    // GuiConfig::largeFileEnabled: files from largeFileSizeBytes on get no styling (plain text,
+    // Scintilla document without style bytes) and no snapshot backup (upstream Buffer.cpp)
+    bool     largeFileRestriction = true;
     std::string untitledPrefix = "new ";   // localized "tab-untitled-string"
 };
 
@@ -42,6 +45,7 @@ struct LoadOptions {
     std::optional<UniMode> uniModeOverride;  // forced Unicode mode (Encoding > Encode in ...), no detection
     std::optional<LangType> langOverride;
     std::string userLangOverride;           // UDL name
+    bool forSearch = false;                 // Find in Files: text only (no language, timestamp, write check)
 };
 
 enum class FileChange { None, Modified, Deleted, Restored, ReadOnlyChanged };
@@ -98,7 +102,7 @@ public:
     LangType detectLanguage(std::string_view utf8Path, std::string_view firstBlock, std::string* udlName) const;
 
 private:
-    Buffer* createBuffer();
+    Buffer* createBuffer(bool largeFile = false);
     bool fillDocument(Buffer& b, const std::string& bytes, const LoadOptions& o);
     std::string nextUntitledName() const;
 

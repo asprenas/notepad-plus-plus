@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>notepadpp-qt</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>Notepad++ Qt</name>
+  <summary>Source code editor, Qt port of Notepad++</summary>
+  <description>
+    <p>Cross-platform port of the Notepad++ source code editor built on Qt and Scintilla.
+    It reads the same configuration files (config.xml, langs.xml, stylers.xml, shortcuts.xml,
+    session.xml) as Notepad++.</p>
+  </description>
+  <launchable type="desktop-id">notepadpp-qt.desktop</launchable>
+  <url type="homepage">https://github.com/asprenas/notepad-plus-plus</url>
+  <provides><binary>notepadpp-qt</binary></provides>
+  <content_rating type="oars-1.1"/>
+</component>

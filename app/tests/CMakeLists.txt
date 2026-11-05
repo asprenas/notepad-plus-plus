@@ -115,3 +115,9 @@ add_test(NAME app.elevatedcopy
     COMMAND ${CMAKE_COMMAND} -DEXE=$<TARGET_FILE:notepadpp-qt> -DWORK=${CMAKE_CURRENT_BINARY_DIR}/elevatedcopy
             -P ${CMAKE_CURRENT_SOURCE_DIR}/scripts/elevated_copy.cmake)
 npp_test_env(app.elevatedcopy)
+
+# --- phase 6: performance measurements (tools/perf; not a CTest test) ------------------------
+add_executable(test_ui_perf ui/test_perf.cpp)
+set_target_properties(test_ui_perf PROPERTIES AUTOMOC ON)
+target_link_libraries(test_ui_perf PRIVATE npp_ui Qt6::Test)
+add_dependencies(test_ui_perf notepadpp-qt)
