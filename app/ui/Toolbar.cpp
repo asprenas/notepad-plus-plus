@@ -2,6 +2,7 @@
 // Fluent UI (regular / filled, small 16 / large 32, light / dark), standard bitmap icon sets,
 // Fluent colorization, toolbarButtonsConf.xml hidden buttons and custom icon folder.
 #include "MainWindow.h"
+#include "plugins/PluginHost.h"
 
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
@@ -170,6 +171,8 @@ void MainWindow::buildToolbar()
         a->setIconVisibleInMenu(false); // upstream menus have no toolbar icons
         m_toolbar->addAction(a);
     }
+    if (m_plugins)
+        m_plugins->addToolbarButtons(m_toolbar, dark, size);
     m_toolbar->setIconSize(QSize(size, size));
     m_toolbar->setVisible(g.toolbarShow);
 }

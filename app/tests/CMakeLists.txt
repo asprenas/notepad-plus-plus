@@ -35,6 +35,7 @@ npp_core_add_test(search SOURCES core/test_search.cpp LIBS npp_scintilla Qt6::Wi
 npp_core_add_test(textops SOURCES core/test_textops.cpp LIBS npp_scintilla Qt6::Widgets)
 npp_core_add_test(regexcompat SOURCES core/test_regexcompat.cpp LIBS npp_scintilla Qt6::Widgets)
 npp_core_add_test(urldetect SOURCES core/test_urldetect.cpp)
+npp_core_add_test(funclist SOURCES core/test_funclist.cpp LIBS npp_scintilla Qt6::Widgets)
 npp_core_add_test(autocompletion SOURCES core/test_autocompletion.cpp LIBS npp_scintilla Qt6::Widgets)
 
 # --- UI tests (phase 2): MainWindow against a temporary user directory --------------------
@@ -87,3 +88,60 @@ endif()
 # --- settings compatibility helper (tools/settings-compat/run-with-npp.ps1, phase 4) --------
 add_executable(settings_compat tools/settings_compat.cpp)
 target_link_libraries(settings_compat PRIVATE npp_core)
+
+# --- phase 5: panels and remaining dialogs ------------------------------------------------
+add_executable(test_ui_panels ui/test_panels.cpp)
+set_target_properties(test_ui_panels PROPERTIES AUTOMOC ON)
+target_link_libraries(test_ui_panels PRIVATE npp_ui Qt6::Test Qt6::PrintSupport)
+add_dependencies(test_ui_panels notepadpp-qt)
+target_compile_definitions(test_ui_panels PRIVATE NPP_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data" NPP_ROOT_DIR="${NPP_ROOT_DIR}")
+add_test(NAME ui.panels COMMAND test_ui_panels)
+set_tests_properties(ui.panels PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+npp_test_env(ui.panels)
+if(WIN32)
+    # UDL highlighting screenshots with real fonts (the offscreen platform has none)
+    add_test(NAME ui.panels.udlscreenshots COMMAND test_ui_panels udlFilesImportAndHighlight)
+    set_tests_properties(ui.panels.udlscreenshots PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=windows")
+    npp_test_env(ui.panels.udlscreenshots)
+endif()
+
+# --- phase 6: crash report and recovery after an abnormal end ---------------------------
+add_test(NAME app.crashrecovery
+    COMMAND ${CMAKE_COMMAND} -DEXE=$<TARGET_FILE:notepadpp-qt> -DWORK=${CMAKE_CURRENT_BINARY_DIR}/crashrecovery
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/scripts/crash_recovery.cmake)
+set_tests_properties(app.crashrecovery PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 150)
+npp_test_env(app.crashrecovery)
+add_test(NAME app.elevatedcopy
+    COMMAND ${CMAKE_COMMAND} -DEXE=$<TARGET_FILE:notepadpp-qt> -DWORK=${CMAKE_CURRENT_BINARY_DIR}/elevatedcopy
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/scripts/elevated_copy.cmake)
+npp_test_env(app.elevatedcopy)
+
+# --- phase 6: performance measurements (tools/perf; not a CTest test) ------------------------
+add_executable(test_ui_perf ui/test_perf.cpp)
+set_target_properties(test_ui_perf PROPERTIES AUTOMOC ON)
+target_link_libraries(test_ui_perf PRIVATE npp_ui Qt6::Test)
+add_dependencies(test_ui_perf notepadpp-qt)
+
+# --- phase 7: plugin API (samples, ported MIME Tools, fault isolation) ------------------------
+set(NPP_TEST_PLUGIN_DIR ${CMAKE_BINARY_DIR}/test-plugins)
+npp_add_plugin(badversion SOURCES plugins/badversion.c OUTPUT_DIR ${NPP_TEST_PLUGIN_DIR})
+npp_add_plugin(initfail SOURCES plugins/initfail.c OUTPUT_DIR ${NPP_TEST_PLUGIN_DIR})
+npp_add_plugin(win32like SOURCES plugins/win32like.c OUTPUT_DIR ${NPP_TEST_PLUGIN_DIR})
+npp_add_plugin(throwing SHARED_RUNTIME SOURCES plugins/throwing.cpp OUTPUT_DIR ${NPP_TEST_PLUGIN_DIR})
+if(MSVC)
+    target_compile_options(throwing PRIVATE /EHs) # exceptions leave extern "C" functions on purpose
+endif()
+
+add_executable(test_ui_plugins ui/test_plugins.cpp)
+set_target_properties(test_ui_plugins PROPERTIES AUTOMOC ON)
+target_link_libraries(test_ui_plugins PRIVATE npp_ui Qt6::Test)
+add_dependencies(test_ui_plugins notepadpp-qt badversion initfail win32like throwing)
+if(NPP_BUILD_PLUGINS)
+    add_dependencies(test_ui_plugins textcase docinfo mimeTools)
+endif()
+target_compile_definitions(test_ui_plugins PRIVATE
+    NPP_PLUGIN_DIR="${NPP_PLUGIN_OUTPUT_DIR}"
+    NPP_TEST_PLUGIN_DIR="${NPP_TEST_PLUGIN_DIR}")
+add_test(NAME ui.plugins COMMAND test_ui_plugins)
+set_tests_properties(ui.plugins PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+npp_test_env(ui.plugins)

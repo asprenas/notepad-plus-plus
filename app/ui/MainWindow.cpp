@@ -1,9 +1,12 @@
+#include "ElevatedSave.h"
 #include "MainWindow.h"
+#include "StartupLog.h"
 
 #include "docking/DockManager.h"
 #include "editor/EditorPane.h"
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
+#include "plugins/PluginHost.h"
 #include "search/FindReplaceDialog.h"
 
 #include "core/editor/Representations.h"
@@ -17,13 +20,16 @@
 #include <ScintillaEditBase.h>
 
 #include <QApplication>
+#include <cstdio>
+#include <QUrl>
+#include <QPushButton>
+#include <QDesktopServices>
 #include <QCloseEvent>
 #include <QDir>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QFileSystemModel>
 #include <QFileSystemWatcher>
 #include <QFontDatabase>
 #include <QHeaderView>
@@ -38,7 +44,6 @@
 #include <QSplitter>
 #include <QStatusBar>
 #include <QTimer>
-#include <QTreeView>
 
 #include <algorithm>
 
@@ -49,8 +54,6 @@ using namespace cmd;
 
 namespace {
 
-constexpr char kPanelDocList[] = "npp.documentList";
-constexpr char kPanelFolder[] = "npp.folderAsWorkspace";
 constexpr int kMarginLineNumber = 0, kMarginBookmark = 1, kMarginFold = 2;
 constexpr int kMarkBookmark = 20; // upstream MARK_BOOKMARK
 constexpr int kMarkHideBegin = 19, kMarkHideEnd = 18; // MARK_HIDELINESBEGIN / END
@@ -179,6 +182,8 @@ CommandLine parseCommandLine(const QStringList& args)
         else if (a == QLatin1String("-nosession")) c.noSession = true;
         else if (a == QLatin1String("-ro")) c.readOnly = true;
         else if (a == QLatin1String("-alwaysOnTop")) c.alwaysOnTop = true;
+        else if (a == QLatin1String("-systemtray")) c.systemTray = true;
+        else if (a == QLatin1String("-noPlugin")) c.noPlugin = true;
         else if (a == QLatin1String("-openSession") && i + 1 < args.size()) c.sessionFile = args[++i];
         else if (a.startsWith(QLatin1String("-settingsDir="))) c.settingsDir = a.mid(13);
         else if (a.startsWith(QLatin1Char('-')) && !QFileInfo::exists(a)) continue; // unknown / unsupported option
@@ -195,11 +200,18 @@ MainWindow::MainWindow(const CommandLine& cmd, QWidget* parent) : QMainWindow(pa
 {
     setAcceptDrops(true);
     loadSettings();
+    startupLog("  loadSettings");
     createUi();
+    startupLog("  createUi");
+    createPluginHost(); // before the menus (plugin sub menus) and the dock layout (plugin panels)
     registerCommands();
+    startupLog("  registerCommands");
     restoreWindowState();
+    panelsAfterRestore();
+    startupLog("  window state, panels");
     connectSystemTheme();
     applyTheme();
+    startupLog("  applyTheme");
 
     m_watcher = new QFileSystemWatcher(this);
     connect(m_watcher, &QFileSystemWatcher::fileChanged, this, [this](const QString&) {
@@ -222,12 +234,46 @@ MainWindow::MainWindow(const CommandLine& cmd, QWidget* parent) : QMainWindow(pa
             restoreSession(*s);
     if (cmd.alwaysOnTop)
         setWindowFlag(Qt::WindowStaysOnTopHint, true);
+    startupLog("  session restored");
     openFromCommandLine(cmd);
     ensureDocument();
+    if (m_plugins)
+        QTimer::singleShot(0, this, [this] {
+            pluginNotify(NPPN_TBMODIFICATION);
+            pluginNotify(NPPN_READY);
+            if (const auto& errors = m_plugins->errors(); !errors.empty() && !m_quietSecurityWarnings) {
+                QString text = tr("Some plugins could not be loaded:");
+                for (const auto& e : errors)
+                    text += QStringLiteral("\n\n") + QDir::toNativeSeparators(e.file) + QStringLiteral("\n") + e.reason;
+                auto* box = new QMessageBox(QMessageBox::Warning, QStringLiteral("Notepad++"), text, QMessageBox::Ok, this);
+                box->setObjectName(QStringLiteral("pluginErrors"));
+                box->setAttribute(Qt::WA_DeleteOnClose);
+                box->setModal(false);
+                box->show();
+            }
+        });
+}
+
+void MainWindow::createPluginHost()
+{
+    if (m_cmd.noPlugin || qEnvironmentVariableIsSet("NPP_QT_NO_PLUGINS"))
+        return;
+    m_plugins = new PluginHost(this);
+    for (int v = 0; v < 2; ++v)
+        m_plugins->connectEditor(v, m_panes[static_cast<size_t>(v)]->editor());
+    m_plugins->loadAll();
+}
+
+void MainWindow::pluginNotify(uint32_t code, uintptr_t id)
+{
+    if (m_plugins)
+        m_plugins->notify(code, id);
 }
 
 MainWindow::~MainWindow()
 {
+    if (m_plugins)
+        m_plugins->shutdown();
     for (auto& ac : m_autoCompletion)
         ac.reset();
     // Views drop their documents before the FileManager releases them.
@@ -245,7 +291,10 @@ void MainWindow::loadSettings()
     QStringList candidates;
     if (const QString env = qEnvironmentVariable("NPP_DATA_DIR"); !env.isEmpty())
         candidates << env;
+    if (const QString appDir = qEnvironmentVariable("APPDIR"); !appDir.isEmpty()) // AppImage (AppRun at the image root)
+        candidates << appDir + QStringLiteral("/usr/share/notepadpp-qt/data");
     candidates << QCoreApplication::applicationDirPath() + QStringLiteral("/data")
+               << QCoreApplication::applicationDirPath() + QStringLiteral("/../share/notepadpp-qt/data") // Linux install / AppImage
                << QCoreApplication::applicationDirPath() + QStringLiteral("/../Resources/data");
     for (const QString& d : candidates)
         if (QFileInfo::exists(d + QStringLiteral("/langs.model.xml"))) {
@@ -302,6 +351,7 @@ void MainWindow::loadSettings()
     fs.newDocLang = langTypeFromName(langInfo(static_cast<LangType>(std::clamp(g.newDocLang, 0, kLangCount - 1))).name)
                         .value_or(L_TEXT);
     fs.largeFileSizeBytes = static_cast<uint64_t>(std::max(1, g.largeFileSizeMB)) * 1024 * 1024;
+    fs.largeFileRestriction = g.largeFileEnabled;
     fs.untitledPrefix = m_nativeLang.localizedString("tab-untitled-string", "new ");
     m_files = std::make_unique<FileManager>(*m_scratch, fs, &m_langs, &m_udls);
 }
@@ -395,33 +445,7 @@ void MainWindow::createUi()
 
 void MainWindow::createPanels()
 {
-    m_docList = new QListWidget;
-    connect(m_docList, &QListWidget::itemActivated, this, [this](QListWidgetItem* item) {
-        const BufferId id = item->data(Qt::UserRole).toULongLong();
-        const int view = item->data(Qt::UserRole + 1).toInt();
-        m_panes[static_cast<size_t>(view)]->activate(id);
-        setActivePane(m_panes[static_cast<size_t>(view)]);
-    });
-    m_dock->addPanel({kPanelDocList, tr("Document List"), {}, DockArea::Left, true, false}, m_docList);
-
-    auto* model = new QFileSystemModel(this);
-    model->setRootPath(QDir::homePath());
-    auto* tree = new QTreeView;
-    tree->setModel(model);
-    tree->setRootIndex(model->index(QDir::homePath()));
-    for (int c = 1; c < model->columnCount(); ++c)
-        tree->hideColumn(c);
-    tree->header()->hide();
-    m_setWorkspaceRoot = [this, model, tree](const QString& dir) {
-        model->setRootPath(dir);
-        tree->setRootIndex(model->index(dir));
-        m_dock->showPanel(kPanelFolder);
-    };
-    connect(tree, &QTreeView::doubleClicked, this, [this, model](const QModelIndex& idx) {
-        if (!model->isDir(idx))
-            openFile(model->filePath(idx));
-    });
-    m_dock->addPanel({kPanelFolder, tr("Folder as Workspace"), {}, DockArea::Left, true, false}, tree);
+    createExtraPanels();
 }
 
 void MainWindow::createStatusBar()
@@ -581,7 +605,7 @@ void MainWindow::restoreWindowState()
         setWindowState(windowState() | Qt::WindowMaximized);
     // Panel layout is kept by the docking backend next to config.xml
     if (const auto st = readFileContent(pathAppend(m_paths.userDir(), "dockLayout-" + m_dock->backendName().toStdString() + ".bin")))
-        m_dock->restoreNativeState(QByteArray::fromStdString(*st));
+        m_dockStateRestored = m_dock->restoreNativeState(QByteArray::fromStdString(*st));
 }
 
 void MainWindow::saveSettings()
@@ -661,7 +685,10 @@ void MainWindow::showBuffer(Buffer* b, EditorPane* pane, bool activateIt)
 
 void MainWindow::setActivePane(EditorPane* pane)
 {
+    const bool changed = m_activeView != pane->viewIndex();
     m_activeView = pane->viewIndex();
+    if (changed)
+        panelsOnBufferChanged();
     if (!pane->editor()->hasFocus() && isVisible())
         pane->editor()->setFocus();
     updateTitleAndStatus();
@@ -677,19 +704,13 @@ void MainWindow::onCurrentBufferChanged(EditorPane* pane, BufferId id)
     }
     if (pane->count() == 0 && pane->viewIndex() == 1)
         pane->hide();
+    if (b)
+        noteActivated(id, pane->viewIndex());
     updateTitleAndStatus();
-    if (m_docList) { // Document List panel
-        QSignalBlocker block(m_docList);
-        m_docList->clear();
-        for (const auto& [tid, p] : allTabs())
-            if (Buffer* tb = buffer(tid)) {
-                auto* item = new QListWidgetItem(tabText(*tb), m_docList);
-                item->setData(Qt::UserRole, QVariant::fromValue<qulonglong>(tid));
-                item->setData(Qt::UserRole + 1, p->viewIndex());
-                if (p == currentPane() && tid == p->current())
-                    m_docList->setCurrentItem(item);
-            }
-    }
+    updateDocumentList();
+    panelsOnBufferChanged();
+    if (b)
+        pluginNotify(NPPN_BUFFERACTIVATED, static_cast<uintptr_t>(id));
 }
 
 void MainWindow::applyLanguageToPane(EditorPane* pane, Buffer* b)
@@ -731,6 +752,8 @@ void MainWindow::setLanguage(Buffer* b, LangType lang, const std::string& udl)
         if (p->current() == b->id)
             applyLanguageToPane(p, b);
     updateTitleAndStatus();
+    panelsOnBufferChanged();
+    pluginNotify(NPPN_LANGCHANGED, static_cast<uintptr_t>(b->id));
 }
 
 QString MainWindow::miscString(const char* strId, const char* fallback) const
@@ -757,6 +780,7 @@ void MainWindow::refreshBuffer(Buffer* b)
         p->setTabText(b->id, tabText(*b), b->isUntitled() ? QString() : q(b->path));
     refreshTabDecorations(*b);
     updateTitleAndStatus();
+    updateDocumentList();
 }
 
 void MainWindow::updateTitleAndStatus()
@@ -824,7 +848,17 @@ Buffer* MainWindow::openFile(const QString& rawPath, const LoadOptions& o, bool 
             return nullptr;
     }
     LoadError err = LoadError::None;
+    pluginNotify(NPPN_FILEBEFORELOAD);
     Buffer* b = m_files->loadFile(path, o, &err);
+    if (b) {
+        pluginNotify(NPPN_FILEBEFOREOPEN, static_cast<uintptr_t>(b->id));
+        pluginNotify(NPPN_FILEOPENED, static_cast<uintptr_t>(b->id));
+    } else {
+        pluginNotify(NPPN_FILELOADFAILED);
+    }
+    // upstream: word wrap is switched off for a large file (performance)
+    if (b && b->largeFile && m_config.gui.largeFileDeactivateWordWrap && m_config.gui.wrap)
+        m_actions->trigger(IDM_VIEW_WRAP);
     if (!b) {
         const auto t = m_nativeLang.messageBox("OpenFileError", "Can not open file \"$STR_REPLACE$\".", "ERROR", 0, path);
         QMessageBox::warning(this, q(t.title), q(t.message));
@@ -912,7 +946,9 @@ bool MainWindow::closeBuffer(BufferId id, EditorPane* pane, bool ask)
                 m_lastClosed.pop_back();
         }
         watchFile(b->path, false);
+        pluginNotify(NPPN_FILEBEFORECLOSE, static_cast<uintptr_t>(id));
         m_files->close(*b);
+        pluginNotify(NPPN_FILECLOSED, static_cast<uintptr_t>(id));
     }
     if (pane->count() == 0) {
         if (pane->viewIndex() == 1 || m_panes[1]->count() > 0) {
@@ -974,8 +1010,13 @@ bool MainWindow::saveBuffer(Buffer* b, bool saveAs, bool copy)
     const bool wasUntitled = b->isUntitled();
     const std::string oldPath = b->path;
     watchFile(b->path, false);
-    const SaveStatus st = m_files->save(*b, path.toStdString(), copy);
+    pluginNotify(NPPN_FILEBEFORESAVE, static_cast<uintptr_t>(b->id));
+    SaveStatus st = m_files->save(*b, path.toStdString(), copy);
+    if (st == SaveStatus::AccessDenied && !processIsElevated())
+        st = saveElevated(b, path, copy);
     watchFile(b->path, true);
+    if (st == SaveStatus::AccessDenied)
+        return false; // cancelled or reported by saveElevated
     if (st != SaveStatus::Ok) {
         const auto t = m_nativeLang.messageBox("FileLockedWarning",
                                                "Please check whether if this file is opened in another program", "Save failed");
@@ -999,7 +1040,39 @@ bool MainWindow::saveBuffer(Buffer* b, bool saveAs, bool copy)
         if (p->current() == b->id)
             p->editor()->send(SCI_SETSAVEPOINT);
     refreshBuffer(b);
+    pluginNotify(NPPN_FILESAVED, static_cast<uintptr_t>(b->id));
     return true;
+}
+
+// Protected file (upstream asks to relaunch in Administrator mode): write it through the
+// elevated helper (UAC on Windows, polkit on Linux) and keep the session running.
+SaveStatus MainWindow::saveElevated(Buffer* b, const QString& path, bool copy)
+{
+    if (qEnvironmentVariableIsSet("NPP_QT_NO_ELEVATION")) // tests: never show a UAC / polkit prompt
+        return SaveStatus::AccessDenied;
+    const auto t = m_nativeLang.messageBox("OpenInAdminMode", "The file cannot be saved and it may be protected.\n"
+                                           "Do you want to launch Notepad++ in Administrator mode?", "Save failed");
+    const QString question = tr("The file cannot be saved and it may be protected.\n"
+                                "Do you want to save it with administrator rights?");
+    if (QMessageBox::question(this, q(t.title), question + QStringLiteral("\n\n") + path) != QMessageBox::Yes)
+        return SaveStatus::AccessDenied;
+    const std::string data = m_files->encodedContent(*b);
+    QString error;
+    switch (elevatedWrite(path, QByteArray::fromStdString(data), &error)) {
+    case ElevatedResult::Ok:
+        if (!copy)
+            m_files->markSaved(*b, path.toStdString(), data.size());
+        return SaveStatus::Ok;
+    case ElevatedResult::Cancelled:
+        return SaveStatus::AccessDenied;
+    case ElevatedResult::Failed:
+    case ElevatedResult::Unsupported:
+        break;
+    }
+    const auto f = m_nativeLang.messageBox("OpenInAdminModeFailed", "Notepad++ cannot be opened in Administrator mode.",
+                                           "Open in Administrator mode failed");
+    QMessageBox::warning(this, q(f.title), error.isEmpty() ? path : error + QStringLiteral("\n\n") + path);
+    return SaveStatus::AccessDenied;
 }
 
 void MainWindow::moveOrCloneToOtherView(bool clone)
@@ -1063,7 +1136,8 @@ void MainWindow::checkFilesystemChanges()
         ids.push_back(b->id);
     for (BufferId id : ids) {
         Buffer* b = buffer(id);
-        if (!b || (b->status != DocStatus::Regular && b->status != DocStatus::Deleted && b->status != DocStatus::Modified))
+        if (!b || b->monitoring // reloaded by the monitoring timer
+            || (b->status != DocStatus::Regular && b->status != DocStatus::Deleted && b->status != DocStatus::Modified))
             continue;
         const FileChange ch = m_files->checkFileState(*b);
         if (ch == FileChange::Modified) {
@@ -1110,6 +1184,13 @@ void MainWindow::backupDirtyBuffers()
         return;
     for (const auto& b : m_files->buffers())
         m_files->backup(*b, m_paths.backupDir());
+    // Upstream keeps session.xml in step with the backups: after a crash the next start
+    // restores the tabs and their unsaved changes.
+    if (m_config.gui.rememberLastSession && !m_cmd.noSession && !m_exiting) {
+        std::error_code ec;
+        fs::create_directories(pathFromUtf8(m_paths.sessionDir()), ec);
+        saveSession(currentSession(true), m_paths.sessionXml());
+    }
 }
 
 void MainWindow::addToRecent(const std::string& path)
@@ -1210,6 +1291,8 @@ void MainWindow::restoreSession(const Session& s)
                         o.userLangOverride = f.lang;
                     }
                     b = m_files->loadFile(f.filename, o);
+                    if (b)
+                        pluginNotify(NPPN_FILEOPENED, static_cast<uintptr_t>(b->id));
                 }
             }
             if (!b)
@@ -1238,13 +1321,18 @@ void MainWindow::restoreSession(const Session& s)
                 e->send(SCI_SETDOCPOINTER, 0, prev);
                 e->send(SCI_RELEASEDOCUMENT, 0, prev);
             }
-            refreshBuffer(b);
+            // tab only: title, status bar and document list once after the loop (startup time)
+            for (EditorPane* pane : m_panes)
+                pane->setTabText(b->id, tabText(*b), b->isUntitled() ? QString() : q(b->path));
+            refreshTabDecorations(*b);
         }
         if (p->count() > 0) {
             p->show();
             p->activate(activeId != kInvalidBuffer ? activeId : p->bufferAt(0));
         }
     }
+    updateTitleAndStatus();
+    updateDocumentList();
     setActivePane(m_panes[static_cast<size_t>(s.activeView == 1 && m_panes[1]->count() > 0 ? 1 : 0)]);
 }
 
@@ -1268,13 +1356,21 @@ bool MainWindow::loadSessionFrom(const QString& path)
 
 bool MainWindow::prepareExit()
 {
+    pluginNotify(NPPN_BEFORESHUTDOWN);
+    if (!panelsPrepareExit()) {
+        pluginNotify(NPPN_CANCELSHUTDOWN);
+        return false;
+    }
+    panelsSaveSettings();
     const bool snapshot = m_config.gui.snapshotMode && m_config.gui.rememberLastSession && !m_cmd.noSession;
     if (snapshot) {
         backupDirtyBuffers();
     } else {
         for (const auto& [id, p] : allTabs())
-            if (!askToSave(buffer(id)))
+            if (!askToSave(buffer(id))) {
+                pluginNotify(NPPN_CANCELSHUTDOWN);
                 return false;
+            }
     }
     m_exiting = true;
     if (m_config.gui.rememberLastSession && !m_cmd.noSession) {
@@ -1293,14 +1389,56 @@ bool MainWindow::prepareExit()
 void MainWindow::shutdownForTest()
 {
     prepareExit();
+    if (m_plugins)
+        m_plugins->shutdown();
+}
+
+void MainWindow::showCrashRecoveryNotice(const QString& crashDir)
+{
+    int dirty = 0;
+    for (const auto& b : m_files->buffers())
+        dirty += b->dirty ? 1 : 0;
+    QString text = tr("Notepad++ was not closed properly last time.");
+    if (m_config.gui.snapshotMode && m_config.gui.rememberLastSession && !m_cmd.noSession)
+        text += QLatin1Char('\n') + tr("The last session was restored from the backup, with %n unsaved document(s).", nullptr, dirty);
+    else
+        text += QLatin1Char('\n') + tr("Session snapshot and periodic backup is off: unsaved changes could not be kept "
+                                        "(Preferences > Backup).");
+    const QDir dir(crashDir);
+    const QStringList reports = dir.entryList({QStringLiteral("npp-*")}, QDir::Files, QDir::Time);
+    if (!reports.isEmpty())
+        text += QStringLiteral("\n\n") + tr("Crash report: %1").arg(QDir::toNativeSeparators(dir.filePath(reports.first())));
+    std::fprintf(stderr, "abnormal termination detected: %s\n", qPrintable(stateSummary()));
+
+    auto* box = new QMessageBox(QMessageBox::Information, QStringLiteral("Notepad++"), text, QMessageBox::Ok, this);
+    box->setAttribute(Qt::WA_DeleteOnClose);
+    if (!reports.isEmpty()) {
+        QPushButton* open = box->addButton(tr("Open Crash Folder"), QMessageBox::ActionRole);
+        connect(open, &QPushButton::clicked, this, [crashDir] { QDesktopServices::openUrl(QUrl::fromLocalFile(crashDir)); });
+    }
+    box->setModal(false);
+    box->show();
+}
+
+QString MainWindow::stateSummary() const
+{
+    int dirty = 0;
+    for (const auto& b : m_files->buffers())
+        dirty += b->dirty ? 1 : 0;
+    return QStringLiteral("tabs=%1 dirty=%2").arg(allTabs().size()).arg(dirty);
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
+    if (closeToTray(event))
+        return;
     if (!m_exiting && !prepareExit()) {
+        m_exitRequested = false;
         event->ignore();
         return;
     }
+    if (m_plugins)
+        m_plugins->shutdown(); // NPPN_SHUTDOWN while the documents are still open
     event->accept();
 }
 

@@ -6,6 +6,7 @@
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
 #include "ShortcutMapper.h"
+#include "plugins/PluginHost.h"
 #include "StyleConfigurator.h"
 #include "prefs/PreferencesDialog.h"
 #include "search/FindReplaceDialog.h"
@@ -67,6 +68,7 @@ void MainWindow::setUiLanguage(const std::string& fileName)
         m_prefs->reload(); // language selector shows the new language
     }
     updateTitleAndStatus();
+    pluginNotify(NPPN_NATIVELANGCHANGED);
 }
 
 // Qt's own strings (standard buttons, file dialogs, message boxes) in the UI language:
@@ -158,6 +160,8 @@ void MainWindow::applyStylesToEditors()
     }
     if (m_searchResults)
         m_searchResults->applyStyles(m_langs, m_styles, m_applyOptions);
+    panelsOnStylesChanged();
+    pluginNotify(NPPN_WORDSTYLESUPDATED);
 }
 
 // New shortcuts (Shortcut Mapper): saved to shortcuts.xml and applied to menus, macros and editors
@@ -167,10 +171,16 @@ void MainWindow::setShortcuts(const ShortcutsFile& f)
     std::error_code ec;
     fs::create_directories(pathFromUtf8(m_paths.userDir()), ec);
     m_shortcuts.save(m_paths.shortcutsXml());
+    recordShortcutsXmlHmac(); // written by Notepad++ itself: trusted
     m_actions->applyShortcuts(&m_shortcuts);
+    rebuildRunMenu();
     rebuildMacroMenu();
     for (EditorPane* p : m_panes)
         applyScintillaKeys(p->editor());
+    if (m_plugins) {
+        m_plugins->applyShortcuts(m_shortcuts);
+        pluginNotify(NPPN_SHORTCUTREMAPPED);
+    }
 }
 
 PreferencesDialog* MainWindow::preferencesDialog()
@@ -241,7 +251,11 @@ void MainWindow::registerSettingsCommands()
         dlg->show();
     }});
     r->setHandler(IDM_SETTING_SHORTCUT_MAPPER, {[this] {
-        ShortcutMapper dlg(m_shortcuts, m_actions, dialogLanguage(), this);
+        std::vector<ShortcutMapper::PluginCommand> pluginCommands;
+        if (m_plugins)
+            for (const PluginHost::Command& c : m_plugins->commands())
+                pluginCommands.push_back({c.module, c.index, c.plugin + QStringLiteral(" - ") + c.name, c.defaultKey});
+        ShortcutMapper dlg(m_shortcuts, m_actions, dialogLanguage(), this, pluginCommands);
         if (dlg.exec() == QDialog::Accepted)
             setShortcuts(dlg.result());
     }});

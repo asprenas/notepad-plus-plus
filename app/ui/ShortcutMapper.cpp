@@ -10,6 +10,8 @@
 #include <Scintilla.h>
 
 #include <QAction>
+
+#include <algorithm>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
@@ -99,8 +101,9 @@ QString clean(QString s)
 
 } // namespace
 
-ShortcutMapper::ShortcutMapper(const ShortcutsFile& current, ActionRegistry* actions, const NativeLanguage* nl, QWidget* parent)
-    : QDialog(parent), m_file(current)
+ShortcutMapper::ShortcutMapper(const ShortcutsFile& current, ActionRegistry* actions, const NativeLanguage* nl, QWidget* parent,
+                               std::vector<PluginCommand> pluginCommands)
+    : QDialog(parent), m_file(current), m_pluginCommands(std::move(pluginCommands))
 {
     setObjectName(QStringLiteral("ShortcutMapper"));
     setWindowTitle(tr("Shortcut mapper"));
@@ -129,10 +132,27 @@ ShortcutMapper::ShortcutMapper(const ShortcutsFile& current, ActionRegistry* act
         m_rows.push_back({1, static_cast<int>(i), QString::fromStdString(current.macros[i].name), {}, current.macros[i].combo, {}});
     for (size_t i = 0; i < current.userCommands.size(); ++i)
         m_rows.push_back({2, static_cast<int>(i), QString::fromStdString(current.userCommands[i].name), {}, current.userCommands[i].combo, {}});
+    // Plugin commands: the loaded plugins' commands (key from shortcuts.xml or the plugin default),
+    // then the shortcuts.xml entries of plugins that are not loaded
+    auto sameModule = [](const std::string& a, const std::string& b) {
+        return QString::fromStdString(a).compare(QString::fromStdString(b), Qt::CaseInsensitive) == 0;
+    };
+    std::vector<bool> fileEntryUsed(current.pluginCommands.size(), false);
+    for (size_t i = 0; i < m_pluginCommands.size(); ++i) {
+        const PluginCommand& pc = m_pluginCommands[i];
+        Row r{3, kPluginRow + static_cast<int>(i), pc.name, QString::fromStdString(pc.module), pc.defaultKey, pc.defaultKey};
+        for (size_t j = 0; j < current.pluginCommands.size(); ++j)
+            if (current.pluginCommands[j].internalId == pc.internalId && sameModule(current.pluginCommands[j].moduleName, pc.module)) {
+                r.key = current.pluginCommands[j].combo;
+                fileEntryUsed[j] = true;
+            }
+        m_rows.push_back(r);
+    }
     for (size_t i = 0; i < current.pluginCommands.size(); ++i)
-        m_rows.push_back({3, static_cast<int>(i), QString::fromStdString(current.pluginCommands[i].moduleName) + QStringLiteral(" #") +
-                                                       QString::number(current.pluginCommands[i].internalId),
-                          {}, current.pluginCommands[i].combo, {}});
+        if (!fileEntryUsed[i])
+            m_rows.push_back({3, static_cast<int>(i), QString::fromStdString(current.pluginCommands[i].moduleName) + QStringLiteral(" #") +
+                                                           QString::number(current.pluginCommands[i].internalId),
+                              {}, current.pluginCommands[i].combo, current.pluginCommands[i].combo});
     std::map<int, KeyCombo> userSci;
     for (const ScintillaKeyShortcut& s : current.scintillaKeys)
         if (!s.combos.empty())
@@ -343,7 +363,27 @@ ShortcutsFile ShortcutMapper::result() const
             break;
         case 1: f.macros[static_cast<size_t>(r.id)].combo = r.key; break;
         case 2: f.userCommands[static_cast<size_t>(r.id)].combo = r.key; break;
-        case 3: f.pluginCommands[static_cast<size_t>(r.id)].combo = r.key; break;
+        case 3: {
+            if (r.id < kPluginRow) {
+                f.pluginCommands[static_cast<size_t>(r.id)].combo = r.key;
+                break;
+            }
+            // loaded plugin: an entry only when the key differs from the plugin's default (upstream)
+            const PluginCommand& pc = m_pluginCommands[static_cast<size_t>(r.id - kPluginRow)];
+            auto it = std::find_if(f.pluginCommands.begin(), f.pluginCommands.end(), [&](const PluginCommandShortcut& c) {
+                return c.internalId == pc.internalId &&
+                       QString::fromStdString(c.moduleName).compare(QString::fromStdString(pc.module), Qt::CaseInsensitive) == 0;
+            });
+            if (r.key == r.defaultKey) {
+                if (it != f.pluginCommands.end())
+                    f.pluginCommands.erase(it);
+            } else if (it != f.pluginCommands.end()) {
+                it->combo = r.key;
+            } else {
+                f.pluginCommands.push_back({pc.module, pc.internalId, r.key});
+            }
+            break;
+        }
         case 4: {
             if (r.key == r.defaultKey) {
                 sciUser.erase(r.id);

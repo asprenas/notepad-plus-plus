@@ -158,3 +158,16 @@ Windows: 레지스트리 `HKCU\Software\NotepadPlusPlusQt`, Linux: `~/.config/No
    CLion이 자동 생성하는 기본 `Debug` 프로필(MinGW 툴체인)은 **비활성화**한다.
    켜져 있으면 MSVC 빌드에 GDB가 붙어 PDB 심볼을 못 읽고 중단점이 동작하지 않는다.
    LLDB로 붙으면 Qt 타입(`QString`, `QByteArray` 등) 값도 표시된다.
+
+## 배포본 (6단계)
+
+| 명령 | 결과 |
+|---|---|
+| `powershell -ExecutionPolicy Bypass -File ci/package-windows.ps1` | `dist/` Windows 설치본(Inno Setup 6 필요), 포터블 zip, PDB zip (MSVC Release) |
+| `bash ci/package-linux.sh` | `dist/` AppImage (Docker: Ubuntu 22.04 + Qt 6.12, `ci/docker/appimage.Dockerfile`) |
+| `powershell -ExecutionPolicy Bypass -File ci/test-package-windows.ps1` | 의존 DLL, 빈 PATH 실행, 포터블, 설치·파일 연결·제거 시험 |
+| `bash ci/test-package-linux.sh` | Ubuntu 22.04/24.04, Debian 12, Fedora 41 새 컨테이너에서 AppImage 시험 |
+| `bash ci/release.sh [--publish]` | 전체 릴리스 ([release.md](release.md)) |
+
+설치 레이아웃은 CMake `install()` 규칙(`app/ui/CMakeLists.txt`): Windows는 실행 파일 옆 `data/`,
+Linux는 `bin/notepadpp-qt` + `share/notepadpp-qt/data/` + `.desktop`/아이콘/metainfo.

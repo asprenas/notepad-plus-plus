@@ -1,4 +1,4 @@
-﻿Original Notepad++ 8.9.8.1 (D:\ProjectAI\notepad-plus-plus\PowerEditor\bin64\notepad++.exe)
+﻿Original Notepad++ 8.9.8.1 (PowerEditor\bin64\notepad++.exe)
 
 == 1. NPP -> port: Notepad++ default config.xml loaded and re-saved by the port
   default-differs autoUpdateNextDate: expected "" got "20080426"   (written by Notepad++'s updater)

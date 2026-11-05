@@ -30,17 +30,22 @@ struct FileManagerSettings {
 #endif
     LangType newDocLang = L_TEXT;
     uint64_t largeFileSizeBytes = 200ull * 1024 * 1024; // GuiConfig::largeFileSizeMB
+    // GuiConfig::largeFileEnabled: files from largeFileSizeBytes on get no styling (plain text,
+    // Scintilla document without style bytes) and no snapshot backup (upstream Buffer.cpp)
+    bool     largeFileRestriction = true;
     std::string untitledPrefix = "new ";   // localized "tab-untitled-string"
 };
 
 enum class LoadError { None, NotFound, CannotRead, TooBig, OutOfMemory };
-enum class SaveStatus { Ok, OpenFailed, WriteFailed, ReadOnlyForbidden };
+// AccessDenied: the file or its folder is protected (save again through the elevated helper)
+enum class SaveStatus { Ok, OpenFailed, WriteFailed, ReadOnlyForbidden, AccessDenied };
 
 struct LoadOptions {
     int encodingOverride = -1;              // forced code page (Encoding > Character sets), -1 = detect
     std::optional<UniMode> uniModeOverride;  // forced Unicode mode (Encoding > Encode in ...), no detection
     std::optional<LangType> langOverride;
     std::string userLangOverride;           // UDL name
+    bool forSearch = false;                 // Find in Files: text only (no language, timestamp, write check)
 };
 
 enum class FileChange { None, Modified, Deleted, Restored, ReadOnlyChanged };
@@ -76,6 +81,9 @@ public:
     // Writes the document to `utf8Path` in the buffer's encoding / Unicode mode. When asCopy is
     // false the buffer adopts the new path, becomes clean and its timestamp is refreshed.
     SaveStatus save(Buffer& buffer, std::string_view utf8Path, bool asCopy = false);
+    // The buffer was written to `utf8Path` by someone else (elevated save helper): adopt the
+    // path, become clean, refresh the timestamp (what save does after writing).
+    void markSaved(Buffer& buffer, std::string_view utf8Path, std::size_t size);
     // Bytes that would be written (encoding applied); used by save and tests.
     std::string encodedContent(const Buffer& buffer) const;
     std::string utf8Content(const Buffer& buffer) const;
@@ -94,7 +102,7 @@ public:
     LangType detectLanguage(std::string_view utf8Path, std::string_view firstBlock, std::string* udlName) const;
 
 private:
-    Buffer* createBuffer();
+    Buffer* createBuffer(bool largeFile = false);
     bool fillDocument(Buffer& b, const std::string& bytes, const LoadOptions& o);
     std::string nextUntitledName() const;
 

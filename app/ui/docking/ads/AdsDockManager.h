@@ -50,6 +50,8 @@ private:
     void placePanel(Panel& panel, DockArea area);
 
     ads::CDockManager* m_manager = nullptr;
+    ads::CDockWidget* m_central = nullptr;
+    DockArea actualArea(const Panel& panel) const; // after the user moved the panel
     std::map<std::string, Panel> m_panels;
     std::map<DockArea, QPointer<ads::CDockAreaWidget>> m_areaWidgets; // for tab grouping
 };

@@ -86,12 +86,26 @@ add_library(npp_core STATIC
 
     search/Search.h
     search/Search.cpp
+
+    funclist/FunctionParser.h
+    funclist/FunctionParser.cpp
+
+    project/Workspace.h
+    project/Workspace.cpp
+
+    util/Hash.h
+    util/Hash.cpp
+
+    run/RunCommand.h
+    run/RunCommand.cpp
+
+    platform/FileAccess.h
 )
 
 if(WIN32)
-    target_sources(npp_core PRIVATE platform/win/CodepageWin.cpp)
+    target_sources(npp_core PRIVATE platform/win/CodepageWin.cpp platform/win/FileAccessWin.cpp)
 else()
-    target_sources(npp_core PRIVATE platform/posix/CodepagePosix.cpp)
+    target_sources(npp_core PRIVATE platform/posix/CodepagePosix.cpp platform/posix/FileAccessPosix.cpp)
     find_package(Iconv REQUIRED)
     target_link_libraries(npp_core PRIVATE Iconv::Iconv)
 endif()

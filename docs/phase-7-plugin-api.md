@@ -96,7 +96,7 @@ intptr_t npp_compat_send(unsigned nppmMessage, uintptr_t w, intptr_t l);
 | 플랫폼 | 경로 |
 |---|---|
 | Windows | `<설치 폴더>\plugins\<이름>\<이름>.dll`, 사용자 `%APPDATA%\Notepad++Qt\plugins\` |
-| Linux | `<설치 폴더>/plugins/<이름>/lib<이름>.so`, `$XDG_DATA_HOME/notepad++qt/plugins/` |
+| Linux | `<prefix>/lib/notepadpp-qt/plugins/<이름>/lib<이름>.so` 또는 `<앱 폴더>/plugins/...`, 사용자 `~/.config/notepad++qt/plugins/` (설정 폴더 아래, 구현 시 변경) |
 | macOS | `<번들>/Contents/PlugIns/<이름>/lib<이름>.dylib`, `~/Library/Application Support/Notepad++Qt/plugins/` |
 
 - `apiVersion` 불일치 시 로드 거부 + 알림. 로드 실패·초기화 예외는 플러그인 단위로 격리하고 해당 플러그인만 비활성화.
@@ -135,10 +135,10 @@ intptr_t npp_compat_send(unsigned nppmMessage, uintptr_t w, intptr_t l);
 
 ## 6. 완료 기준
 
-- [ ] `npp_plugin_api.h` v1 확정·문서화
-- [ ] 샘플 플러그인 2개가 Windows·Linux에서 동작
-- [ ] 공개 플러그인 1개 이식 성공
-- [ ] 플러그인 개발 문서 작성
+- [x] `npp_plugin_api.h` v1 확정·문서화
+- [x] 샘플 플러그인 2개가 Windows·Linux에서 동작
+- [x] 공개 플러그인 1개 이식 성공
+- [x] 플러그인 개발 문서 작성
 
 ## 7. 리스크
 
@@ -147,3 +147,28 @@ intptr_t npp_compat_send(unsigned nppmMessage, uintptr_t w, intptr_t l);
 | 플러그인과 앱의 Qt 버전 일치 요구 | UI 없는 플러그인은 Qt 비의존, UI 플러그인은 앱 Qt 버전 명시 |
 | `NPPM_*` 의미 중 Win32 특화(창 핸들 반환 등) | 대응 불가 목록으로 문서화, 대체 함수 제공 |
 | 플러그인 생태계가 생기지 않음 | 핵심 기능은 내장 기능화, 스크립팅으로 진입 장벽 낮춤 |
+
+## 8. 진행 현황
+
+| ID | 상태 | 구현 위치 / 비고 |
+|---|---|---|
+| P7-01 | 완료 | `tools/plugin-survey/nppm_usage.py`, 인기 플러그인 10개 조사 → [plugin-api-nppm.md](plugin-api-nppm.md). 상위 50개 중 44개 지원, 6개 새 API로 대체 |
+| P7-02 | 완료 | `app/plugin-api/include/npp_plugin_api.h` v1 (C ABI, `NppApi.size` + `NPP_API_HAS`로 확장) |
+| P7-03 | 완료 | `app/ui/plugins/PluginHost` (QLibrary 로더, 플러그인 메뉴, `NPPN_*` 19종·`SCN_*` 전달, 플러그인 단위 오류 격리, `-noPlugin`) |
+| P7-04 | 완료 | `registerPanel`/`showPanel`(DockManager, ADS·QT 공통), 단축키 매퍼 "플러그인 명령" 탭·`shortcuts.xml` `<PluginCommands>`, 툴바 버튼(`addToolbarIcon`) |
+| P7-05 | 완료 | `npp_compat.h`, `npp_compat_win32.h`, `npp_msgs.h`(`tools/gen-npp-msgs.py`), `PluginMessages.cpp`: 76개 메시지 |
+| P7-06 | 완료 | `app/plugins/samples/textcase`(C, UI 없음), `app/plugins/samples/docinfo`(Qt 도킹 패널 + 툴바) |
+| P7-07 | 완료 | MIME Tools 3.2 이식 `app/plugins/ports/mimetools` (알고리즘 무수정, 변경 내역 `PORTING.md`/`port.patch`) |
+| P7-08 | 완료 | [plugin-development.md](plugin-development.md) |
+| P7-09 | 차후 | 플러그인 관리자 (선택) |
+
+테스트: `ui.plugins`(CTest, Windows MinGW·MSVC, Linux, ADS·QT 백엔드): 샘플·이식 플러그인 로드와 메뉴, 명령 실행, 알림 수신,
+체크 표시, Qt 패널 표시·갱신, 툴바 버튼, MIME Tools 인코딩/디코딩, `shortcuts.xml`·단축키 매퍼, 주요 `NPPM_*` 메시지,
+잘못된 플러그인(API 버전 불일치, 초기화 실패, Win32 플러그인, 라이브러리 아님, 예외) 격리.
+
+계획과 다르게 한 점 / 제한:
+- 사용자 플러그인 폴더는 `$XDG_DATA_HOME` 대신 설정 폴더 아래 `plugins` (가져오기·포터블 모드와 같은 위치).
+- 툴바 아이콘·플러그인 파일 경로 함수(`addToolbarIcon`, `pluginFilePath`)를 v1에 추가 (조사에서 툴바 아이콘이 가장 많이 쓰인 미지원 메시지).
+- Scintilla.h 끝의 Notepad++ C++ 구조체를 `#ifdef __cplusplus`로 감쌈 (C 플러그인용, third-party-patches.md).
+- 공개 플러그인의 "수동 확인"은 자동 테스트(메뉴 명령으로 실제 인코딩/디코딩 결과 비교)로 대신했다.
+- 충돌(잘못된 메모리 접근)은 격리하지 못한다. 플러그인 서명 검증은 하지 않는다.

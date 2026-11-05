@@ -14,6 +14,8 @@
 #include <QDateTime>
 #include <QSaveFile>
 
+#include "core/platform/FileAccess.h"
+
 #include <algorithm>
 #include <ctime>
 #include <set>
@@ -106,11 +108,14 @@ FileManager::~FileManager()
             m_scratch.send(SCI_RELEASEDOCUMENT, 0, b->document);
 }
 
-Buffer* FileManager::createBuffer()
+Buffer* FileManager::createBuffer(bool largeFile)
 {
     auto b = std::make_unique<Buffer>();
     b->id = m_nextId++;
-    b->document = m_scratch.send(SCI_CREATEDOCUMENT, 0, SC_DOCUMENTOPTION_DEFAULT);
+    // upstream: large files get no style bytes (half the memory, no lexing)
+    b->document = m_scratch.send(SCI_CREATEDOCUMENT, 0,
+                                 largeFile ? SC_DOCUMENTOPTION_STYLES_NONE | SC_DOCUMENTOPTION_TEXT_LARGE
+                                           : SC_DOCUMENTOPTION_TEXT_LARGE);
     {
         DocSwitch sw(m_scratch, b->document);
         m_scratch.send(SCI_SETCODEPAGE, SC_CP_UTF8);
@@ -216,7 +221,7 @@ bool FileManager::fillDocument(Buffer& b, const std::string& bytes, const LoadOp
     b.uniMode = mode;
     b.eol = detectEol(utf8.data(), std::min(utf8.size(), kDetectionBlock * 8), m_settings.newDocEol);
     b.fileSize = bytes.size();
-    b.largeFile = bytes.size() >= m_settings.largeFileSizeBytes;
+    b.largeFile = m_settings.largeFileRestriction && bytes.size() >= m_settings.largeFileSizeBytes;
 
     // --- fill the Scintilla document --------------------------------------------------------
     DocSwitch sw(m_scratch, b.document);
@@ -251,7 +256,7 @@ Buffer* FileManager::loadFile(std::string_view utf8PathIn, const LoadOptions& o,
         return nullptr;
     }
 
-    Buffer* b = createBuffer();
+    Buffer* b = createBuffer(m_settings.largeFileRestriction && bytes->size() >= m_settings.largeFileSizeBytes);
     b->path = utf8Path;
     b->status = DocStatus::Regular;
     if (!fillDocument(*b, *bytes, o)) {
@@ -259,12 +264,15 @@ Buffer* FileManager::loadFile(std::string_view utf8PathIn, const LoadOptions& o,
         if (error) *error = LoadError::OutOfMemory;
         return nullptr;
     }
+    if (o.forSearch)
+        return b; // searched and closed again: language / timestamps are not needed
     if (o.langOverride) {
         b->lang = *o.langOverride;
         b->userLangName = o.userLangOverride;
+    } else if (b->largeFile) {
+        b->lang = L_TEXT; // upstream: no syntax highlighting for large files
     } else {
-        b->lang = detectLanguage(utf8Path, b->largeFile ? std::string_view() : std::string_view(*bytes).substr(0, kDetectionBlock),
-                                 &b->userLangName);
+        b->lang = detectLanguage(utf8Path, std::string_view(*bytes).substr(0, kDetectionBlock), &b->userLangName);
     }
     b->timestamp = fileLastWriteTime(utf8Path);
     b->fileReadOnly = !QFileInfo(QString::fromStdString(utf8Path)).isWritable();
@@ -378,23 +386,28 @@ SaveStatus FileManager::save(Buffer& b, std::string_view utf8PathIn, bool asCopy
     QSaveFile f(QString::fromStdString(utf8Path));
     f.setDirectWriteFallback(true); // directory not writable but file is
     if (!f.open(QIODevice::WriteOnly))
-        return SaveStatus::OpenFailed;
+        return writeAccessDenied(utf8Path) ? SaveStatus::AccessDenied : SaveStatus::OpenFailed;
     if (f.write(data.data(), static_cast<qint64>(data.size())) != static_cast<qint64>(data.size()) || !f.commit())
-        return SaveStatus::WriteFailed;
+        return writeAccessDenied(utf8Path) ? SaveStatus::AccessDenied : SaveStatus::WriteFailed;
 
-    if (!asCopy) {
-        b.path = utf8Path;
-        b.untitledName.clear();
-        b.status = DocStatus::Regular;
-        b.dirty = false;
-        b.timestamp = fileLastWriteTime(utf8Path);
-        b.fileReadOnly = false;
-        b.fileSize = data.size();
-        DocSwitch sw(m_scratch, b.document);
-        m_scratch.send(SCI_SETSAVEPOINT);
-        deleteBackup(b);
-    }
+    if (!asCopy)
+        markSaved(b, utf8Path, data.size());
     return SaveStatus::Ok;
+}
+
+void FileManager::markSaved(Buffer& b, std::string_view utf8PathIn, std::size_t size)
+{
+    const std::string utf8Path = absolutePath(utf8PathIn);
+    b.path = utf8Path;
+    b.untitledName.clear();
+    b.status = DocStatus::Regular;
+    b.dirty = false;
+    b.timestamp = fileLastWriteTime(utf8Path);
+    b.fileReadOnly = false;
+    b.fileSize = size;
+    DocSwitch sw(m_scratch, b.document);
+    m_scratch.send(SCI_SETSAVEPOINT);
+    deleteBackup(b);
 }
 
 FileChange FileManager::checkFileState(Buffer& b)
@@ -445,6 +458,8 @@ bool FileManager::backup(Buffer& b, std::string_view backupDir)
 {
     if (!b.dirty)
         return deleteBackup(b);
+    if (b.largeFile)
+        return true; // upstream: no snapshot / periodic backup of large files
     if (b.backupPath.empty()) {
         std::error_code ec;
         fs::create_directories(pathFromUtf8(backupDir), ec);

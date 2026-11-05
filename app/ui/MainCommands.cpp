@@ -6,6 +6,8 @@
 #include "editor/EditorPane.h"
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
+#include "panels/FolderAsWorkspacePanel.h"
+#include "plugins/PluginHost.h"
 
 #include "core/encoding/EncodingMapper.h"
 #include "core/util/PathUtil.h"
@@ -40,7 +42,6 @@ using namespace cmd;
 namespace {
 
 QString q(const std::string& s) { return QString::fromStdString(s); }
-const std::string kPanelDocList = "npp.documentList", kPanelFolder = "npp.folderAsWorkspace";
 
 struct LangCmd {
     int id;
@@ -74,6 +75,21 @@ void MainWindow::buildMenus()
         updateRecentMenu();
     }
     rebuildMacroMenu();
+    connectWindowMenu();
+    m_userCommandObjects.clear(); // owned by the previous menus
+    rebuildRunMenu();
+    addPrintPreviewAction();
+    m_udlMenuActions.clear(); // the new menus do not contain them yet
+    refreshUdlMenu();
+    if (m_plugins) { // plugin sub menus above "Open Plugins Folder..." (upstream order)
+        QAction* openFolder = m_actions->action(IDM_SETTING_OPENPLUGINSDIR);
+        QMenu* pluginsMenu = nullptr;
+        for (QObject* o : openFolder->associatedObjects())
+            if (auto* m = qobject_cast<QMenu*>(o))
+                pluginsMenu = m;
+        m_plugins->buildMenu(pluginsMenu, openFolder);
+        m_plugins->applyShortcuts(m_shortcuts);
+    }
 }
 
 void MainWindow::rebuildMenus()
@@ -100,6 +116,12 @@ void MainWindow::registerCommands()
     registerFindCommands();
     registerCompletionCommands();
     registerToolDialogs();
+    registerPanelCommands();
+    registerWindowCommands();
+    registerToolCommands();
+    registerRunCommands();
+    registerPrintCommands();
+    registerTrayCommands();
 
     registerMacroCommands();
     registerSettingsCommands();
@@ -296,7 +318,11 @@ void MainWindow::registerFileCommands()
         m_config.history.files.clear();
         updateRecentMenu();
     }, [this] { return !m_config.history.files.empty(); }});
-    r->setHandler(IDM_FILE_EXIT, {[this] { close(); }});
+    r->setHandler(IDM_FILE_EXIT, {[this] {
+        m_exitRequested = true; // not to the tray (upstream: WM_CLOSE, not SC_CLOSE)
+        close();
+        m_exitRequested = false;
+    }});
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -423,8 +449,21 @@ void MainWindow::registerViewCommands()
         show();
     }, {}, [this] { return bool(windowFlags() & Qt::WindowStaysOnTopHint); }});
     r->setHandler(IDM_VIEW_FULLSCREENTOGGLE, {[this] { isFullScreen() ? showNormal() : showFullScreen(); }, {}, [this] { return isFullScreen(); }});
-    r->setHandler(IDM_VIEW_DOCLIST, {[this] { m_dock->isPanelVisible(kPanelDocList) ? m_dock->hidePanel(kPanelDocList) : m_dock->showPanel(kPanelDocList); }});
-    r->setHandler(IDM_VIEW_FILEBROWSER, {[this] { m_dock->isPanelVisible(kPanelFolder) ? m_dock->hidePanel(kPanelFolder) : m_dock->showPanel(kPanelFolder); }});
+    r->setHandler(IDM_VIEW_DOCLIST, {[this] { m_dock->isPanelVisible(kPanelDocumentList) ? m_dock->hidePanel(kPanelDocumentList) : m_dock->showPanel(kPanelDocumentList); },
+                                     {}, [this] { return m_dock->isPanelVisible(kPanelDocumentList); }});
+    r->setHandler(IDM_VIEW_FILEBROWSER, {[this] {
+        if (m_dock->isPanelVisible(kPanelFolderAsWorkspace)) {
+            m_dock->hidePanel(kPanelFolderAsWorkspace);
+            return;
+        }
+        if (m_folderPanel->roots().isEmpty()) { // upstream asks for a folder first
+            const QString dir = QFileDialog::getExistingDirectory(this, tr("Select a folder to add in Folder as Workspace panel"));
+            if (dir.isEmpty())
+                return;
+            m_folderPanel->addRoot(dir);
+        }
+        m_dock->showPanel(kPanelFolderAsWorkspace);
+    }, {}, [this] { return m_dock->isPanelVisible(kPanelFolderAsWorkspace); }});
 
     // Tabs / split view
     auto tabCount = [this] { return currentPane()->count(); };
@@ -637,15 +676,41 @@ void MainWindow::registerLanguageCommands()
         m_actions->setHandler(lc.id, {[this, lang] { setLanguage(currentBuffer(), lang); }, {},
                                       [this, lang] { const Buffer* b = currentBuffer(); return b && b->lang == lang; }});
     }
-    // User defined languages: IDM_LANG_USER + 1 + n (upstream order of the UDL list)
+}
+
+// User defined languages in the Language menu: IDM_LANG_USER + 1 + n after "User-Defined"
+// (upstream order of the UDL list); rebuilt when the UDL dialog changes the list.
+void MainWindow::refreshUdlMenu()
+{
+    for (const QPointer<QAction>& a : m_udlMenuActions)
+        if (a)
+            for (QObject* o : a->associatedObjects())
+                if (auto* m = qobject_cast<QMenu*>(o))
+                    m->removeAction(a);
+    m_udlMenuActions.clear();
     const auto& udls = m_udls.languages();
-    for (size_t i = 0; i < udls.size() && i < static_cast<size_t>(IDM_LANG_USER_LIMIT - IDM_LANG_USER); ++i) {
+    QAction* anchor = m_actions->action(IDM_LANG_USER);
+    std::vector<QMenu*> menus;
+    for (QObject* o : anchor->associatedObjects())
+        if (auto* m = qobject_cast<QMenu*>(o))
+            menus.push_back(m);
+    for (size_t i = 0; i < udls.size() && i < static_cast<size_t>(IDM_LANG_USER_LIMIT - IDM_LANG_USER - 1); ++i) {
         const std::string name = udls[i].name;
-        QAction* a = m_actions->action(IDM_LANG_USER + 1 + static_cast<int>(i));
+        const int id = IDM_LANG_USER + 1 + static_cast<int>(i);
+        QAction* a = m_actions->action(id);
         a->setText(q(name));
-        m_actions->setHandler(IDM_LANG_USER + 1 + static_cast<int>(i), {[this, name] { setLanguage(currentBuffer(), L_USER, name); }, {},
+        m_actions->setHandler(id, {[this, name] { setLanguage(currentBuffer(), L_USER, name); }, {},
             [this, name] { const Buffer* b = currentBuffer(); return b && b->lang == L_USER && b->userLangName == name; }});
+        m_udlMenuActions.emplace_back(a);
     }
+    for (QMenu* m : menus) {
+        const QList<QAction*> acts = m->actions();
+        const int at = static_cast<int>(acts.indexOf(anchor));
+        QAction* before = at + 1 < acts.size() ? acts[at + 1] : nullptr;
+        for (const QPointer<QAction>& a : m_udlMenuActions)
+            m->insertAction(before, a);
+    }
+    m_actions->updateStates();
 }
 
 // ------------------------------------------------------------------------------------------------

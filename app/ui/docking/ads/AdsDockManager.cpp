@@ -46,6 +46,7 @@ void AdsDockManager::setCentralWidget(QWidget* widget)
     central->setFeature(ads::CDockWidget::DockWidgetMovable, false);
     central->setFeature(ads::CDockWidget::DockWidgetFloatable, false);
     m_manager->setCentralWidget(central);
+    m_central = central;
 }
 
 void AdsDockManager::addPanel(const PanelDesc& desc, QWidget* content)
@@ -139,16 +140,38 @@ void AdsDockManager::setPanelTitle(const std::string& id, const QString& title)
         it->second.widget->setWindowTitle(title);
 }
 
+DockArea AdsDockManager::actualArea(const Panel& panel) const
+{
+    if (panel.widget->isFloating())
+        return DockArea::Floating;
+    // Position of the panel's dock area relative to the editor area (ADS has no area query).
+    ads::CDockAreaWidget* area = panel.widget->dockAreaWidget();
+    ads::CDockAreaWidget* centre = m_central ? m_central->dockAreaWidget() : nullptr;
+    if (!area || !centre || area == centre || !area->isVisible())
+        return panel.area;
+    const QRect a(area->mapTo(m_manager, QPoint(0, 0)), area->size());
+    const QRect c(centre->mapTo(m_manager, QPoint(0, 0)), centre->size());
+    if (a.isEmpty() || c.isEmpty())
+        return panel.area;
+    if (a.right() < c.left())
+        return DockArea::Left;
+    if (a.left() > c.right())
+        return DockArea::Right;
+    if (a.bottom() < c.top())
+        return DockArea::Top;
+    if (a.top() > c.bottom())
+        return DockArea::Bottom;
+    return panel.area;
+}
+
 DockLayout AdsDockManager::layout() const
 {
-    // TODO(phase 2): derive the actual dock area after user drag & drop.
-    // For now: last placed area, or Floating when the panel is floating.
     DockLayout result;
     for (const auto& [id, panel] : m_panels) {
         PanelLayout pl;
         pl.id      = id;
         pl.visible = !panel.widget->isClosed();
-        pl.area    = panel.widget->isFloating() ? DockArea::Floating : panel.area;
+        pl.area    = actualArea(panel);
         result.panels.push_back(pl);
     }
     return result;

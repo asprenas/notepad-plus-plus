@@ -1,6 +1,7 @@
 #include "core/config/AppPaths.h"
 #include "core/config/ConfigFile.h"
 #include "core/config/ContextMenuConfig.h"
+#include "core/project/Workspace.h"
 #include "core/session/Session.h"
 #include "core/shortcut/Shortcuts.h"
 #include "core/util/PathUtil.h"
@@ -8,6 +9,7 @@
 #include <pugixml.hpp>
 
 #include <QCoreApplication>
+#include <QTemporaryDir>
 #include <QTest>
 
 using namespace npp::core;
@@ -161,6 +163,85 @@ private slots:
         for (const char* s : {"yes", "auto", "Update2End", "autoUpdate2End", "yesOld", "autoOld", "Update2EndOld",
                               "autoUpdate2EndOld", "no"})
             QCOMPARE(GuiConfig::fileAutoDetectionToString(GuiConfig::fileAutoDetectionFromString(s)), std::string(s));
+    }
+
+
+    void projectPanelsAndFileBrowserInConfig()
+    {
+        ConfigFile c;
+        QVERIFY(c.loadFromString("<NotepadPlus><GUIConfigs/><ProjectPanels><ProjectPanel id=\"0\" workSpaceFile=\"C:\\w\\a.xml\"/>"
+                                 "<ProjectPanel id=\"2\" workSpaceFile=\"/tmp/c.xml\"/></ProjectPanels>"
+                                 "<FileBrowser latestSelectedItem=\"/x/y\"><root foldername=\"/x\"><expanded path=\"/x/z\"/></root></FileBrowser>"
+                                 "</NotepadPlus>"));
+        QCOMPARE(c.projectPanelFiles[0], std::string("C:\\w\\a.xml"));
+        QVERIFY(c.projectPanelFiles[1].empty());
+        QCOMPARE(c.projectPanelFiles[2], std::string("/tmp/c.xml"));
+        QCOMPARE(c.fileBrowser.roots.size(), size_t(1));
+        QCOMPARE(c.fileBrowser.roots[0].expanded, std::vector<std::string>{"/x/z"});
+        QCOMPARE(c.fileBrowser.latestSelectedItem, std::string("/x/y"));
+        c.projectPanelFiles[1] = "b.xml";
+        c.fileBrowser.roots.push_back({"/q", {"/q/2", "/q/1"}});
+        ConfigFile d;
+        QVERIFY(d.loadFromString(c.saveToString()));
+        QCOMPARE(d.projectPanelFiles[1], std::string("b.xml"));
+        QCOMPARE(d.fileBrowser.roots.size(), size_t(2));
+        QCOMPARE(d.fileBrowser.roots[1].expanded, (std::vector<std::string>{"/q/1", "/q/2"})); // sorted as upstream
+
+        // a new config.xml does not get the elements until they are used
+        ConfigFile n;
+        QVERIFY(n.loadFromString("<NotepadPlus><GUIConfigs/></NotepadPlus>"));
+        const std::string xml = n.saveToString();
+        QVERIFY(xml.find("ProjectPanels") == std::string::npos);
+        QVERIFY(xml.find("FileBrowser") == std::string::npos);
+    }
+
+    void workspaceFiles()
+    {
+        QTemporaryDir tmp;
+        const std::string dir = tmp.path().toStdString();
+        const std::string ws = pathAppend(dir, "ws.xml");
+#if defined(_WIN32)
+        const std::string inside = pathAppend(dir, "src\\a.cpp");
+        const std::string outside = "C:\\elsewhere\\b.h";
+#else
+        const std::string inside = pathAppend(dir, "src/a.cpp");
+        const std::string outside = "/elsewhere/b.h";
+#endif
+        Workspace w;
+        ProjectItem p = ProjectItem::project("Proj");
+        ProjectItem f = ProjectItem::folder("Sources");
+        f.children.push_back(ProjectItem::file(inside));
+        p.children.push_back(std::move(f));
+        p.children.push_back(ProjectItem::file(outside));
+        w.projects.push_back(std::move(p));
+        w.projects.push_back(ProjectItem::project("Empty"));
+        QVERIFY(saveWorkspace(w, ws));
+
+        const std::string xml = *readFileContent(ws);
+        QVERIFY2(xml.find("<?xml") == std::string::npos, xml.c_str());
+#if defined(_WIN32)
+        QVERIFY2(xml.find("<File name=\"src\\a.cpp\" />") != std::string::npos, xml.c_str());
+#else
+        QVERIFY2(xml.find("<File name=\"src/a.cpp\" />") != std::string::npos, xml.c_str());
+#endif
+        QVERIFY2(xml.find(outside) != std::string::npos, xml.c_str());
+
+        const auto r = loadWorkspace(ws);
+        QVERIFY(r);
+        QCOMPARE(r->projects.size(), size_t(2));
+        QCOMPARE(r->projects[0].name, std::string("Proj"));
+        QCOMPARE(r->projects[0].children[0].kind, ProjectItem::Kind::Folder);
+        QVERIFY(samePath(r->projects[0].children[0].children[0].path, inside));
+        QCOMPARE(r->projects[0].children[0].children[0].name, std::string("a.cpp"));
+        QCOMPARE(r->projects[0].children[1].path, outside);
+        QVERIFY(!loadWorkspace(pathAppend(dir, "missing.xml")));
+
+        // upstream workspace written on Windows: backslash relative names
+        QVERIFY(writeFileContent(ws, "<NotepadPlus><Project name=\"P\"><File name=\"sub\\x.txt\"/></Project></NotepadPlus>"));
+        const auto u = loadWorkspace(ws);
+        QVERIFY(u);
+        QCOMPARE(u->projects[0].children[0].name, std::string("x.txt"));
+        QVERIFY(samePath(u->projects[0].children[0].path, pathAppend(pathAppend(dir, "sub"), "x.txt")));
     }
 
     void session()

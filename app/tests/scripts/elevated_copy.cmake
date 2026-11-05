@@ -1,0 +1,20 @@
+# Helper mode of the executable used by the elevated save (--elevated-copy <source> <target>):
+# copies the bytes into the existing target in place, without starting the GUI.
+# cmake -DEXE=<notepadpp-qt> -DWORK=<dir> -P elevated_copy.cmake
+file(REMOVE_RECURSE "${WORK}")
+file(MAKE_DIRECTORY "${WORK}")
+file(WRITE "${WORK}/source.tmp" "new content\r\nline 2\n")
+file(WRITE "${WORK}/target.txt" "old content that is longer than the new one ..........................\n")
+execute_process(COMMAND "${EXE}" --elevated-copy "${WORK}/source.tmp" "${WORK}/target.txt" RESULT_VARIABLE rc TIMEOUT 30)
+if(NOT rc EQUAL 0)
+    message(FATAL_ERROR "helper failed: ${rc}")
+endif()
+file(SHA256 "${WORK}/source.tmp" a)
+file(SHA256 "${WORK}/target.txt" b)
+if(NOT a STREQUAL b)
+    message(FATAL_ERROR "target differs from source")
+endif()
+execute_process(COMMAND "${EXE}" --elevated-copy "${WORK}/missing.tmp" "${WORK}/target.txt" RESULT_VARIABLE rc TIMEOUT 30)
+if(rc EQUAL 0)
+    message(FATAL_ERROR "missing source reported as success")
+endif()

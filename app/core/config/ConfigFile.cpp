@@ -117,6 +117,49 @@ void ConfigFile::parse()
         readList("Find", h.finds, h.maxFind);
         readList("Replace", h.replaces, h.maxReplace);
     }
+
+    for (pugi::xml_node n = root.child("ProjectPanels").child("ProjectPanel"); n; n = n.next_sibling("ProjectPanel")) {
+        const int id = xml::getInt(n, "id", 0);
+        if (id >= 0 && id <= 2)
+            if (const char* f = n.attribute("workSpaceFile").value(); *f)
+                projectPanelFiles[static_cast<size_t>(id)] = f;
+    }
+
+    if (const pugi::xml_node fb = root.child("FileBrowser")) {
+        fileBrowser.latestSelectedItem = fb.attribute("latestSelectedItem").value();
+        for (pugi::xml_node r = fb.child("root"); r; r = r.next_sibling("root")) {
+            FileBrowserSettings::Root fr{r.attribute("foldername").value(), {}};
+            if (fr.folder.empty())
+                continue;
+            for (pugi::xml_node e = r.child("expanded"); e; e = e.next_sibling("expanded"))
+                if (const char* p = e.attribute("path").value(); *p)
+                    fr.expanded.emplace_back(p);
+            fileBrowser.roots.push_back(std::move(fr));
+        }
+    }
+    if (const pugi::xml_node dm = xml::childWithAttr(root.child("GUIConfigs"), "GUIConfig", "name", "DockingManager")) {
+        DockingData& d = docking;
+        d.leftWidth = xml::getInt(dm, "leftWidth", d.leftWidth);
+        d.rightWidth = xml::getInt(dm, "rightWidth", d.rightWidth);
+        d.topHeight = xml::getInt(dm, "topHeight", d.topHeight);
+        d.bottomHeight = xml::getInt(dm, "bottomHeight", d.bottomHeight);
+        for (pugi::xml_node n = dm.child("FloatingWindow"); n; n = n.next_sibling("FloatingWindow"))
+            if (const int cont = xml::getInt(n, "cont", -1); cont > -1)
+                d.floating.push_back({cont, xml::getInt(n, "x", 0), xml::getInt(n, "y", 0), xml::getInt(n, "width", 200),
+                                      xml::getInt(n, "height", 200)});
+        for (pugi::xml_node n = dm.child("PluginDlg"); n; n = n.next_sibling("PluginDlg")) {
+            const char* name = n.attribute("pluginName").value();
+            const int id = xml::getInt(n, "id", -1);
+            if (*name && id > -1)
+                d.plugins.push_back({name, id, xml::getInt(n, "curr", 0), xml::getInt(n, "prev", 0), xml::getBool(n, "isVisible", false)});
+        }
+        for (pugi::xml_node n = dm.child("ActiveTabs"); n; n = n.next_sibling("ActiveTabs"))
+            d.activeTabs.push_back({xml::getInt(n, "cont", 0), xml::getInt(n, "activeTab", -1)});
+    }
+
+    m_loadedProjectPanelFiles = projectPanelFiles;
+    m_loadedFileBrowser = fileBrowser;
+    m_loadedDocking = docking;
 }
 
 void ConfigFile::writeBack()
@@ -178,6 +221,71 @@ void ConfigFile::writeBack()
     writeList("Filter", fhd.filters);
     writeList("Find", fhd.finds);
     writeList("Replace", fhd.replaces);
+
+    // Upstream recreates both at the end of <NotepadPlus> on every save; rewritten here only when
+    // changed (unchanged files keep their content, a new config.xml stays minimal).
+    if (projectPanelFiles != m_loadedProjectPanelFiles) {
+        pugi::xml_node old = root.child("ProjectPanels");
+        if (old)
+            root.remove_child(old);
+        pugi::xml_node pp = root.append_child("ProjectPanels");
+        for (int i = 0; i < 3; ++i) {
+            pugi::xml_node n = pp.append_child("ProjectPanel");
+            xml::setInt(n, "id", i);
+            xml::setString(n, "workSpaceFile", projectPanelFiles[static_cast<size_t>(i)]);
+        }
+    }
+    if (!(fileBrowser == m_loadedFileBrowser)) {
+        pugi::xml_node old = root.child("FileBrowser");
+        if (old)
+            root.remove_child(old);
+        pugi::xml_node fb = root.append_child("FileBrowser");
+        if (!fileBrowser.roots.empty()) {
+            xml::setString(fb, "latestSelectedItem", fileBrowser.latestSelectedItem);
+            for (const auto& r : fileBrowser.roots) {
+                pugi::xml_node rn = fb.append_child("root");
+                xml::setString(rn, "foldername", r.folder);
+                std::vector<std::string> expanded = r.expanded;
+                std::sort(expanded.begin(), expanded.end());
+                for (const auto& e : expanded)
+                    xml::setString(rn.append_child("expanded"), "path", e);
+            }
+        }
+    }
+    if (!(docking == m_loadedDocking)) { // upstream insertDockingParamNode
+        pugi::xml_node guiRoot = root.child("GUIConfigs");
+        pugi::xml_node dm = xml::childWithAttr(guiRoot, "GUIConfig", "name", "DockingManager", true);
+        while (pugi::xml_node c = dm.first_child())
+            dm.remove_child(c);
+        xml::setInt(dm, "leftWidth", docking.leftWidth);
+        xml::setInt(dm, "rightWidth", docking.rightWidth);
+        xml::setInt(dm, "topHeight", docking.topHeight);
+        xml::setInt(dm, "bottomHeight", docking.bottomHeight);
+        for (const auto& f : docking.floating) {
+            pugi::xml_node n = dm.append_child("FloatingWindow");
+            xml::setInt(n, "cont", f.cont);
+            xml::setInt(n, "x", f.x);
+            xml::setInt(n, "y", f.y);
+            xml::setInt(n, "width", f.width);
+            xml::setInt(n, "height", f.height);
+        }
+        for (const auto& p : docking.plugins) {
+            pugi::xml_node n = dm.append_child("PluginDlg");
+            xml::setString(n, "pluginName", p.name);
+            xml::setInt(n, "id", p.id);
+            xml::setInt(n, "curr", p.curr);
+            xml::setInt(n, "prev", p.prev);
+            xml::setBool(n, "isVisible", p.visible);
+        }
+        for (const auto& a : docking.activeTabs) {
+            pugi::xml_node n = dm.append_child("ActiveTabs");
+            xml::setInt(n, "cont", a.cont);
+            xml::setInt(n, "activeTab", a.activeTab);
+        }
+    }
+    m_loadedProjectPanelFiles = projectPanelFiles;
+    m_loadedFileBrowser = fileBrowser;
+    m_loadedDocking = docking;
 }
 
 bool ConfigFile::save(std::string_view utf8Path)

@@ -15,7 +15,9 @@ values = {m.group(1): int(m.group(2)) for m in re.finditer(r"inline constexpr in
 
 # Handlers: IDM_ names used in setHandler calls / loops of the UI sources
 handled = set()
+# Table rows of the upstream default context menus ({IDM_X, "text", ...}) are not handlers
 src = "".join(p.read_text(encoding="utf-8") for p in ui_dir.glob("*.cpp"))
+src = re.sub(r'^\s*\{(IDM_\w+), "[^"\n]*", -?\d+\},?[ \t]*$', "", src, flags=re.M)
 handled |= set(re.findall(r"\b(IDM_\w+)\b", src))
 handled |= set(re.findall(r"NPP_LANGCMD\((IDM_\w+)", (menu_dir / "LanguageCommands.inc").read_text(encoding="utf-8")))
 ranges = []  # (first, last) id ranges registered in loops
@@ -29,6 +31,8 @@ for first, count, step in [("IDM_SEARCH_MARKALLEXT1", 5, 2), ("IDM_SEARCH_UNMARK
 if "(collapse ? IDM_VIEW_FOLD : IDM_VIEW_UNFOLD) + 1 + level" in src:
     for base in ("IDM_VIEW_FOLD", "IDM_VIEW_UNFOLD"):
         handled.update(n for n, v in values.items() if values[base] + 1 <= v <= values[base] + 8 and n.startswith(base + "_"))
+if "id = IDM_VIEW_TAB_COLOUR_NONE; id <= IDM_VIEW_TAB_COLOUR_5" in src:
+    ranges.append((values["IDM_VIEW_TAB_COLOUR_NONE"], values["IDM_VIEW_TAB_COLOUR_5"]))
 if "IDM_FORMAT_ENCODE + i" in src:
     ranges.append((values["IDM_FORMAT_ENCODE"], values.get("IDM_FORMAT_ENCODE_END", values["IDM_FORMAT_ENCODE"] + 60)))
 
