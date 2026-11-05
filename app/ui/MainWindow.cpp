@@ -662,7 +662,10 @@ void MainWindow::showBuffer(Buffer* b, EditorPane* pane, bool activateIt)
 
 void MainWindow::setActivePane(EditorPane* pane)
 {
+    const bool changed = m_activeView != pane->viewIndex();
     m_activeView = pane->viewIndex();
+    if (changed)
+        panelsOnBufferChanged();
     if (!pane->editor()->hasFocus() && isVisible())
         pane->editor()->setFocus();
     updateTitleAndStatus();

@@ -58,6 +58,7 @@ class EditorPane;
 class FindReplaceDialog;
 class SearchResultsPanel;
 class FunctionListPanel;
+class DocumentMapPanel;
 class PreferencesDialog;
 
 // Command line options of upstream CmdLineParams handled by the MVP
@@ -115,6 +116,8 @@ public:
     SearchResultsPanel* searchResults(bool show = true);
     // --- phase 5 panels (PanelCommands.cpp)
     static const char* const kPanelFunctionList;
+    static const char* const kPanelDocumentMap;
+    DocumentMapPanel* documentMap() const noexcept { return m_docMap; }
     FunctionListPanel* functionList() const noexcept { return m_funcList; }
     DockManager* dockManager() const noexcept { return m_dock.get(); }
     void reloadFunctionList();
@@ -220,6 +223,7 @@ private:
     void createExtraPanels();
     void registerPanelCommands();
     void panelsOnBufferChanged();
+    void panelsOnStylesChanged();
     void markFunctionListEntry();
     // --- small dialogs (ToolDialogs.cpp)
     void registerToolDialogs();
@@ -325,6 +329,7 @@ private:
     std::vector<QAction*>        m_savedMacroActions;
     SearchResultsPanel*          m_searchResults = nullptr;
     FunctionListPanel*           m_funcList = nullptr;
+    DocumentMapPanel*            m_docMap = nullptr;
     std::unique_ptr<core::FunctionParsersManager> m_funcParsers;
     QTimer*                      m_panelTimer = nullptr;
     bool                         m_syncScrollV = false, m_syncScrollH = false, m_syncing = false;

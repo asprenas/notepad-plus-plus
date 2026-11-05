@@ -5,6 +5,7 @@
 #include "editor/EditorPane.h"
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
+#include "panels/DocumentMapPanel.h"
 #include "panels/FunctionListPanel.h"
 
 #include <Scintilla.h>
@@ -101,6 +102,48 @@ private slots:
         QCOMPARE(fl->tree()->topLevelItemCount(), 0);
         QVERIFY(m_w->actions()->trigger(IDM_VIEW_FUNC_LIST));
         QVERIFY(!m_w->dockManager()->isPanelVisible(MainWindow::kPanelFunctionList));
+    }
+
+    void documentMapFollowsEditor()
+    {
+        QByteArray text;
+        for (int i = 0; i < 2000; ++i)
+            text += "line " + QByteArray::number(i) + " some text here\n";
+        QVERIFY(m_w->openFile(writeFile(QStringLiteral("long.txt"), text)));
+        m_w->resize(1000, 700);
+        m_w->show();
+        QVERIFY(QTest::qWaitForWindowExposed(m_w.get()));
+        QVERIFY(m_w->actions()->trigger(IDM_VIEW_DOC_MAP));
+        DocumentMapPanel* dm = m_w->documentMap();
+        QTRY_VERIFY(dm->isVisible());
+        ScintillaEditBase* map = dm->map();
+        QCOMPARE(map->send(SCI_GETDOCPOINTER), editor()->send(SCI_GETDOCPOINTER)); // same document
+        QVERIFY(map->send(SCI_GETZOOM) < 0);
+        QTRY_VERIFY(!dm->viewZone().isEmpty());
+        const QRect top = dm->viewZone();
+
+        editor()->send(SCI_SETFIRSTVISIBLELINE, 1500);
+        QTRY_VERIFY(dm->viewZone().top() > top.top());
+        QVERIFY(map->send(SCI_GETFIRSTVISIBLELINE) > 0);
+
+        // click near the top of the map scrolls the editor back up
+        dm->scrollEditorTo(1);
+        QVERIFY(editor()->send(SCI_GETFIRSTVISIBLELINE) < 1500);
+
+        // the map is not editable: key presses are swallowed
+        const auto len = editor()->send(SCI_GETLENGTH);
+        QTest::keyClick(map->viewport(), Qt::Key_A);
+        QCOMPARE(editor()->send(SCI_GETLENGTH), len);
+
+        // switching documents follows the active editor
+        QVERIFY(m_w->openFile(writeFile(QStringLiteral("short.txt"), "x\n")));
+        QCOMPARE(map->send(SCI_GETDOCPOINTER), editor()->send(SCI_GETDOCPOINTER));
+
+        // wrapping follows the editor
+        QVERIFY(m_w->actions()->trigger(IDM_VIEW_WRAP));
+        m_w->documentMap()->sync();
+        QCOMPARE(map->send(SCI_GETWRAPMODE), editor()->send(SCI_GETWRAPMODE));
+        QVERIFY(m_w->actions()->trigger(IDM_VIEW_WRAP));
     }
 };
 

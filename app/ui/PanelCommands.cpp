@@ -6,6 +6,7 @@
 #include "editor/EditorPane.h"
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
+#include "panels/DocumentMapPanel.h"
 #include "panels/FunctionListPanel.h"
 
 #include "core/funclist/FunctionParser.h"
@@ -29,6 +30,7 @@ QString q(const std::string& s) { return QString::fromStdString(s); }
 } // namespace
 
 const char* const MainWindow::kPanelFunctionList = "npp.functionList";
+const char* const MainWindow::kPanelDocumentMap = "npp.documentMap";
 
 void MainWindow::createExtraPanels()
 {
@@ -51,6 +53,11 @@ void MainWindow::createExtraPanels()
     m_dock->addPanel({kPanelFunctionList, miscString("function-list-title", "Function List"), {}, DockArea::Right, true, false},
                      m_funcList);
 
+    // --- Document Map
+    m_docMap = new DocumentMapPanel;
+    m_dock->addPanel({kPanelDocumentMap, miscString("document-map-title", "Document Map"), {}, DockArea::Right, true, false},
+                     m_docMap);
+
     m_panelTimer = new QTimer(this);
     m_panelTimer->setSingleShot(true);
     m_panelTimer->setInterval(1000); // upstream reloads the list at most once per second after edits
@@ -67,13 +74,23 @@ void MainWindow::createExtraPanels()
                     m_panelTimer->start();
         });
         connect(e, &ScintillaEditBase::updateUi, this, [this, p](Scintilla::Update u) {
-            if (p == currentPane() && Scintilla::FlagSet(u, Scintilla::Update::Selection) && m_dock->isPanelVisible(kPanelFunctionList))
+            if (p != currentPane())
+                return;
+            if (Scintilla::FlagSet(u, Scintilla::Update::Selection) && m_dock->isPanelVisible(kPanelFunctionList))
                 markFunctionListEntry();
+            if (m_dock->isPanelVisible(kPanelDocumentMap))
+                m_docMap->sync();
+        });
+        connect(e, &ScintillaEditBase::zoom, this, [this, p](int) {
+            if (p == currentPane() && m_dock->isPanelVisible(kPanelDocumentMap))
+                m_docMap->sync();
         });
     }
     connect(m_dock.get(), &DockManager::panelVisibilityChanged, this, [this](const std::string& id, bool visible) {
         if (visible && id == kPanelFunctionList)
             reloadFunctionList();
+        if (visible && id == kPanelDocumentMap)
+            panelsOnBufferChanged();
     });
 }
 
@@ -81,6 +98,16 @@ void MainWindow::panelsOnBufferChanged()
 {
     if (m_funcList && m_dock->isPanelVisible(kPanelFunctionList))
         reloadFunctionList();
+    if (m_docMap && m_dock->isPanelVisible(kPanelDocumentMap)) {
+        Buffer* b = currentBuffer();
+        m_docMap->setSource(currentPane()->editor(), b ? b->document : 0);
+    }
+}
+
+void MainWindow::panelsOnStylesChanged()
+{
+    if (m_docMap && m_dock->isPanelVisible(kPanelDocumentMap))
+        m_docMap->refreshStyles();
 }
 
 std::vector<FoundFunction> MainWindow::parseFunctions(Buffer* b, bool* parsed)
@@ -136,6 +163,7 @@ void MainWindow::registerPanelCommands()
         };
     };
     r->setHandler(IDM_VIEW_FUNC_LIST, {toggle(kPanelFunctionList), {}, visible(kPanelFunctionList)});
+    r->setHandler(IDM_VIEW_DOC_MAP, {toggle(kPanelDocumentMap), {}, visible(kPanelDocumentMap)});
     r->setHandler(IDM_VIEW_SWITCHTO_FUNC_LIST,
                   {focusPanel(kPanelFunctionList, [this]() -> QWidget* { return m_funcList->tree(); })});
 }

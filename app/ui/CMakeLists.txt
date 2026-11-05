@@ -15,6 +15,8 @@ qt_add_library(npp_ui STATIC
     PanelCommands.cpp
     panels/FunctionListPanel.h
     panels/FunctionListPanel.cpp
+    panels/DocumentMapPanel.h
+    panels/DocumentMapPanel.cpp
     DialogTranslator.h
     DialogTranslator.cpp
     Toolbar.cpp

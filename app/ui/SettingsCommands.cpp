@@ -158,6 +158,7 @@ void MainWindow::applyStylesToEditors()
     }
     if (m_searchResults)
         m_searchResults->applyStyles(m_langs, m_styles, m_applyOptions);
+    panelsOnStylesChanged();
 }
 
 // New shortcuts (Shortcut Mapper): saved to shortcuts.xml and applied to menus, macros and editors
