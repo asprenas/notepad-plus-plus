@@ -77,6 +77,7 @@ void MainWindow::buildMenus()
     connectWindowMenu();
     m_userCommandObjects.clear(); // owned by the previous menus
     rebuildRunMenu();
+    addPrintPreviewAction();
 }
 
 void MainWindow::rebuildMenus()
@@ -107,6 +108,7 @@ void MainWindow::registerCommands()
     registerWindowCommands();
     registerToolCommands();
     registerRunCommands();
+    registerPrintCommands();
 
     registerMacroCommands();
     registerSettingsCommands();

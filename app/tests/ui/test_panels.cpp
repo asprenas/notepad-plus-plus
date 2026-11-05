@@ -19,6 +19,8 @@
 #include <QCheckBox>
 #include <QClipboard>
 #include <QPlainTextEdit>
+#include <QPrinter>
+#include <QRegularExpression>
 #include <QListWidget>
 #include <QTableWidget>
 #include <QDir>
@@ -610,6 +612,71 @@ private slots:
         QCOMPARE(got, QByteArray("run me"));
 #endif
         QFile::remove(QDir(m_user.path()).filePath(QStringLiteral("shortcuts.xml")));
+    }
+
+    void printToPdf()
+    {
+        QByteArray text;
+        for (int i = 1; i <= 300; ++i)
+            text += "print line " + QByteArray::number(i) + "\n";
+        QVERIFY(m_w->openFile(writeFile(QStringLiteral("print.txt"), text)));
+        GuiConfig& g = m_w->mutableConfig().gui;
+        g.printHeaderLeft = "$(FILE_NAME)";
+        g.printFooterRight = "Page $(CURRENT_PRINTING_PAGE)";
+        QCOMPARE(m_w->expandPrintVariables(g.printHeaderLeft), QStringLiteral("print.txt"));
+
+        auto pdfPages = [](const QString& file) {
+            QFile f(file);
+            if (!f.open(QIODevice::ReadOnly))
+                return -1;
+            const QByteArray pdf = f.readAll();
+            return static_cast<int>(QRegularExpression(QStringLiteral("/Type\\s*/Page[^s]"))
+                                        .globalMatch(QString::fromLatin1(pdf))
+                                        .hasNext()
+                                        ? pdf.count("/Type /Page\n") + pdf.count("/Type /Page\r") + pdf.count("/Type /Page ")
+                                              + pdf.count("/Type /Page/")
+                                        : 0);
+        };
+        const QString pdf = QDir(m_files.path()).filePath(QStringLiteral("out.pdf"));
+        int pages = 0;
+        {
+            QPrinter printer(QPrinter::HighResolution);
+            printer.setOutputFormat(QPrinter::PdfFormat);
+            printer.setOutputFileName(pdf);
+            printer.setPageSize(QPageSize(QPageSize::A4));
+            pages = m_w->printDocument(printer, false);
+        }
+        QVERIFY2(pages >= 4, qPrintable(QString::number(pages))); // 300 lines do not fit on a few A4 pages
+        QVERIFY(QFileInfo(pdf).size() > 1000);
+        const int inPdf = pdfPages(pdf);
+        QVERIFY2(inPdf == pages, qPrintable(QStringLiteral("%1 / %2").arg(inPdf).arg(pages)));
+
+        // selection only: one page; a page range
+        editor()->send(SCI_SETSEL, 0, 40);
+        {
+            QPrinter printer(QPrinter::HighResolution);
+            printer.setOutputFormat(QPrinter::PdfFormat);
+            printer.setOutputFileName(pdf);
+            QCOMPARE(m_w->printDocument(printer, true), 1);
+        }
+        {
+            QPrinter printer(QPrinter::HighResolution);
+            printer.setOutputFormat(QPrinter::PdfFormat);
+            printer.setOutputFileName(pdf);
+            printer.setPrintRange(QPrinter::PageRange);
+            printer.setFromTo(2, 3);
+            QCOMPARE(m_w->printDocument(printer, false), 2);
+        }
+        // line numbers margin restored after printing without line numbers
+        g.printLineNumber = false;
+        const auto w = editor()->send(SCI_GETMARGINWIDTHN, 0);
+        {
+            QPrinter printer(QPrinter::HighResolution);
+            printer.setOutputFormat(QPrinter::PdfFormat);
+            printer.setOutputFileName(pdf);
+            QVERIFY(m_w->printDocument(printer, false) >= 4);
+        }
+        QCOMPARE(editor()->send(SCI_GETMARGINWIDTHN, 0), w);
     }
 };
 

@@ -32,6 +32,7 @@
 #include <optional>
 
 class QAction;
+class QPrinter;
 class QMenu;
 class QTranslator;
 class QCheckBox;
@@ -166,6 +167,10 @@ public:
     bool runCommandLine(const QString& command);
     void addUserCommand(const QString& name, const QString& command);
     QDialog* runDialog() const { return m_runDialog; }
+    // --- printing (PrintCommands.cpp)
+    int printDocument(QPrinter& printer, bool selectionOnly); // pages printed, -1 if the printer cannot start
+    QString expandPrintVariables(const std::string& text);
+    void showPrintPreview();
     FunctionListPanel* functionList() const noexcept { return m_funcList; }
     DockManager* dockManager() const noexcept { return m_dock.get(); }
     void reloadFunctionList();
@@ -287,6 +292,8 @@ private:
     void registerRunCommands();
     void showRunDialog();
     void rebuildRunMenu();
+    void registerPrintCommands();
+    void addPrintPreviewAction();
     void markFunctionListEntry();
     // --- small dialogs (ToolDialogs.cpp)
     void registerToolDialogs();

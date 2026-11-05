@@ -16,6 +16,7 @@ qt_add_library(npp_ui STATIC
     WindowCommands.cpp
     ToolCommands.cpp
     RunCommands.cpp
+    PrintCommands.cpp
     panels/FunctionListPanel.h
     panels/FunctionListPanel.cpp
     panels/DocumentMapPanel.h
@@ -78,6 +79,7 @@ target_link_libraries(npp_ui PUBLIC
     npp_scintilla
     npp_core
     Qt6::Widgets
+    Qt6::PrintSupport
     Qt6::Network)
 
 qt_add_executable(notepadpp-qt main.cpp)

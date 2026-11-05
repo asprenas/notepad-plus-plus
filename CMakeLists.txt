@@ -36,7 +36,7 @@ if(BUILD_TESTING)
     enable_testing()
 endif()
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets Network Core5Compat)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Widgets Network PrintSupport Core5Compat)
 qt_standard_project_setup()
 
 # Paths to the existing (upstream) source tree reused by the port
