@@ -7,6 +7,7 @@
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
 #include "panels/FolderAsWorkspacePanel.h"
+#include "plugins/PluginHost.h"
 
 #include "core/encoding/EncodingMapper.h"
 #include "core/util/PathUtil.h"
@@ -80,6 +81,15 @@ void MainWindow::buildMenus()
     addPrintPreviewAction();
     m_udlMenuActions.clear(); // the new menus do not contain them yet
     refreshUdlMenu();
+    if (m_plugins) { // plugin sub menus above "Open Plugins Folder..." (upstream order)
+        QAction* openFolder = m_actions->action(IDM_SETTING_OPENPLUGINSDIR);
+        QMenu* pluginsMenu = nullptr;
+        for (QObject* o : openFolder->associatedObjects())
+            if (auto* m = qobject_cast<QMenu*>(o))
+                pluginsMenu = m;
+        m_plugins->buildMenu(pluginsMenu, openFolder);
+        m_plugins->applyShortcuts(m_shortcuts);
+    }
 }
 
 void MainWindow::rebuildMenus()

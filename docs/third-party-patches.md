@@ -9,6 +9,7 @@
 | `PowerEditor/src/uchardet/nsCharSetProber.cpp` | `#include <cstdint>` 추가 | Notepad++ 수정 코드가 `uintptr_t` 사용, Linux GCC에서 헤더 누락 오류 | 2026-11-02 |
 | `lexilla/lexers/LexUser.cxx` | `#include <windows.h>`를 `_WIN32`로 감싸고, 비 Windows용 `_itoa` 대체 함수 추가, `<cstring>` 명시 포함 | UDL 렉서가 Windows 헤더/MSVC CRT(`_itoa`)에 의존. `strlen`/`strcmp`는 `windows.h` 경유로 들어오던 것 | 2026-11-02 |
 | `boostregex/boost/regex/config.hpp` | GCC on Windows `BOOST_REGEX_NO_W32` 조건에 `!defined(NPP_BOOST_REGEX_GCC_WIN32_LOCALE)` 추가 (MinGW 빌드에서 정의) | Boost가 GCC/Windows에서 Win32 locale traits를 끄고 "C" locale을 써서 `é` 등 비 ASCII 대소문자 무시 검색이 원본(MSVC, Win32 traits)과 달랐음. 정규식 호환 테스트로 발견 | 2026-11-03 |
+| `scintilla/include/Scintilla.h` | Notepad++가 끝에 추가한 C++ 구조체(`SearchResultMarkingLine`, `SearchResultMarkings`, `<vector>`)를 `#ifdef __cplusplus`로 감쌈 | C로 작성한 플러그인(7단계 샘플 `textcase.c`)이 `Scintilla.h`를 포함할 수 있도록 | 2026-11-05 |
 
 ## 서브모듈
 

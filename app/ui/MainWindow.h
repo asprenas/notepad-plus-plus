@@ -71,6 +71,7 @@ class ClipboardHistoryPanel;
 class UdlPanel;
 class TaskListPopup;
 class PreferencesDialog;
+class PluginHost;
 
 // Command line options of upstream CmdLineParams handled by the MVP
 struct CommandLine {
@@ -85,6 +86,7 @@ struct CommandLine {
     bool readOnly = false;
     bool alwaysOnTop = false;
     bool systemTray = false;   // -systemtray
+    bool noPlugin = false;     // -noPlugin
 };
 CommandLine parseCommandLine(const QStringList& args);
 
@@ -95,6 +97,7 @@ DockLayout dockingDataToLayout(const core::DockingData& d);
 
 class MainWindow final : public QMainWindow {
     Q_OBJECT
+    friend class PluginHost;
 public:
     explicit MainWindow(const CommandLine& cmd = {}, QWidget* parent = nullptr);
     ~MainWindow() override;
@@ -319,6 +322,8 @@ private:
     void registerTrayCommands();
     bool closeToTray(QCloseEvent* event);
     void markFunctionListEntry();
+    void createPluginHost();
+    void pluginNotify(uint32_t code, uintptr_t id = 0);
     // --- small dialogs (ToolDialogs.cpp)
     void registerToolDialogs();
     void showFindCharsInRange();
@@ -349,6 +354,8 @@ private:
     void syncToolbarFromMode(bool dark);
     void syncToolbarToMode(bool dark);
 public:
+    // --- plugins (phase 7, plugins/PluginHost)
+    PluginHost* plugins() const noexcept { return m_plugins; }
     std::string pluginsDir() const;
     int importPlugins(const QStringList& files); // Settings > Import > Import plugin(s)
 private:
@@ -383,6 +390,7 @@ private:
     std::unique_ptr<core::FileManager> m_files;
 
     ActionRegistry*              m_actions = nullptr;
+    PluginHost*                  m_plugins = nullptr; // child QObject; null with -noPlugin
     std::unique_ptr<DockManager> m_dock;
     QSplitter*                   m_splitter = nullptr;
     std::array<EditorPane*, 2>   m_panes{};

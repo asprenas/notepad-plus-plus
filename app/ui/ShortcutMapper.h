@@ -33,8 +33,14 @@ public:
         QString name, category;
         core::KeyCombo key, defaultKey;
     };
+    struct PluginCommand {          // a loaded plugin's menu command (Plugin commands tab)
+        std::string module;         // shortcuts.xml moduleName
+        int internalId = 0;         // index in the plugin's menu
+        QString name;
+        core::KeyCombo defaultKey;
+    };
     ShortcutMapper(const core::ShortcutsFile& current, ActionRegistry* actions, const core::NativeLanguage* nl,
-                   QWidget* parent = nullptr);
+                   QWidget* parent = nullptr, std::vector<PluginCommand> pluginCommands = {});
 
     // Result: shortcuts.xml model with the edited keys
     core::ShortcutsFile result() const;
@@ -50,6 +56,8 @@ private:
     QString keyText(const core::KeyCombo& k) const;
 
     core::ShortcutsFile m_file;
+    std::vector<PluginCommand> m_pluginCommands; // Row::id = kPluginRow + index
+    static constexpr int kPluginRow = 1 << 20;
     std::vector<Row> m_rows;
     QTabWidget* m_tabs = nullptr;
     QTableWidget* m_tables[5] = {};

@@ -3,6 +3,21 @@
 버전 규칙: `0.x.y` (베타 전 `0.`). 원본 기준 버전은 각 항목에 표기한다.
 릴리스 절차는 [release.md](release.md), 빌드는 [build.md](build.md).
 
+## [Unreleased]
+
+### 플러그인 API (7단계)
+- 새 플러그인 인터페이스 v1: C ABI(`app/plugin-api/include/npp_plugin_api.h`), Windows `.dll` / Linux `.so`.
+  플러그인 폴더 `<앱>/plugins/<이름>/`, `<설정 폴더>/plugins/<이름>/` (Linux 설치본 `<prefix>/lib/notepadpp-qt/plugins`).
+  `-noPlugin` 명령줄 옵션.
+- 플러그인 메뉴(플러그인별 하위 메뉴, 체크 표시), 기본 단축키 + 단축키 매퍼 "플러그인 명령" 탭(`shortcuts.xml` `<PluginCommands>` 원본 형식),
+  도킹 패널(QWidget), 툴바 버튼, `NPPN_*` 19종 / `SCN_*` 알림, 플러그인 간 메시지(`NPPM_MSGTOPLUGIN`).
+- 원본 `NPPM_*` 메시지 76개 호환(`npp_compat.h`, `npp_compat_win32.h`): 인기 플러그인 10개 조사에서 상위 50개 중 44개 지원,
+  6개(도킹·툴바 아이콘·메뉴 핸들)는 새 API로 대체 ([plugin-api-nppm.md](plugin-api-nppm.md)).
+- 오류 격리: 로드 실패·API 버전 불일치·원본 Win32 플러그인·초기화 실패·C++ 예외는 해당 플러그인만 비활성화하고 알림(모달 아님).
+- 샘플 플러그인: Text Case(C, UI 없음), Document Info(Qt 도킹 패널). 공개 플러그인 MIME Tools 3.2 이식.
+  개발 문서 [plugin-development.md](plugin-development.md).
+- 원본 Win32 플러그인 DLL 은 바이너리 호환되지 않는다 (소스 이식 필요).
+
 ## [0.1.0] - 2026-11-05
 
 첫 베타. 원본 기준: Notepad++ 8.9.8.1 (이 저장소에서 병합한 upstream master).

@@ -65,7 +65,14 @@ qt_add_library(npp_ui STATIC
     editor/EditorPane.cpp
     docking/DockManager.h
     docking/DockManager.cpp
+    plugins/PluginHost.h
+    plugins/PluginHost.cpp
+    plugins/PluginMessages.cpp
 )
+# Exceptions thrown by plugin code through the C entry points are caught (/EHs: extern "C" may throw)
+if(MSVC)
+    set_source_files_properties(plugins/PluginHost.cpp plugins/PluginMessages.cpp PROPERTIES COMPILE_OPTIONS "/EHs")
+endif()
 
 # --- docking backend: selected here and in DockManager.cpp only ---------------
 if(NPP_DOCKING_BACKEND STREQUAL "ADS")
@@ -86,6 +93,7 @@ target_compile_definitions(npp_ui PUBLIC NPP_QT_VERSION="${PROJECT_VERSION}")
 target_link_libraries(npp_ui PUBLIC
     npp_scintilla
     npp_core
+    npp_plugin_api
     Qt6::Widgets
     Qt6::PrintSupport
     Qt6::Network)

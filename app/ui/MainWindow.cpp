@@ -6,6 +6,7 @@
 #include "editor/EditorPane.h"
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
+#include "plugins/PluginHost.h"
 #include "search/FindReplaceDialog.h"
 
 #include "core/editor/Representations.h"
@@ -182,6 +183,7 @@ CommandLine parseCommandLine(const QStringList& args)
         else if (a == QLatin1String("-ro")) c.readOnly = true;
         else if (a == QLatin1String("-alwaysOnTop")) c.alwaysOnTop = true;
         else if (a == QLatin1String("-systemtray")) c.systemTray = true;
+        else if (a == QLatin1String("-noPlugin")) c.noPlugin = true;
         else if (a == QLatin1String("-openSession") && i + 1 < args.size()) c.sessionFile = args[++i];
         else if (a.startsWith(QLatin1String("-settingsDir="))) c.settingsDir = a.mid(13);
         else if (a.startsWith(QLatin1Char('-')) && !QFileInfo::exists(a)) continue; // unknown / unsupported option
@@ -201,6 +203,7 @@ MainWindow::MainWindow(const CommandLine& cmd, QWidget* parent) : QMainWindow(pa
     startupLog("  loadSettings");
     createUi();
     startupLog("  createUi");
+    createPluginHost(); // before the menus (plugin sub menus) and the dock layout (plugin panels)
     registerCommands();
     startupLog("  registerCommands");
     restoreWindowState();
@@ -234,10 +237,43 @@ MainWindow::MainWindow(const CommandLine& cmd, QWidget* parent) : QMainWindow(pa
     startupLog("  session restored");
     openFromCommandLine(cmd);
     ensureDocument();
+    if (m_plugins)
+        QTimer::singleShot(0, this, [this] {
+            pluginNotify(NPPN_TBMODIFICATION);
+            pluginNotify(NPPN_READY);
+            if (const auto& errors = m_plugins->errors(); !errors.empty() && !m_quietSecurityWarnings) {
+                QString text = tr("Some plugins could not be loaded:");
+                for (const auto& e : errors)
+                    text += QStringLiteral("\n\n") + QDir::toNativeSeparators(e.file) + QStringLiteral("\n") + e.reason;
+                auto* box = new QMessageBox(QMessageBox::Warning, QStringLiteral("Notepad++"), text, QMessageBox::Ok, this);
+                box->setObjectName(QStringLiteral("pluginErrors"));
+                box->setAttribute(Qt::WA_DeleteOnClose);
+                box->setModal(false);
+                box->show();
+            }
+        });
+}
+
+void MainWindow::createPluginHost()
+{
+    if (m_cmd.noPlugin || qEnvironmentVariableIsSet("NPP_QT_NO_PLUGINS"))
+        return;
+    m_plugins = new PluginHost(this);
+    for (int v = 0; v < 2; ++v)
+        m_plugins->connectEditor(v, m_panes[static_cast<size_t>(v)]->editor());
+    m_plugins->loadAll();
+}
+
+void MainWindow::pluginNotify(uint32_t code, uintptr_t id)
+{
+    if (m_plugins)
+        m_plugins->notify(code, id);
 }
 
 MainWindow::~MainWindow()
 {
+    if (m_plugins)
+        m_plugins->shutdown();
     for (auto& ac : m_autoCompletion)
         ac.reset();
     // Views drop their documents before the FileManager releases them.
@@ -673,6 +709,8 @@ void MainWindow::onCurrentBufferChanged(EditorPane* pane, BufferId id)
     updateTitleAndStatus();
     updateDocumentList();
     panelsOnBufferChanged();
+    if (b)
+        pluginNotify(NPPN_BUFFERACTIVATED, static_cast<uintptr_t>(id));
 }
 
 void MainWindow::applyLanguageToPane(EditorPane* pane, Buffer* b)
@@ -715,6 +753,7 @@ void MainWindow::setLanguage(Buffer* b, LangType lang, const std::string& udl)
             applyLanguageToPane(p, b);
     updateTitleAndStatus();
     panelsOnBufferChanged();
+    pluginNotify(NPPN_LANGCHANGED, static_cast<uintptr_t>(b->id));
 }
 
 QString MainWindow::miscString(const char* strId, const char* fallback) const
@@ -809,7 +848,14 @@ Buffer* MainWindow::openFile(const QString& rawPath, const LoadOptions& o, bool 
             return nullptr;
     }
     LoadError err = LoadError::None;
+    pluginNotify(NPPN_FILEBEFORELOAD);
     Buffer* b = m_files->loadFile(path, o, &err);
+    if (b) {
+        pluginNotify(NPPN_FILEBEFOREOPEN, static_cast<uintptr_t>(b->id));
+        pluginNotify(NPPN_FILEOPENED, static_cast<uintptr_t>(b->id));
+    } else {
+        pluginNotify(NPPN_FILELOADFAILED);
+    }
     // upstream: word wrap is switched off for a large file (performance)
     if (b && b->largeFile && m_config.gui.largeFileDeactivateWordWrap && m_config.gui.wrap)
         m_actions->trigger(IDM_VIEW_WRAP);
@@ -900,7 +946,9 @@ bool MainWindow::closeBuffer(BufferId id, EditorPane* pane, bool ask)
                 m_lastClosed.pop_back();
         }
         watchFile(b->path, false);
+        pluginNotify(NPPN_FILEBEFORECLOSE, static_cast<uintptr_t>(id));
         m_files->close(*b);
+        pluginNotify(NPPN_FILECLOSED, static_cast<uintptr_t>(id));
     }
     if (pane->count() == 0) {
         if (pane->viewIndex() == 1 || m_panes[1]->count() > 0) {
@@ -962,6 +1010,7 @@ bool MainWindow::saveBuffer(Buffer* b, bool saveAs, bool copy)
     const bool wasUntitled = b->isUntitled();
     const std::string oldPath = b->path;
     watchFile(b->path, false);
+    pluginNotify(NPPN_FILEBEFORESAVE, static_cast<uintptr_t>(b->id));
     SaveStatus st = m_files->save(*b, path.toStdString(), copy);
     if (st == SaveStatus::AccessDenied && !processIsElevated())
         st = saveElevated(b, path, copy);
@@ -991,6 +1040,7 @@ bool MainWindow::saveBuffer(Buffer* b, bool saveAs, bool copy)
         if (p->current() == b->id)
             p->editor()->send(SCI_SETSAVEPOINT);
     refreshBuffer(b);
+    pluginNotify(NPPN_FILESAVED, static_cast<uintptr_t>(b->id));
     return true;
 }
 
@@ -1241,6 +1291,8 @@ void MainWindow::restoreSession(const Session& s)
                         o.userLangOverride = f.lang;
                     }
                     b = m_files->loadFile(f.filename, o);
+                    if (b)
+                        pluginNotify(NPPN_FILEOPENED, static_cast<uintptr_t>(b->id));
                 }
             }
             if (!b)
@@ -1304,16 +1356,21 @@ bool MainWindow::loadSessionFrom(const QString& path)
 
 bool MainWindow::prepareExit()
 {
-    if (!panelsPrepareExit())
+    pluginNotify(NPPN_BEFORESHUTDOWN);
+    if (!panelsPrepareExit()) {
+        pluginNotify(NPPN_CANCELSHUTDOWN);
         return false;
+    }
     panelsSaveSettings();
     const bool snapshot = m_config.gui.snapshotMode && m_config.gui.rememberLastSession && !m_cmd.noSession;
     if (snapshot) {
         backupDirtyBuffers();
     } else {
         for (const auto& [id, p] : allTabs())
-            if (!askToSave(buffer(id)))
+            if (!askToSave(buffer(id))) {
+                pluginNotify(NPPN_CANCELSHUTDOWN);
                 return false;
+            }
     }
     m_exiting = true;
     if (m_config.gui.rememberLastSession && !m_cmd.noSession) {
@@ -1332,6 +1389,8 @@ bool MainWindow::prepareExit()
 void MainWindow::shutdownForTest()
 {
     prepareExit();
+    if (m_plugins)
+        m_plugins->shutdown();
 }
 
 void MainWindow::showCrashRecoveryNotice(const QString& crashDir)
@@ -1378,6 +1437,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
         event->ignore();
         return;
     }
+    if (m_plugins)
+        m_plugins->shutdown(); // NPPN_SHUTDOWN while the documents are still open
     event->accept();
 }
 

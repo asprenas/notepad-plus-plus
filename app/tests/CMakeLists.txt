@@ -121,3 +121,27 @@ add_executable(test_ui_perf ui/test_perf.cpp)
 set_target_properties(test_ui_perf PROPERTIES AUTOMOC ON)
 target_link_libraries(test_ui_perf PRIVATE npp_ui Qt6::Test)
 add_dependencies(test_ui_perf notepadpp-qt)
+
+# --- phase 7: plugin API (samples, ported MIME Tools, fault isolation) ------------------------
+set(NPP_TEST_PLUGIN_DIR ${CMAKE_BINARY_DIR}/test-plugins)
+npp_add_plugin(badversion SOURCES plugins/badversion.c OUTPUT_DIR ${NPP_TEST_PLUGIN_DIR})
+npp_add_plugin(initfail SOURCES plugins/initfail.c OUTPUT_DIR ${NPP_TEST_PLUGIN_DIR})
+npp_add_plugin(win32like SOURCES plugins/win32like.c OUTPUT_DIR ${NPP_TEST_PLUGIN_DIR})
+npp_add_plugin(throwing SHARED_RUNTIME SOURCES plugins/throwing.cpp OUTPUT_DIR ${NPP_TEST_PLUGIN_DIR})
+if(MSVC)
+    target_compile_options(throwing PRIVATE /EHs) # exceptions leave extern "C" functions on purpose
+endif()
+
+add_executable(test_ui_plugins ui/test_plugins.cpp)
+set_target_properties(test_ui_plugins PROPERTIES AUTOMOC ON)
+target_link_libraries(test_ui_plugins PRIVATE npp_ui Qt6::Test)
+add_dependencies(test_ui_plugins notepadpp-qt badversion initfail win32like throwing)
+if(NPP_BUILD_PLUGINS)
+    add_dependencies(test_ui_plugins textcase docinfo mimeTools)
+endif()
+target_compile_definitions(test_ui_plugins PRIVATE
+    NPP_PLUGIN_DIR="${NPP_PLUGIN_OUTPUT_DIR}"
+    NPP_TEST_PLUGIN_DIR="${NPP_TEST_PLUGIN_DIR}")
+add_test(NAME ui.plugins COMMAND test_ui_plugins)
+set_tests_properties(ui.plugins PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+npp_test_env(ui.plugins)

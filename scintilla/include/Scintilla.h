@@ -1494,6 +1494,7 @@ struct SCNotification {
 	int characterSource;	/* SCN_CHARADDED */
 };
 
+#ifdef __cplusplus /* [npp-qt] C plugins (phase 7) include this header */
 #include <vector>
 struct SearchResultMarkingLine { // each line could have several segments if user want to see only 1 found line which contains several results
 	std::vector<std::pair<intptr_t, intptr_t>> _segmentPostions; // a vector of pair of start & end of occurrence for colourizing
@@ -1503,6 +1504,7 @@ struct SearchResultMarkings {
 	intptr_t _length;
 	SearchResultMarkingLine *_markings;
 };
+#endif /* __cplusplus */
 #ifdef INCLUDE_DEPRECATED_FEATURES
 
 #define SCI_SETKEYSUNICODE 2521

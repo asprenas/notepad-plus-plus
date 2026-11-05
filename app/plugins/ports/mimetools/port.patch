@@ -1,0 +1,261 @@
+--- a/src/mimeTools.cpp
++++ b/src/mimeTools.cpp
+@@ -28,18 +28,12 @@
+ const TCHAR PLUGIN_NAME[] = TEXT("MIME Tools");
+ const int nbFunc = 22;
+ 
+-HINSTANCE g_hInst = nullptr;;
+ NppData nppData;
+ FuncItem funcItem[nbFunc];
+-HWND g_hAboutDlg = nullptr;
+ 
+-BOOL APIENTRY DllMain(HANDLE hModule, DWORD reasonForCall, LPVOID /*lpReserved*/)
++static void commandMenuInit() // Qt port: was DllMain(DLL_PROCESS_ATTACH)
+ {
+-	switch (reasonForCall)
+-	{
+-		case DLL_PROCESS_ATTACH:
+ 		{
+-			g_hInst = (HINSTANCE)hModule;
+ 			funcItem[0]._pFunc = convertToBase64FromAscii;
+ 			funcItem[1]._pFunc = convertToBase64FromAscii_pad;
+ 			funcItem[2]._pFunc = convertToBase64FromAscii_B64Format;
+@@ -137,68 +131,31 @@
+ 			funcItem[16]._pShKey = NULL;
+ 			funcItem[17]._pShKey = NULL;
+ 		}
+-		break;
+-
+-		case DLL_PROCESS_DETACH:
+-		break;
+-
+-		case DLL_THREAD_ATTACH:
+-		break;
+-
+-		case DLL_THREAD_DETACH:
+-		break;
+-	}
+-	return TRUE;
+ }
+ 
+-extern "C" __declspec(dllexport) void setInfo(NppData notpadPlusData)
+-{
+-	nppData = notpadPlusData;
+-}
++// Qt port: entry points of the Notepad++ Qt plugin API instead of setInfo / getName /
++// getFuncsArray / beNotified / isUnicode / messageProc
++extern "C" {
+ 
+-extern "C" __declspec(dllexport) const TCHAR * getName()
++NPP_EXPORT const NppPluginInfo* npp_plugin_info(void)
+ {
+-	return PLUGIN_NAME;
++	static const NppPluginInfo info{NPP_PLUGIN_API_VERSION, PLUGIN_NAME, "3.2"};
++	return &info;
+ }
+ 
+-extern "C" __declspec(dllexport) FuncItem * getFuncsArray(int *nbF)
++NPP_EXPORT int npp_plugin_init(const NppApi* api, NppPluginHandle self)
+ {
+-	*nbF = nbFunc;
+-	return funcItem;
+-}
+-
+-extern "C" __declspec(dllexport) void beNotified(SCNotification* notifyCode)
+-{
+-	switch (notifyCode->nmhdr.code)
+-	{
+-		case NPPN_DARKMODECHANGED:
+-		{
+-			if (g_hAboutDlg)
+-			{
+-				::SendMessage(nppData._nppHandle, NPPM_DARKMODESUBCLASSANDTHEME, static_cast<WPARAM>(NppDarkMode::dmfHandleChange), reinterpret_cast<LPARAM>(g_hAboutDlg));
+-				::SetWindowPos(g_hAboutDlg, nullptr, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED); // to redraw titlebar
+-			}
+-			break;
+-		}
+-	}
++	nppData = npp_compat_init(api, self);
++	return 0;
+ }
+ 
+-#ifdef UNICODE
+-extern "C" __declspec(dllexport) BOOL isUnicode()
++NPP_EXPORT int npp_plugin_menu_items(NppMenuItem** items)
+ {
+-	return TRUE;
++	commandMenuInit();
++	return npp_compat_menu_items(funcItem, nbFunc, items);
+ }
+-#endif //UNICODE
+ 
+-// Here you can process the Npp Messages 
+-// I will make the messages accessible little by little, according to the need of plugin development.
+-// Please let me know if you need to access to some messages :
+-// https://github.com/notepad-plus-plus/notepad-plus-plus/issues
+-//
+-extern "C" __declspec(dllexport) LRESULT messageProc(UINT, WPARAM, LPARAM)
+-{
+-	return TRUE;
+-}
++} // extern "C"
+ 
+ HWND getCurrentScintillaHandle()
+ {
+@@ -470,46 +427,12 @@
+ 	quotedPrintableConvert(qp_encode);
+ }
+ 
+-BOOL CALLBACK aboutDlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM /*lParam*/)
++void about() // Qt port: message box instead of the Win32 dialog resource
+ {
+-	switch (message) 
+-	{
+-		case WM_COMMAND:
+-			switch (LOWORD(wParam))
+-            {
+-                case IDCLOSE :
+-			    {
+-					::EndDialog(hwnd, 0);
+-					g_hAboutDlg = nullptr;
+-					return  TRUE;
+-				}
+-			}
+-			return FALSE;
+-	}
+-	return FALSE;
+-}
+-
+-void about()
+-{
+-	g_hAboutDlg = ::CreateDialogParam(g_hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), nppData._nppHandle, (DLGPROC)aboutDlgProc, (LPARAM)NULL);
+-		    
+-	// Go to center
+-	RECT rc;
+-	::GetClientRect(nppData._nppHandle, &rc);
+-	POINT center;
+-	int w = rc.right - rc.left;
+-	int h = rc.bottom - rc.top;
+-	center.x = rc.left + w/2;
+-	center.y = rc.top + h/2;
+-	::ClientToScreen(nppData._nppHandle, &center);
+-
+-	RECT dlgRect;
+-	::GetClientRect(g_hAboutDlg, &dlgRect);
+-	int x = center.x - (dlgRect.right - dlgRect.left)/2;
+-	int y = center.y - (dlgRect.bottom - dlgRect.top)/2;
+-	::SendMessage(nppData._nppHandle, NPPM_DARKMODESUBCLASSANDTHEME, static_cast<WPARAM>(NppDarkMode::dmfInit), reinterpret_cast<LPARAM>(g_hAboutDlg));
+-
+-	::SetWindowPos(g_hAboutDlg, HWND_TOP, x, y, (dlgRect.right - dlgRect.left), (dlgRect.bottom - dlgRect.top), SWP_SHOWWINDOW);
++	::MessageBox(nppData._nppHandle,
++		TEXT("MIME Tools 3.2\n\nBase64, Quoted-printable, URL and SAML encode / decode.\n")
++		TEXT("Copyright Don HO, Paul Nankervis. GNU GPL.\n\nPorted to the Notepad++ Qt plugin API."),
++		TEXT("About MIME Tools"), MB_OK | MB_ICONINFORMATION);
+ }
+ 
+ void convertSamlDecode()
+--- a/src/PluginInterface.h
++++ b/src/PluginInterface.h
+@@ -1,73 +1,9 @@
+-// This file is part of Notepad++ project
+-// Copyright (C)2024 Don HO <don.h@free.fr>
+-
+-// This program is free software: you can redistribute it and/or modify
+-// it under the terms of the GNU General Public License as published by
+-// the Free Software Foundation, either version 3 of the License, or
+-// at your option any later version.
+-//
+-// This program is distributed in the hope that it will be useful,
+-// but WITHOUT ANY WARRANTY; without even the implied warranty of
+-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+-// GNU General Public License for more details.
+-//
+-// You should have received a copy of the GNU General Public License
+-// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-
+-
+-
+-// For more comprehensive information on plugin communication, please refer to the following resource:
+-// https://npp-user-manual.org/docs/plugin-communication/
+-
++// Qt port of MIME Tools: replaces upstream PluginInterface.h / Notepad_plus_msgs.h / <windows.h>.
++// NppData, FuncItem, ShortcutKey, NPPM_* / NPPN_* and the Win32 names the plugin uses
++// (::SendMessage on the NppData handles, ::MessageBox, TCHAR, TEXT, lstrcpy) come from the
++// compatibility headers of the Notepad++ Qt plugin API.
+ #pragma once
+ 
+-#include "Scintilla.h"
+-#include "Notepad_plus_msgs.h"
+-
+-
+-typedef const TCHAR * (__cdecl * PFUNCGETNAME)();
+-
+-struct NppData
+-{
+-	HWND _nppHandle = nullptr;
+-	HWND _scintillaMainHandle = nullptr;
+-	HWND _scintillaSecondHandle = nullptr;
+-};
+-
+-typedef void (__cdecl * PFUNCSETINFO)(NppData);
+-typedef void (__cdecl * PFUNCPLUGINCMD)();
+-typedef void (__cdecl * PBENOTIFIED)(SCNotification *);
+-typedef LRESULT (__cdecl * PMESSAGEPROC)(UINT Message, WPARAM wParam, LPARAM lParam);
+-
+-
+-struct ShortcutKey
+-{
+-	bool _isCtrl = false;
+-	bool _isAlt = false;
+-	bool _isShift = false;
+-	UCHAR _key = 0;
+-};
+-
+-const int menuItemSize = 64;
+-
+-struct FuncItem
+-{
+-	TCHAR _itemName[menuItemSize] = { '\0' };
+-	PFUNCPLUGINCMD _pFunc = nullptr;
+-	int _cmdID = 0;
+-	bool _init2Check = false;
+-	ShortcutKey *_pShKey = nullptr;
+-};
+-
+-typedef FuncItem * (__cdecl * PFUNCGETFUNCSARRAY)(int *);
+-
+-// You should implement (or define an empty function body) those functions which are called by Notepad++ plugin manager
+-extern "C" __declspec(dllexport) void setInfo(NppData);
+-extern "C" __declspec(dllexport) const TCHAR * getName();
+-extern "C" __declspec(dllexport) FuncItem * getFuncsArray(int *);
+-extern "C" __declspec(dllexport) void beNotified(SCNotification *);
+-extern "C" __declspec(dllexport) LRESULT messageProc(UINT Message, WPARAM wParam, LPARAM lParam);
+-
+-// This API return always true now, since Notepad++ isn't compiled in ANSI mode anymore
+-extern "C" __declspec(dllexport) BOOL isUnicode();
+-
++#define NPP_PLUGIN_IMPLEMENTATION
++#include <npp_compat_win32.h>
++#include <Scintilla.h>
+--- a/src/b64.h
++++ b/src/b64.h
+@@ -17,7 +17,7 @@
+ 
+ #pragma once
+ 
+-#include <windows.h>
++#include "PluginInterface.h" // Qt port: was <windows.h>
+ 
+ int base64Encode(char *resultString, const char *asciiString, size_t asciiStringLength, size_t wrapLength, bool padFlag, bool byLineFlag);
+ int base64Decode(char *resultString, const char *encodedString, size_t encodedStringLength, bool strictFlag, bool whitespaceReset);
+--- a/src/qp.h
++++ b/src/qp.h
+@@ -19,7 +19,7 @@
+ 
+ #include <stdint.h>
+ #include <stdio.h>
+-#include <windows.h>
++#include "PluginInterface.h" // Qt port: was <windows.h>
+ 
+ // "QP works by using the equals sign = as an escape character.It also limits line length to 76, as some software has limits on line length."
+ // ref: https://en.wikipedia.org/wiki/Quoted-printable

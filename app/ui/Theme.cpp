@@ -3,6 +3,7 @@
 // darkColors + tone offsets, or the customized colors). Like upstream, switching the mode also
 // switches the editor theme: DarkMode darkThemeName / lightThemeName (empty = stylers.xml).
 #include "MainWindow.h"
+#include "plugins/PluginHost.h"
 
 #include "docking/DockManager.h"
 #include "editor/EditorPane.h"
@@ -145,7 +146,10 @@ void MainWindow::applyTheme()
         if (m_themeApplied)
             syncToolbarToMode(m_themeIsDark);
         syncToolbarFromMode(dark);
+        const bool changed = m_themeApplied && m_themeIsDark != dark;
         m_themeIsDark = dark;
+        if (changed)
+            pluginNotify(NPPN_DARKMODECHANGED);
         m_themeApplied = true;
     }
     if (m_toolbar)
