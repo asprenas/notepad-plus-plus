@@ -74,6 +74,7 @@ void MainWindow::buildMenus()
         updateRecentMenu();
     }
     rebuildMacroMenu();
+    connectWindowMenu();
 }
 
 void MainWindow::rebuildMenus()
@@ -101,6 +102,7 @@ void MainWindow::registerCommands()
     registerCompletionCommands();
     registerToolDialogs();
     registerPanelCommands();
+    registerWindowCommands();
 
     registerMacroCommands();
     registerSettingsCommands();

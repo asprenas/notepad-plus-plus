@@ -651,6 +651,8 @@ void MainWindow::onCurrentBufferChanged(EditorPane* pane, BufferId id)
     }
     if (pane->count() == 0 && pane->viewIndex() == 1)
         pane->hide();
+    if (b)
+        noteActivated(id, pane->viewIndex());
     updateTitleAndStatus();
     updateDocumentList();
     panelsOnBufferChanged();

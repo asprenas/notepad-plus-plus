@@ -13,6 +13,7 @@ qt_add_library(npp_ui STATIC
     SettingsCommands.cpp
     ContextMenus.cpp
     PanelCommands.cpp
+    WindowCommands.cpp
     panels/FunctionListPanel.h
     panels/FunctionListPanel.cpp
     panels/DocumentMapPanel.h

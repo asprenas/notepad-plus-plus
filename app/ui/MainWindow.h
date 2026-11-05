@@ -64,6 +64,7 @@ class FolderAsWorkspacePanel;
 class DocumentListPanel;
 class CharacterPanel;
 class ClipboardHistoryPanel;
+class TaskListPopup;
 class PreferencesDialog;
 
 // Command line options of upstream CmdLineParams handled by the MVP
@@ -138,6 +139,15 @@ public:
     static const char* const kPanelClipboardHistory;
     CharacterPanel* characterPanel() const noexcept { return m_charPanel; }
     ClipboardHistoryPanel* clipboardHistory() const noexcept { return m_clipboardPanel; }
+    // --- Window menu, Ctrl+Tab switcher (WindowCommands.cpp)
+    void switchDocument(bool next);
+    std::vector<std::pair<core::BufferId, int>> switcherOrder() const; // MRU or tab order
+    QWidget* taskList() const;
+    void setTaskListKeepOpen(bool on) noexcept { m_taskListKeepOpen = on; } // tests: Ctrl is not held
+    void sortTabs(int key, bool ascending);   // 0 name, 1 path, 2 type, 3 size, 4 time
+    void showWindowsDialog();
+    QDialog* windowsDialog() const noexcept { return m_windowsDialog; }
+    void updateWindowMenu();
     FunctionListPanel* functionList() const noexcept { return m_funcList; }
     DockManager* dockManager() const noexcept { return m_dock.get(); }
     void reloadFunctionList();
@@ -248,6 +258,9 @@ private:
     void panelsSaveSettings(); // panel states to m_config
     void panelsAfterRestore(); // after the dock layout was restored
     void updateDocumentList();
+    void noteActivated(core::BufferId id, int view);
+    void registerWindowCommands();
+    void connectWindowMenu();
     void markFunctionListEntry();
     // --- small dialogs (ToolDialogs.cpp)
     void registerToolDialogs();
@@ -322,6 +335,11 @@ private:
     bool                         m_dockStateRestored = false; // dockLayout-<backend>.bin was applied
     CharacterPanel*              m_charPanel = nullptr;
     ClipboardHistoryPanel*       m_clipboardPanel = nullptr;
+    std::deque<std::pair<core::BufferId, int>> m_mru; // activated documents, most recent first
+    TaskListPopup*               m_taskList = nullptr;
+    bool                         m_taskListKeepOpen = false;
+    QDialog*                     m_windowsDialog = nullptr;
+    std::vector<QAction*>        m_windowMenuActions;
     QMenu*                       m_recentMenu = nullptr;
     std::deque<std::string>      m_lastClosed;
     QFileSystemWatcher*          m_watcher = nullptr;

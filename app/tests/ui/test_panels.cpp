@@ -23,7 +23,10 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QLineEdit>
+#include <QMenu>
+#include <QPushButton>
 #include <QTemporaryDir>
+#include <QTimer>
 #include <QTest>
 #include <QTreeWidget>
 
@@ -388,6 +391,95 @@ private slots:
         layoutToDockingData(l, d);
         QCOMPARE(d.plugins[2].curr, 0);
         QCOMPARE(d.plugins[2].prev, 3);
+    }
+
+    void windowMenuSortAndWindowsDialog()
+    {
+        for (const char* n : {"c.txt", "a.cpp", "b.h"})
+            QVERIFY(m_w->openFile(writeFile(QString::fromLatin1(n), QByteArray(n))));
+        auto tabNames = [this] {
+            QStringList out;
+            for (BufferId id : m_w->currentPane()->buffers())
+                out << QFileInfo(QString::fromStdString(m_w->files().find(id)->path)).fileName();
+            return out;
+        };
+        QVERIFY(m_w->actions()->trigger(IDM_WINDOW_SORT_FN_ASC));
+        QStringList names = tabNames();
+        names.removeAll(QString()); // untitled "new 1" of a fresh window has no path
+        QCOMPARE(names, (QStringList{QStringLiteral("a.cpp"), QStringLiteral("b.h"), QStringLiteral("c.txt")}));
+        QVERIFY(m_w->actions()->trigger(IDM_WINDOW_SORT_FT_DSC));
+        names = tabNames();
+        names.removeAll(QString());
+        QCOMPARE(names.first(), QStringLiteral("c.txt"));
+
+        // the Window menu lists the documents of the current view
+        m_w->updateWindowMenu();
+        QMenu* menu = nullptr;
+        for (QObject* o : m_w->actions()->action(IDM_WINDOW_WINDOWS)->associatedObjects())
+            if ((menu = qobject_cast<QMenu*>(o)))
+                break;
+        QVERIFY(menu);
+        int docs = 0;
+        for (QAction* a : menu->actions())
+            if (a->isCheckable() && a->text().contains(QStringLiteral(".")))
+                ++docs;
+        QVERIFY(docs >= 3);
+
+        // Windows... dialog: list, close selection
+        bool seen = false;
+        QTimer::singleShot(0, this, [&] {
+            QDialog* d = m_w->windowsDialog();
+            QVERIFY(d);
+            auto* tree = d->findChild<QTreeWidget*>(QStringLiteral("windowsList"));
+            QVERIFY(tree);
+            seen = tree->topLevelItemCount() >= 3;
+            tree->clearSelection();
+            for (int i = 0; i < tree->topLevelItemCount(); ++i)
+                if (tree->topLevelItem(i)->text(0) == QStringLiteral("b.h"))
+                    tree->topLevelItem(i)->setSelected(true);
+            for (QPushButton* b : d->findChildren<QPushButton*>())
+                if (b->text().contains(QStringLiteral("Close")))
+                    b->click();
+            d->accept();
+        });
+        QVERIFY(m_w->actions()->trigger(IDM_WINDOW_WINDOWS));
+        QVERIFY(seen);
+        QVERIFY(!tabNames().contains(QStringLiteral("b.h")));
+    }
+
+    void ctrlTabSwitchesInMruOrder()
+    {
+        const QString a = writeFile(QStringLiteral("one.txt"), "1"), b = writeFile(QStringLiteral("two.txt"), "2"),
+                      c = writeFile(QStringLiteral("three.txt"), "3");
+        QVERIFY(m_w->openFile(a));
+        QVERIFY(m_w->openFile(b));
+        QVERIFY(m_w->openFile(c));
+        QVERIFY(m_w->openFile(a)); // MRU: one, three, two
+        auto current = [this] { return QFileInfo(QString::fromStdString(m_w->currentBuffer()->path)).fileName(); };
+        m_w->mutableConfig().gui.doTaskList = false;
+        m_w->switchDocument(true);
+        QCOMPARE(current(), QStringLiteral("three.txt")); // previous document, not the next tab
+        m_w->switchDocument(true);
+        QCOMPARE(current(), QStringLiteral("one.txt"));
+
+        // with the switcher popup: Tab steps while Ctrl is held, the release activates
+        m_w->mutableConfig().gui.doTaskList = true;
+        m_w->setTaskListKeepOpen(true);
+        m_w->switchDocument(true);
+        QWidget* popup = m_w->taskList();
+        QVERIFY(popup);
+        QTest::keyClick(popup, Qt::Key_Tab, Qt::ControlModifier);
+        QTest::keyRelease(popup, Qt::Key_Control);
+        QCOMPARE(current(), QStringLiteral("two.txt")); // MRU one, three, two: second step
+        QVERIFY(!m_w->taskList());
+
+        // tab order mode
+        m_w->mutableConfig().gui.styleMru = false;
+        m_w->mutableConfig().gui.doTaskList = false;
+        const int idx = m_w->currentPane()->currentIndex();
+        m_w->switchDocument(true);
+        QCOMPARE(m_w->currentPane()->currentIndex(), (idx + 1) % m_w->currentPane()->count());
+        m_w->setTaskListKeepOpen(false);
     }
 };
 
