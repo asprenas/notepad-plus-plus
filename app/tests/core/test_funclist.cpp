@@ -153,6 +153,22 @@ private slots:
         QVERIFY(got == expected);
     }
 
+    void cppSmallDocumentLf()
+    {
+        FunctionParsersManager mgr;
+        QVERIFY(mgr.init(m_rulesDir, {}));
+        m_e->send(SCI_SETCODEPAGE, SC_CP_UTF8);
+        m_e->sendStr(SCI_SETTEXT, 0,
+            "int top() { return 1; }\n"
+            "class Foo {\npublic:\n    void bar() {}\n    int baz(int x) { return x; }\n};\n"
+            "void Foo::qux() {}\n"
+            "static void alpha() {}\n");
+        std::vector<FoundFunction> found;
+        QVERIFY(mgr.parse(found, *m_e, L_CPP));
+        QCOMPARE(functionListJson(found, "a"),
+                 std::string("{\"leaves\":[\"top\",\"alpha\"],\"nodes\":[{\"leaves\":[\"bar\",\"baz\",\"qux\"],\"name\":\"Foo\"}],\"root\":\"a\"}"));
+    }
+
     void jsonEscapesLikeNlohmann()
     {
         std::vector<FoundFunction> f{{"a\"b\\c\td\x01", "", 0, -1}, {"m", "K", 3, 1}, {"n", "K", 5, 1}};

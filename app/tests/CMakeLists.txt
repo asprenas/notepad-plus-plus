@@ -88,3 +88,12 @@ endif()
 # --- settings compatibility helper (tools/settings-compat/run-with-npp.ps1, phase 4) --------
 add_executable(settings_compat tools/settings_compat.cpp)
 target_link_libraries(settings_compat PRIVATE npp_core)
+
+# --- phase 5: panels and remaining dialogs ------------------------------------------------
+add_executable(test_ui_panels ui/test_panels.cpp)
+set_target_properties(test_ui_panels PROPERTIES AUTOMOC ON)
+target_link_libraries(test_ui_panels PRIVATE npp_ui Qt6::Test)
+add_dependencies(test_ui_panels notepadpp-qt)
+add_test(NAME ui.panels COMMAND test_ui_panels)
+set_tests_properties(ui.panels PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+npp_test_env(ui.panels)

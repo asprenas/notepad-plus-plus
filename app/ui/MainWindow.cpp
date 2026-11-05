@@ -422,6 +422,7 @@ void MainWindow::createPanels()
             openFile(model->filePath(idx));
     });
     m_dock->addPanel({kPanelFolder, tr("Folder as Workspace"), {}, DockArea::Left, true, false}, tree);
+    createExtraPanels();
 }
 
 void MainWindow::createStatusBar()
@@ -690,6 +691,7 @@ void MainWindow::onCurrentBufferChanged(EditorPane* pane, BufferId id)
                     m_docList->setCurrentItem(item);
             }
     }
+    panelsOnBufferChanged();
 }
 
 void MainWindow::applyLanguageToPane(EditorPane* pane, Buffer* b)
@@ -731,6 +733,7 @@ void MainWindow::setLanguage(Buffer* b, LangType lang, const std::string& udl)
         if (p->current() == b->id)
             applyLanguageToPane(p, b);
     updateTitleAndStatus();
+    panelsOnBufferChanged();
 }
 
 QString MainWindow::miscString(const char* strId, const char* fallback) const

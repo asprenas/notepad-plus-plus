@@ -100,6 +100,7 @@ void MainWindow::registerCommands()
     registerFindCommands();
     registerCompletionCommands();
     registerToolDialogs();
+    registerPanelCommands();
 
     registerMacroCommands();
     registerSettingsCommands();

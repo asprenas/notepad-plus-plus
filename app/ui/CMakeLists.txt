@@ -12,6 +12,9 @@ qt_add_library(npp_ui STATIC
     ToolDialogs.cpp
     SettingsCommands.cpp
     ContextMenus.cpp
+    PanelCommands.cpp
+    panels/FunctionListPanel.h
+    panels/FunctionListPanel.cpp
     DialogTranslator.h
     DialogTranslator.cpp
     Toolbar.cpp
@@ -108,6 +111,8 @@ add_custom_command(TARGET notepadpp-qt POST_BUILD
         ${NPP_ROOT_DIR}/PowerEditor/installer/nativeLang "${NPP_DATA_OUT}/localization"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${NPP_ROOT_DIR}/PowerEditor/installer/themes "${NPP_DATA_OUT}/themes"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${NPP_ROOT_DIR}/PowerEditor/installer/functionList "${NPP_DATA_OUT}/functionList"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${NPP_LEGACY_SRC_DIR}/icons "${NPP_DATA_OUT}/icons"
     VERBATIM)

@@ -6,6 +6,7 @@
 #include "core/config/AppPaths.h"
 #include "core/config/ConfigFile.h"
 #include "core/editor/EditorLanguage.h"
+#include "core/funclist/FunctionParser.h"
 #include "core/search/Search.h"
 #include "core/i18n/NativeLanguage.h"
 #include "core/lang/LanguageRegistry.h"
@@ -56,6 +57,7 @@ class DockManager;
 class EditorPane;
 class FindReplaceDialog;
 class SearchResultsPanel;
+class FunctionListPanel;
 class PreferencesDialog;
 
 // Command line options of upstream CmdLineParams handled by the MVP
@@ -111,6 +113,12 @@ public:
     const core::ShortcutsFile& shortcuts() const noexcept { return m_shortcuts; }
     FindReplaceDialog* findDialog();
     SearchResultsPanel* searchResults(bool show = true);
+    // --- phase 5 panels (PanelCommands.cpp)
+    static const char* const kPanelFunctionList;
+    FunctionListPanel* functionList() const noexcept { return m_funcList; }
+    DockManager* dockManager() const noexcept { return m_dock.get(); }
+    void reloadFunctionList();
+    std::vector<core::FoundFunction> parseFunctions(core::Buffer* b, bool* parsed = nullptr);
     ActionRegistry* actions() const noexcept { return m_actions; }
     core::FileManager& files() { return *m_files; }
     EditorPane* pane(int view) const { return m_panes[static_cast<size_t>(view)]; }
@@ -208,6 +216,11 @@ private:
     void connectAutoCompletion(EditorPane* p);
     void updateAutoCompletionLanguage(EditorPane* p);
     void onCharAdded(EditorPane* p, int ch);
+    // --- phase 5 panels (PanelCommands.cpp)
+    void createExtraPanels();
+    void registerPanelCommands();
+    void panelsOnBufferChanged();
+    void markFunctionListEntry();
     // --- small dialogs (ToolDialogs.cpp)
     void registerToolDialogs();
     void showFindCharsInRange();
@@ -311,6 +324,9 @@ private:
     std::vector<core::MacroStep> m_macro;
     std::vector<QAction*>        m_savedMacroActions;
     SearchResultsPanel*          m_searchResults = nullptr;
+    FunctionListPanel*           m_funcList = nullptr;
+    std::unique_ptr<core::FunctionParsersManager> m_funcParsers;
+    QTimer*                      m_panelTimer = nullptr;
     bool                         m_syncScrollV = false, m_syncScrollH = false, m_syncing = false;
     intptr_t                     m_syncLineOffset = 0, m_syncXOffset = 0;
     std::array<QLabel*, 6>       m_status{}; // language, length/lines, position, EOL, encoding, INS/OVR
