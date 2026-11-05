@@ -47,7 +47,6 @@ using namespace cmd;
 
 namespace {
 
-constexpr char kPanelDocList[] = "npp.documentList";
 constexpr int kMarginLineNumber = 0, kMarginBookmark = 1, kMarginFold = 2;
 constexpr int kMarkBookmark = 20; // upstream MARK_BOOKMARK
 constexpr int kMarkHideBegin = 19, kMarkHideEnd = 18; // MARK_HIDELINESBEGIN / END
@@ -393,15 +392,6 @@ void MainWindow::createUi()
 
 void MainWindow::createPanels()
 {
-    m_docList = new QListWidget;
-    connect(m_docList, &QListWidget::itemActivated, this, [this](QListWidgetItem* item) {
-        const BufferId id = item->data(Qt::UserRole).toULongLong();
-        const int view = item->data(Qt::UserRole + 1).toInt();
-        m_panes[static_cast<size_t>(view)]->activate(id);
-        setActivePane(m_panes[static_cast<size_t>(view)]);
-    });
-    m_dock->addPanel({kPanelDocList, tr("Document List"), {}, DockArea::Left, true, false}, m_docList);
-
     createExtraPanels();
 }
 
@@ -662,18 +652,7 @@ void MainWindow::onCurrentBufferChanged(EditorPane* pane, BufferId id)
     if (pane->count() == 0 && pane->viewIndex() == 1)
         pane->hide();
     updateTitleAndStatus();
-    if (m_docList) { // Document List panel
-        QSignalBlocker block(m_docList);
-        m_docList->clear();
-        for (const auto& [tid, p] : allTabs())
-            if (Buffer* tb = buffer(tid)) {
-                auto* item = new QListWidgetItem(tabText(*tb), m_docList);
-                item->setData(Qt::UserRole, QVariant::fromValue<qulonglong>(tid));
-                item->setData(Qt::UserRole + 1, p->viewIndex());
-                if (p == currentPane() && tid == p->current())
-                    m_docList->setCurrentItem(item);
-            }
-    }
+    updateDocumentList();
     panelsOnBufferChanged();
 }
 
@@ -743,6 +722,7 @@ void MainWindow::refreshBuffer(Buffer* b)
         p->setTabText(b->id, tabText(*b), b->isUntitled() ? QString() : q(b->path));
     refreshTabDecorations(*b);
     updateTitleAndStatus();
+    updateDocumentList();
 }
 
 void MainWindow::updateTitleAndStatus()

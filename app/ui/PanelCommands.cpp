@@ -6,6 +6,7 @@
 #include "editor/EditorPane.h"
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
+#include "panels/DocumentListPanel.h"
 #include "panels/DocumentMapPanel.h"
 #include "panels/FolderAsWorkspacePanel.h"
 #include "search/FindReplaceDialog.h"
@@ -38,9 +39,39 @@ QString q(const std::string& s) { return QString::fromStdString(s); }
 const char* const MainWindow::kPanelFunctionList = "npp.functionList";
 const char* const MainWindow::kPanelDocumentMap = "npp.documentMap";
 const char* const MainWindow::kPanelFolderAsWorkspace = "npp.folderAsWorkspace";
+const char* const MainWindow::kPanelDocumentList = "npp.documentList";
 
 void MainWindow::createExtraPanels()
 {
+    // --- Document List
+    m_docList = new DocumentListPanel;
+    {
+        const GuiConfig& g = m_config.gui;
+        m_docList->setColumns({!g.fileSwitcherWithoutExtColumn, !g.fileSwitcherWithoutPathColumn, !g.fileSwitcherNoGroups,
+                               g.fileSwitcherExtWidth, g.fileSwitcherPathWidth});
+    }
+    connect(m_docList, &DocumentListPanel::activateRequested, this, [this](BufferId id, int view) {
+        EditorPane* p = m_panes[static_cast<size_t>(view)];
+        p->activate(id);
+        setActivePane(p);
+    });
+    auto toPanes = [this](const std::vector<std::pair<BufferId, int>>& docs) {
+        std::vector<std::pair<BufferId, EditorPane*>> out;
+        for (const auto& [id, v] : docs)
+            out.emplace_back(id, m_panes[static_cast<size_t>(v)]);
+        return out;
+    };
+    connect(m_docList, &DocumentListPanel::closeRequested, this,
+            [this, toPanes](std::vector<std::pair<BufferId, int>> docs) { closeBuffers(toPanes(docs)); });
+    connect(m_docList, &DocumentListPanel::saveRequested, this, [this](std::vector<std::pair<BufferId, int>> docs) {
+        for (const auto& d : docs)
+            if (Buffer* b = buffer(d.first))
+                saveBuffer(b, false);
+    });
+    connect(m_docList, &DocumentListPanel::columnsChanged, this, &MainWindow::updateDocumentList);
+    m_dock->addPanel({kPanelDocumentList, miscString("panel-documentList", "Document List"), {}, DockArea::Left, true, false},
+                     m_docList);
+
     // --- Folder as Workspace
     m_folderPanel = new FolderAsWorkspacePanel;
     connect(m_folderPanel, &FolderAsWorkspacePanel::openFileRequested, this, [this](const QString& f) { openFile(f); });
@@ -145,8 +176,29 @@ void MainWindow::panelsAfterRestore()
         m_dock->showPanel(kPanelFolderAsWorkspace, false);
 }
 
+void MainWindow::updateDocumentList()
+{
+    if (!m_docList)
+        return;
+    std::vector<DocumentListPanel::Entry> entries;
+    for (const auto& [id, p] : allTabs())
+        if (Buffer* b = buffer(id))
+            entries.push_back({id, p->viewIndex(), q(b->displayName()), b->isUntitled() ? QString() : QDir::toNativeSeparators(q(b->path)),
+                               b->dirty, b->isReadOnly(), p == currentPane() && id == p->current()});
+    m_docList->setEntries(entries);
+}
+
 void MainWindow::panelsSaveSettings()
 {
+    if (m_docList) {
+        const DocumentListPanel::Columns c = m_docList->columns();
+        GuiConfig& g = m_config.gui;
+        g.fileSwitcherWithoutExtColumn = !c.ext;
+        g.fileSwitcherWithoutPathColumn = !c.path;
+        g.fileSwitcherNoGroups = !c.groups;
+        g.fileSwitcherExtWidth = c.extWidth;
+        g.fileSwitcherPathWidth = c.pathWidth;
+    }
     if (m_folderPanel)
         m_config.fileBrowser = m_folderPanel->settings();
 }

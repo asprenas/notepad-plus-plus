@@ -5,6 +5,7 @@
 #include "editor/EditorPane.h"
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
+#include "panels/DocumentListPanel.h"
 #include "panels/DocumentMapPanel.h"
 #include "panels/FolderAsWorkspacePanel.h"
 #include "panels/FunctionListPanel.h"
@@ -228,6 +229,54 @@ private slots:
         QCOMPARE(QFileInfo(FolderAsWorkspacePanel::pathOf(fw->tree()->currentItem())), QFileInfo(target));
         fw->removeAllRoots();
         QVERIFY(fw->roots().isEmpty());
+    }
+
+    void documentListColumnsGroupsAndActions()
+    {
+        QVERIFY(m_w->openFile(writeFile(QStringLiteral("b.cpp"), "b")));
+        QVERIFY(m_w->openFile(writeFile(QStringLiteral("a.txt"), "a")));
+        QVERIFY(m_w->actions()->trigger(IDM_VIEW_DOCLIST));
+        DocumentListPanel* dl = m_w->documentList();
+        QVERIFY(m_w->dockManager()->isPanelVisible(MainWindow::kPanelDocumentList));
+        QStringList names = dl->names();
+        QVERIFY2(names.contains(QStringLiteral("b.cpp")) && names.contains(QStringLiteral("a.txt")), qPrintable(names.join(',')));
+        // name and extension in separate columns
+        QTreeWidgetItem* first = dl->tree()->topLevelItem(dl->tree()->topLevelItemCount() - 1);
+        QCOMPARE(first->text(1), QStringLiteral("txt"));
+        QCOMPARE(dl->tree()->currentItem()->text(0), QStringLiteral("a"));
+
+        // click activates
+        QTreeWidgetItem* b = nullptr;
+        for (int i = 0; i < dl->tree()->topLevelItemCount(); ++i)
+            if (dl->tree()->topLevelItem(i)->text(0) == QStringLiteral("b"))
+                b = dl->tree()->topLevelItem(i);
+        QVERIFY(b);
+        emit dl->tree()->itemClicked(b, 0);
+        QVERIFY(m_w->currentBuffer()->path.find("b.cpp") != std::string::npos);
+
+        // dirty state is reflected, groups appear with two views
+        editor()->send(SCI_APPENDTEXT, 1, reinterpret_cast<intptr_t>("x"));
+        QVERIFY(m_w->actions()->trigger(IDM_VIEW_GOTO_ANOTHER_VIEW));
+        QCOMPARE(dl->tree()->topLevelItemCount(), 2);
+        QCOMPARE(dl->tree()->topLevelItem(0)->text(0), QStringLiteral("Main View"));
+        QCOMPARE(dl->tree()->topLevelItem(1)->childCount(), 1);
+
+        // middle / menu close goes through the normal close (asks for dirty documents: undo first)
+        editor()->send(SCI_UNDO);
+        QTreeWidgetItem* moved = dl->tree()->topLevelItem(1)->child(0);
+        const auto id = moved->data(0, Qt::UserRole).toULongLong();
+        emit dl->closeRequested({{id, 1}});
+        QCOMPARE(m_w->pane(1)->count(), 0);
+        QCOMPARE(dl->tree()->topLevelItemCount() >= 1, true);
+
+        // the Ext. column setting is saved in config.xml (MISC fileSwitcherWithoutExtColumn)
+        DocumentListPanel::Columns c = dl->columns();
+        c.ext = false;
+        dl->setColumns(c);
+        QVERIFY(dl->names().contains(QStringLiteral("a.txt")));
+        QCOMPARE(dl->tree()->topLevelItem(0)->text(1), QString());
+        m_w->shutdownForTest();
+        QVERIFY(m_w->config().gui.fileSwitcherWithoutExtColumn);
     }
 };
 

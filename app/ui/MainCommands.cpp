@@ -41,7 +41,6 @@ using namespace cmd;
 namespace {
 
 QString q(const std::string& s) { return QString::fromStdString(s); }
-const std::string kPanelDocList = "npp.documentList";
 
 struct LangCmd {
     int id;
@@ -425,7 +424,8 @@ void MainWindow::registerViewCommands()
         show();
     }, {}, [this] { return bool(windowFlags() & Qt::WindowStaysOnTopHint); }});
     r->setHandler(IDM_VIEW_FULLSCREENTOGGLE, {[this] { isFullScreen() ? showNormal() : showFullScreen(); }, {}, [this] { return isFullScreen(); }});
-    r->setHandler(IDM_VIEW_DOCLIST, {[this] { m_dock->isPanelVisible(kPanelDocList) ? m_dock->hidePanel(kPanelDocList) : m_dock->showPanel(kPanelDocList); }});
+    r->setHandler(IDM_VIEW_DOCLIST, {[this] { m_dock->isPanelVisible(kPanelDocumentList) ? m_dock->hidePanel(kPanelDocumentList) : m_dock->showPanel(kPanelDocumentList); },
+                                     {}, [this] { return m_dock->isPanelVisible(kPanelDocumentList); }});
     r->setHandler(IDM_VIEW_FILEBROWSER, {[this] {
         if (m_dock->isPanelVisible(kPanelFolderAsWorkspace)) {
             m_dock->hidePanel(kPanelFolderAsWorkspace);
