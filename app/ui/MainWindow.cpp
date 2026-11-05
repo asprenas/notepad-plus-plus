@@ -1031,7 +1031,8 @@ void MainWindow::checkFilesystemChanges()
         ids.push_back(b->id);
     for (BufferId id : ids) {
         Buffer* b = buffer(id);
-        if (!b || (b->status != DocStatus::Regular && b->status != DocStatus::Deleted && b->status != DocStatus::Modified))
+        if (!b || b->monitoring // reloaded by the monitoring timer
+            || (b->status != DocStatus::Regular && b->status != DocStatus::Deleted && b->status != DocStatus::Modified))
             continue;
         const FileChange ch = m_files->checkFileState(*b);
         if (ch == FileChange::Modified) {

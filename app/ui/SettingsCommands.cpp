@@ -168,6 +168,7 @@ void MainWindow::setShortcuts(const ShortcutsFile& f)
     std::error_code ec;
     fs::create_directories(pathFromUtf8(m_paths.userDir()), ec);
     m_shortcuts.save(m_paths.shortcutsXml());
+    recordShortcutsXmlHmac(); // written by Notepad++ itself: trusted
     m_actions->applyShortcuts(&m_shortcuts);
     rebuildMacroMenu();
     for (EditorPane* p : m_panes)

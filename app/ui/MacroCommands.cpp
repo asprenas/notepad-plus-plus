@@ -224,7 +224,7 @@ void MainWindow::rebuildMacroMenu()
         a->setShortcutContext(Qt::WindowShortcut);
         addAction(a);
         connect(a, &QAction::triggered, this, [this, i] {
-            if (i < m_shortcuts.macros.size())
+            if (i < m_shortcuts.macros.size() && shortcutsXmlTrusted()) // upstream shortcuts.xml security check
                 playMacro(m_shortcuts.macros[i].steps);
         });
         menu->insertAction(insertBefore, a);
@@ -329,6 +329,8 @@ void MainWindow::registerMacroCommands()
         if (which->count() == 0 || dlg.exec() != QDialog::Accepted)
             return;
         const int idx = which->currentData().toInt();
+        if (idx >= 0 && !shortcutsXmlTrusted()) // saved macro: upstream shortcuts.xml security check
+            return;
         runMacroMultiple(idx < 0 ? m_macro : m_shortcuts.macros[static_cast<size_t>(idx)].steps, toEof->isChecked() ? -1 : count->value());
     }, [this] { return !m_recording && (!m_macro.empty() || !m_shortcuts.macros.empty()); }});
 }
@@ -339,6 +341,7 @@ void MainWindow::saveMacro(const MacroShortcut& m)
     std::error_code ec;
     fs::create_directories(pathFromUtf8(m_paths.userDir()), ec);
     m_shortcuts.save(m_paths.shortcutsXml());
+    recordShortcutsXmlHmac(); // written by Notepad++ itself: trusted
     rebuildMacroMenu();
 }
 

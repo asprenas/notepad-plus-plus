@@ -92,6 +92,9 @@ add_library(npp_core STATIC
 
     project/Workspace.h
     project/Workspace.cpp
+
+    util/Hash.h
+    util/Hash.cpp
 )
 
 if(WIN32)

@@ -103,6 +103,7 @@ void MainWindow::registerCommands()
     registerToolDialogs();
     registerPanelCommands();
     registerWindowCommands();
+    registerToolCommands();
 
     registerMacroCommands();
     registerSettingsCommands();

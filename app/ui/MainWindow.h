@@ -18,6 +18,7 @@
 
 #include <QColor>
 #include <QDialog>
+#include <QHash>
 #include <QMainWindow>
 #include <QPointer>
 #include <QStringList>
@@ -148,6 +149,16 @@ public:
     void showWindowsDialog();
     QDialog* windowsDialog() const noexcept { return m_windowsDialog; }
     void updateWindowMenu();
+    // --- tools, summary, monitoring, help (ToolCommands.cpp)
+    QDialog* hashDialog(int type, bool fromFiles); // core::HashType
+    QString summaryText();
+    void setMonitoring(core::Buffer* b, bool on);
+    std::string shortcutsXmlHmac() const;   // HMAC of shortcuts.xml on disk
+    bool shortcutsXmlTrusted();             // config.xml shortcutsXmlHMAC matches (else review + warning)
+    void setQuietSecurityWarnings(bool on) noexcept { m_quietSecurityWarnings = on; } // tests
+    static QString commandLineHelpText();
+    QString debugInfoText() const;
+    QDialog* openedDialog() const { return m_openedDialog; }
     FunctionListPanel* functionList() const noexcept { return m_funcList; }
     DockManager* dockManager() const noexcept { return m_dock.get(); }
     void reloadFunctionList();
@@ -261,6 +272,11 @@ private:
     void noteActivated(core::BufferId id, int view);
     void registerWindowCommands();
     void connectWindowMenu();
+    void registerToolCommands();
+    void pollMonitoredFiles();
+    void recordShortcutsXmlHmac();
+    void showCommandLineHelp();
+    void showDebugInfo();
     void markFunctionListEntry();
     // --- small dialogs (ToolDialogs.cpp)
     void registerToolDialogs();
@@ -340,6 +356,10 @@ private:
     bool                         m_taskListKeepOpen = false;
     QDialog*                     m_windowsDialog = nullptr;
     std::vector<QAction*>        m_windowMenuActions;
+    QHash<QString, QPointer<QDialog>> m_hashDialogs;
+    QTimer*                      m_monitorTimer = nullptr;
+    bool                         m_quietSecurityWarnings = false;
+    QPointer<QDialog>            m_openedDialog;
     QMenu*                       m_recentMenu = nullptr;
     std::deque<std::string>      m_lastClosed;
     QFileSystemWatcher*          m_watcher = nullptr;

@@ -16,7 +16,9 @@
 #include <ScintillaEditBase.h>
 
 #include <QApplication>
+#include <QCheckBox>
 #include <QClipboard>
+#include <QPlainTextEdit>
 #include <QListWidget>
 #include <QTableWidget>
 #include <QDir>
@@ -480,6 +482,89 @@ private slots:
         m_w->switchDocument(true);
         QCOMPARE(m_w->currentPane()->currentIndex(), (idx + 1) % m_w->currentPane()->count());
         m_w->setTaskListKeepOpen(false);
+    }
+
+    void hashToolsSummaryAndHelp()
+    {
+        m_w->ensureDocument();
+        editor()->send(SCI_SETTEXT, 0, reinterpret_cast<intptr_t>("abc def\r\nx"));
+        // Generate from selection into clipboard
+        editor()->send(SCI_SETSEL, 0, 3);
+        QVERIFY(m_w->actions()->trigger(IDM_TOOL_MD5_GENERATEINTOCLIPBOARD));
+        QCOMPARE(QApplication::clipboard()->text(), QStringLiteral("900150983cd24fb0d6963f7d28e17f72"));
+        QVERIFY(m_w->actions()->trigger(IDM_TOOL_SHA256_GENERATEINTOCLIPBOARD));
+        QVERIFY(QApplication::clipboard()->text().startsWith(QStringLiteral("ba7816bf")));
+
+        // Generate... dialog: digest follows the text, per line option
+        QDialog* d = m_w->hashDialog(0, false);
+        QVERIFY(d->isVisible());
+        auto* text = d->findChild<QPlainTextEdit*>(QStringLiteral("1931"));
+        auto* result = d->findChild<QPlainTextEdit*>(QStringLiteral("1933"));
+        auto* perLine = d->findChild<QCheckBox*>(QStringLiteral("1932"));
+        QVERIFY(text && result && perLine);
+        text->setPlainText(QStringLiteral("abc"));
+        QCOMPARE(result->toPlainText(), QStringLiteral("900150983cd24fb0d6963f7d28e17f72"));
+        text->setPlainText(QStringLiteral("abc\nabc"));
+        perLine->setChecked(true);
+        QCOMPARE(result->toPlainText(), QStringLiteral("900150983cd24fb0d6963f7d28e17f72\n900150983cd24fb0d6963f7d28e17f72\n"));
+        QCOMPARE(m_w->hashDialog(0, false), d); // one dialog per kind
+        QVERIFY(m_w->hashDialog(3, true)->windowTitle().contains(QStringLiteral("SHA-512")));
+
+        // Summary
+        editor()->send(SCI_SETSEL, 0, 7);
+        const QString sum = m_w->summaryText();
+        QVERIFY2(sum.contains(QStringLiteral("Characters (without line endings): 8")), qPrintable(sum));
+        QVERIFY2(sum.contains(QStringLiteral("Words: 3")), qPrintable(sum));
+        QVERIFY2(sum.contains(QStringLiteral("Lines: 2")), qPrintable(sum));
+        QVERIFY2(sum.contains(QStringLiteral("Document length: 10")), qPrintable(sum));
+        QVERIFY2(sum.contains(QStringLiteral("7 selected characters (7 bytes) in 1 ranges")), qPrintable(sum));
+
+        QVERIFY(MainWindow::commandLineHelpText().contains(QStringLiteral("-settingsDir")));
+        const QString dbg = m_w->debugInfoText();
+        QVERIFY(dbg.contains(QStringLiteral("Qt : ")));
+        QVERIFY(dbg.contains(QStringLiteral("Docking backend : ")));
+    }
+
+    void monitoringReloadsAndFollowsTheEnd()
+    {
+        const QString f = writeFile(QStringLiteral("log.txt"), "line 1\n");
+        QVERIFY(m_w->openFile(f));
+        QVERIFY(m_w->actions()->trigger(IDM_VIEW_MONITORING));
+        QVERIFY(m_w->currentBuffer()->monitoring);
+        QVERIFY(editor()->send(SCI_GETREADONLY));
+        QTest::qWait(1100); // file times have a coarse resolution on some file systems
+        QFile out(f);
+        QVERIFY(out.open(QIODevice::Append));
+        out.write("line 2\nline 3\n");
+        out.close();
+        QTRY_VERIFY_WITH_TIMEOUT(docText().contains("line 3"), 5000);
+        QCOMPARE(editor()->send(SCI_GETCURRENTPOS), editor()->send(SCI_GETLENGTH));
+        QVERIFY(m_w->actions()->trigger(IDM_VIEW_MONITORING));
+        QVERIFY(!m_w->currentBuffer()->monitoring);
+        QVERIFY(!editor()->send(SCI_GETREADONLY));
+    }
+
+    void shortcutsXmlIntegrity()
+    {
+        m_w->setQuietSecurityWarnings(true);
+        const QString sx = QDir(m_user.path()).filePath(QStringLiteral("shortcuts.xml"));
+        QFile::remove(sx);
+        QFile f(sx);
+        QVERIFY(f.open(QIODevice::WriteOnly));
+        f.write("<NotepadPlus><InternalCommands/><Macros/><UserDefinedCommands/><PluginCommands/><ScintillaKeys/></NotepadPlus>");
+        f.close();
+        m_w->mutableConfig().gui.shortcutsXmlHmac.clear();
+        QVERIFY(!m_w->shortcutsXmlTrusted()); // missing HMAC: shortcuts.xml opened read-only for review
+        QVERIFY(m_w->currentBuffer()->path.find("shortcuts.xml") != std::string::npos);
+        QVERIFY(m_w->currentBuffer()->userReadOnly);
+        QVERIFY(m_w->actions()->trigger(IDM_EXECUTE_VALIDATE_SHORTCUTSXML));
+        QCOMPARE(m_w->config().gui.shortcutsXmlHmac.size(), size_t(64));
+        QVERIFY(m_w->shortcutsXmlTrusted());
+        QVERIFY(f.open(QIODevice::Append));
+        f.write("\n");
+        f.close();
+        QVERIFY(!m_w->shortcutsXmlTrusted()); // modified outside: tampered
+        QFile::remove(sx);
     }
 };
 
