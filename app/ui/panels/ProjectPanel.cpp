@@ -101,7 +101,7 @@ ProjectPanel::ProjectPanel(int index, QWidget* parent) : QWidget(parent), m_inde
         if (!askToSave())
             return;
         const QString f = QFileDialog::getOpenFileName(this, tr("Open Workspace"), QFileInfo(m_path).absolutePath(),
-                                                       tr("All types (*.*)"));
+                                                       tr("All types (*)"));
         if (!f.isEmpty() && !openWorkspace(f))
             QMessageBox::warning(this, tr("Open Workspace"), tr("The workspace could not be opened.\nIt seems the file to open is not a valid project file."));
     });
@@ -117,12 +117,12 @@ ProjectPanel::ProjectPanel(int index, QWidget* parent) : QWidget(parent), m_inde
     menu->addSeparator();
     menu->addAction(tr("Save"), this, [this] { saveWorkspace(); });
     menu->addAction(tr("Save As..."), this, [this] {
-        const QString f = QFileDialog::getSaveFileName(this, tr("Save Workspace As"), m_path, tr("All types (*.*)"));
+        const QString f = QFileDialog::getSaveFileName(this, tr("Save Workspace As"), m_path, tr("All types (*)"));
         if (!f.isEmpty())
             saveWorkspaceAs(f);
     });
     menu->addAction(tr("Save a Copy As..."), this, [this] {
-        const QString f = QFileDialog::getSaveFileName(this, tr("Save a Copy As"), m_path, tr("All types (*.*)"));
+        const QString f = QFileDialog::getSaveFileName(this, tr("Save a Copy As"), m_path, tr("All types (*)"));
         if (!f.isEmpty())
             saveWorkspaceAs(f, true);
     });
@@ -289,7 +289,7 @@ bool ProjectPanel::saveWorkspaceAs(const QString& path, bool copy)
 bool ProjectPanel::saveWorkspace()
 {
     if (m_path.isEmpty()) {
-        const QString f = QFileDialog::getSaveFileName(this, tr("Save Workspace As"), {}, tr("All types (*.*)"));
+        const QString f = QFileDialog::getSaveFileName(this, tr("Save Workspace As"), {}, tr("All types (*)"));
         return !f.isEmpty() && saveWorkspaceAs(f);
     }
     return saveWorkspaceAs(m_path);

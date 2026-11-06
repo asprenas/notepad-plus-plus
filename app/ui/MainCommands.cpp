@@ -148,7 +148,7 @@ void MainWindow::registerFileCommands()
         QString dir = q(m_config.gui.openSaveDir == 2 ? m_config.gui.defaultDir : m_config.gui.lastUsedDir);
         if (const Buffer* b = currentBuffer(); b && !b->isUntitled() && m_config.gui.openSaveDir == 0)
             dir = QFileInfo(q(b->path)).absolutePath();
-        const QStringList files = QFileDialog::getOpenFileNames(this, tr("Open"), dir, tr("All types (*.*)"));
+        const QStringList files = QFileDialog::getOpenFileNames(this, tr("Open"), dir, tr("All types (*)"));
         if (!files.isEmpty())
             m_config.gui.lastUsedDir = QFileInfo(files.first()).absolutePath().toStdString();
         for (const QString& f : files)
@@ -290,12 +290,12 @@ void MainWindow::registerFileCommands()
             m_setWorkspaceRoot(dir);
     }});
     r->setHandler(IDM_FILE_LOADSESSION, {[this] {
-        const QString f = QFileDialog::getOpenFileName(this, tr("Load Session"), {}, tr("All types (*.*)"));
+        const QString f = QFileDialog::getOpenFileName(this, tr("Load Session"), {}, tr("All types (*)"));
         if (!f.isEmpty())
             loadSessionFrom(f);
     }});
     r->setHandler(IDM_FILE_SAVESESSION, {[this] {
-        const QString f = QFileDialog::getSaveFileName(this, tr("Save Session"), {}, tr("All types (*.*)"));
+        const QString f = QFileDialog::getSaveFileName(this, tr("Save Session"), {}, tr("All types (*)"));
         if (!f.isEmpty())
             saveSessionTo(f);
     }});

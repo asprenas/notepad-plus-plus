@@ -993,7 +993,7 @@ bool MainWindow::saveBuffer(Buffer* b, bool saveAs, bool copy)
                 pats << QStringLiteral("*.") + q(e);
             filter = q(std::string(langInfo(b->lang).longName)) + QStringLiteral(" (") + pats.join(' ') + QStringLiteral(");;");
         }
-        filter += tr("All types (*.*)");
+        filter += tr("All types (*)");
         path = QFileDialog::getSaveFileName(this, copy ? tr("Save a Copy As") : tr("Save As"), start, filter);
         if (path.isEmpty())
             return false;

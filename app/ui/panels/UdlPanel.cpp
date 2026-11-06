@@ -185,7 +185,7 @@ UdlPanel::UdlPanel(UserLanguageRegistry& registry, QWidget* parent) : QWidget(pa
             removeCurrent();
     });
     connect(import, &QPushButton::clicked, this, [this] {
-        const QString f = QFileDialog::getOpenFileName(this, tr("Import"), {}, tr("UDL (*.xml);;All types (*.*)"));
+        const QString f = QFileDialog::getOpenFileName(this, tr("Import"), {}, tr("UDL (*.xml);;All types (*)"));
         if (!f.isEmpty() && !importFile(f))
             QMessageBox::warning(this, tr("Import"), tr("Failed to import."));
     });
