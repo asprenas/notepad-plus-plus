@@ -1054,7 +1054,8 @@ SaveStatus MainWindow::saveElevated(Buffer* b, const QString& path, bool copy)
                                            "Do you want to launch Notepad++ in Administrator mode?", "Save failed");
     const QString question = tr("The file cannot be saved and it may be protected.\n"
                                 "Do you want to save it with administrator rights?");
-    if (QMessageBox::question(this, q(t.title), question + QStringLiteral("\n\n") + path) != QMessageBox::Yes)
+    if (!elevationRemembered()
+        && QMessageBox::question(this, q(t.title), question + QStringLiteral("\n\n") + path) != QMessageBox::Yes)
         return SaveStatus::AccessDenied;
     const std::string data = m_files->encodedContent(*b);
     QString error;

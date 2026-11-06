@@ -165,7 +165,13 @@ void MainWindow::registerFileCommands()
         }
         reloadBuffer(b);
     }, hasFile});
-    r->setHandler(IDM_FILE_SAVE, {[this] { saveBuffer(currentBuffer(), false); }, hasDoc});
+    r->setHandler(IDM_FILE_SAVE, {[this] {
+        // Upstream: nothing to do for an unchanged file (no write, no elevation prompt)
+        Buffer* b = currentBuffer();
+        if (b && !b->isUntitled() && !b->dirty)
+            return;
+        saveBuffer(b, false);
+    }, hasDoc});
     r->setHandler(IDM_FILE_SAVEAS, {[this] { saveBuffer(currentBuffer(), true); }, hasDoc});
     r->setHandler(IDM_FILE_SAVECOPYAS, {[this] { saveBuffer(currentBuffer(), false, true); }, hasDoc});
     r->setHandler(IDM_FILE_SAVEALL, {[this] {

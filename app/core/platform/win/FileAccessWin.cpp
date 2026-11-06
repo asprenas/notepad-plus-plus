@@ -56,4 +56,10 @@ bool writeAccessDenied(std::string_view utf8Path)
     return ::GetLastError() == ERROR_ACCESS_DENIED;
 }
 
+bool fileReadOnlyAttribute(std::string_view utf8Path)
+{
+    const DWORD attr = ::GetFileAttributesW(widen(utf8Path).c_str());
+    return attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY) == 0 && (attr & FILE_ATTRIBUTE_READONLY) != 0;
+}
+
 } // namespace npp::core

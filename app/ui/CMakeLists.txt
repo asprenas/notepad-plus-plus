@@ -102,6 +102,22 @@ if(WIN32)
     target_link_libraries(npp_ui PRIVATE shell32 advapi32 dbghelp)
 endif()
 
+# Elevated save through GVfs admin:// (one polkit prompt per session); optional, pkexec otherwise
+if(UNIX AND NOT APPLE)
+    find_package(PkgConfig QUIET)
+    if(PkgConfig_FOUND)
+        pkg_check_modules(GIO QUIET IMPORTED_TARGET gio-2.0)
+    endif()
+    if(GIO_FOUND)
+        target_sources(npp_ui PRIVATE ElevatedSaveGio.h ElevatedSaveGio.cpp)
+        target_compile_definitions(npp_ui PRIVATE NPP_HAVE_GIO)
+        target_link_libraries(npp_ui PRIVATE PkgConfig::GIO)
+        message(STATUS "Elevated save: GVfs admin:// (gio-2.0 ${GIO_VERSION}) with pkexec fallback")
+    else()
+        message(STATUS "Elevated save: pkexec (gio-2.0 not found)")
+    endif()
+endif()
+
 qt_add_executable(notepadpp-qt main.cpp)
 target_link_libraries(notepadpp-qt PRIVATE npp_ui)
 

@@ -1,5 +1,9 @@
 #include "ElevatedSave.h"
 
+#if defined(NPP_HAVE_GIO)
+#include "ElevatedSaveGio.h"
+#endif
+
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
@@ -63,8 +67,40 @@ bool processIsElevated()
 #endif
 }
 
+bool elevationRemembered()
+{
+#if defined(NPP_HAVE_GIO)
+    return gvfs_admin::mounted();
+#else
+    return false;
+#endif
+}
+
 ElevatedResult elevatedWrite(const QString& target, const QByteArray& data, QString* error)
 {
+#if defined(NPP_HAVE_GIO)
+    // GVfs admin:// first: one polkit prompt, then the mount is kept for this process
+    {
+        const bool wasMounted = gvfs_admin::mounted();
+        std::string gioError;
+        switch (gvfs_admin::write(target.toStdString(), data.constData(), static_cast<std::size_t>(data.size()), &gioError)) {
+        case gvfs_admin::Result::Ok:
+            return ElevatedResult::Ok;
+        case gvfs_admin::Result::Cancelled:
+            return ElevatedResult::Cancelled;
+        case gvfs_admin::Result::Failed:
+            // Authenticated and still failing (disk full, ...): reported. Mount failure: pkexec below
+            if (wasMounted || gvfs_admin::mounted()) {
+                if (error)
+                    *error = QString::fromStdString(gioError);
+                return ElevatedResult::Failed;
+            }
+            break;
+        case gvfs_admin::Result::Unavailable:
+            break; // no GVfs: pkexec for each save
+        }
+    }
+#endif
     const QString tmp = writeTemp(data, error);
     if (tmp.isEmpty())
         return ElevatedResult::Failed;

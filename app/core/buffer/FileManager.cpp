@@ -275,7 +275,7 @@ Buffer* FileManager::loadFile(std::string_view utf8PathIn, const LoadOptions& o,
         b->lang = detectLanguage(utf8Path, std::string_view(*bytes).substr(0, kDetectionBlock), &b->userLangName);
     }
     b->timestamp = fileLastWriteTime(utf8Path);
-    b->fileReadOnly = !QFileInfo(QString::fromStdString(utf8Path)).isWritable();
+    b->fileReadOnly = fileReadOnlyAttribute(utf8Path);
     return b;
 }
 
@@ -328,7 +328,7 @@ bool FileManager::reload(Buffer& b, int encodingOverride, std::optional<UniMode>
     b.dirty = false;
     b.status = DocStatus::Regular;
     b.timestamp = fileLastWriteTime(b.path);
-    b.fileReadOnly = !QFileInfo(QString::fromStdString(b.path)).isWritable();
+    b.fileReadOnly = fileReadOnlyAttribute(b.path);
     return true;
 }
 
@@ -433,7 +433,7 @@ FileChange FileManager::checkFileState(Buffer& b)
         b.status = DocStatus::Modified;
         return FileChange::Modified;
     }
-    const bool ro = !QFileInfo(QString::fromStdString(b.path)).isWritable();
+    const bool ro = fileReadOnlyAttribute(b.path);
     if (ro != b.fileReadOnly) {
         b.fileReadOnly = ro;
         return FileChange::ReadOnlyChanged;

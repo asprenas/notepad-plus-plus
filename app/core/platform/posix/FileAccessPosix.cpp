@@ -24,4 +24,11 @@ bool writeAccessDenied(std::string_view utf8Path)
     return ::access(dir.c_str(), W_OK | X_OK) != 0 && (errno == EACCES || errno == EPERM);
 }
 
+bool fileReadOnlyAttribute(std::string_view utf8Path)
+{
+    struct stat st {};
+    const std::string path(utf8Path);
+    return ::stat(path.c_str(), &st) == 0 && S_ISREG(st.st_mode) && (st.st_mode & (S_IWUSR | S_IWGRP | S_IWOTH)) == 0;
+}
+
 } // namespace npp::core
