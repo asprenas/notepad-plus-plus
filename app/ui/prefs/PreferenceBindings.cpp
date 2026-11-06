@@ -7,6 +7,7 @@
 #include "core/i18n/NativeLanguage.h"
 
 #include <QCheckBox>
+#include <QCollator>
 #include <QComboBox>
 #include <QFileDialog>
 #include <QFontDatabase>
@@ -128,11 +129,21 @@ void PreferencesDialog::setupBindings()
         p.check(6132, &GuiConfig::hideMenuRightShortcuts);
         p.check(6134, &GuiConfig::statusBarShow, true);
         if (auto* lang = p.w<QComboBox>(6124); lang && m_ctx.availableLanguages) {
-            const auto langs = m_ctx.availableLanguages();
+            auto langs = m_ctx.availableLanguages();
+            // Locale-aware order (byte order put non-Latin names such as Korean at the very end)
+            QCollator coll;
+            coll.setCaseSensitivity(Qt::CaseInsensitive);
+            std::sort(langs.begin(), langs.end(), [&coll](const auto& a, const auto& b) {
+                return coll.compare(QString::fromStdString(a.first), QString::fromStdString(b.first)) < 0;
+            });
             lang->addItem(QStringLiteral("English"), QString());
             for (const auto& [name, file] : langs)
                 if (QString::fromStdString(file).compare(QLatin1String("english.xml"), Qt::CaseInsensitive) != 0)
                     lang->addItem(QString::fromStdString(name), QString::fromStdString(file));
+            // Scrollable popup of bounded height (some styles otherwise show all ~90 items at once,
+            // running off the screen)
+            lang->setStyleSheet(QStringLiteral("QComboBox { combobox-popup: 0; }"));
+            lang->setMaxVisibleItems(20);
             p.add([=, this] {
                 const QString cur = m_ctx.currentLanguageFile ? QString::fromStdString(m_ctx.currentLanguageFile()) : QString();
                 const int i = lang->findData(cur, Qt::UserRole, Qt::MatchFixedString);
