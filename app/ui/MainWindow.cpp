@@ -1045,7 +1045,7 @@ bool MainWindow::saveBuffer(Buffer* b, bool saveAs, bool copy)
 }
 
 // Protected file (upstream asks to relaunch in Administrator mode): write it through the
-// elevated helper (UAC on Windows, polkit on Linux) and keep the session running.
+// elevated helper (UAC on Windows, polkit on Linux, administrator dialog on macOS) and keep the session running.
 SaveStatus MainWindow::saveElevated(Buffer* b, const QString& path, bool copy)
 {
     if (qEnvironmentVariableIsSet("NPP_QT_NO_ELEVATION")) // tests: never show a UAC / polkit prompt

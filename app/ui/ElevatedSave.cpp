@@ -150,6 +150,26 @@ ElevatedResult elevatedWrite(const QString& target, const QByteArray& data, QStr
         else if (error)
             *error = QString::fromLocal8Bit(p.readAllStandardError()).trimmed();
     }
+#elif defined(Q_OS_MACOS)
+    // AppleScript "with administrator privileges": the system password dialog, then cat into
+    // the existing file (owner, group and mode kept). Paths are passed as arguments and quoted
+    // by AppleScript ("quoted form of"), never spliced into the script text.
+    QProcess p;
+    p.start(QStringLiteral("/usr/bin/osascript"),
+            {QStringLiteral("-e"), QStringLiteral("on run argv"),
+             QStringLiteral("-e"), QStringLiteral("do shell script \"cat -- \" & quoted form of (item 1 of argv) & \" > \" & "
+                                                  "quoted form of (item 2 of argv) with administrator privileges"),
+             QStringLiteral("-e"), QStringLiteral("end run"),
+             tmp, target});
+    p.waitForFinished(-1);
+    const int code = p.exitStatus() == QProcess::NormalExit ? p.exitCode() : -1;
+    const QString stderrText = QString::fromLocal8Bit(p.readAllStandardError()).trimmed();
+    if (code == 0)
+        result = ElevatedResult::Ok;
+    else if (stderrText.contains(QLatin1String("(-128)"))) // "User canceled."
+        result = ElevatedResult::Cancelled;
+    else if (error)
+        *error = stderrText.isEmpty() ? p.errorString() : stderrText;
 #else
     result = ElevatedResult::Unsupported;
 #endif

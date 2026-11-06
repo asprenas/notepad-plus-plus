@@ -2,8 +2,11 @@
 // (upstream: "Save failed ... launch Notepad++ in Administrator mode").
 //  - Windows: this executable again, started with the "runas" verb (UAC prompt), in copy mode.
 //  - Linux:   GVfs admin:// when available (one polkit prompt, the mount is kept for the
-//             session: later saves need no password); otherwise pkexec (polkit dialog) running /bin/sh to copy the bytes; writing into the existing
-//             file keeps its owner and permissions.
+//             session: later saves need no password); otherwise pkexec (polkit dialog)
+//             running /bin/sh to copy the bytes; writing into the existing file keeps its
+//             owner and permissions.
+//  - macOS:   osascript "do shell script ... with administrator privileges" (system password
+//             dialog for each save), cat into the existing file.
 #pragma once
 
 #include <QByteArray>
