@@ -258,10 +258,10 @@ void MainWindow::registerFileCommands()
         }
     }, [this] { return !m_lastClosed.empty(); }});
     r->setHandler(IDM_FILE_OPEN_FOLDER, {[this] {
-        if (const Buffer* b = currentBuffer(); b && !b->isUntitled()) {
-            revealInFileManager(q(b->path));
-        }
-    }, hasFile});
+        // Like the terminal: the file's folder, the home folder for an untitled document
+        const Buffer* b = currentBuffer();
+        revealInFileManager(b && !b->isUntitled() ? q(b->path) : QDir::homePath());
+    }});
     r->setHandler(IDM_FILE_OPEN_CMD, {[this] {
         const Buffer* b = currentBuffer();
         const QString dir = b && !b->isUntitled() ? QFileInfo(q(b->path)).absolutePath() : QDir::homePath();

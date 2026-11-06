@@ -12,14 +12,23 @@
 
 namespace npp::ui {
 
-// Shows `path` in the file manager (selected on Windows; its folder elsewhere).
+// Shows `path` in the file manager: a folder is opened; a file is selected in its folder on
+// Windows (Explorer) and macOS (Finder), its folder is opened elsewhere.
 inline void revealInFileManager(const QString& path)
 {
+    const QFileInfo info(path);
 #if defined(Q_OS_WIN)
-    QProcess::startDetached(QStringLiteral("explorer.exe"), {QStringLiteral("/select,") + QDir::toNativeSeparators(path)});
+    if (info.isDir())
+        QProcess::startDetached(QStringLiteral("explorer.exe"), {QDir::toNativeSeparators(info.absoluteFilePath())});
+    else
+        QProcess::startDetached(QStringLiteral("explorer.exe"), {QStringLiteral("/select,") + QDir::toNativeSeparators(path)});
+#elif defined(Q_OS_MACOS)
+    if (info.isDir())
+        QProcess::startDetached(QStringLiteral("open"), {info.absoluteFilePath()});
+    else
+        QProcess::startDetached(QStringLiteral("open"), {QStringLiteral("-R"), info.absoluteFilePath()});
 #else
-    const QFileInfo fi(path);
-    QDesktopServices::openUrl(QUrl::fromLocalFile(fi.isDir() ? fi.absoluteFilePath() : fi.absolutePath()));
+    QDesktopServices::openUrl(QUrl::fromLocalFile(info.isDir() ? info.absoluteFilePath() : info.absolutePath()));
 #endif
 }
 
