@@ -33,7 +33,7 @@ done
 if [[ $PUBLISH -eq 1 && ( $SKIP_CI -eq 1 || $SKIP_TESTS -eq 1 || $ALLOW_DIRTY -eq 1 ) ]]; then
     echo "--publish cannot be combined with --skip-ci / --skip-tests / --allow-dirty"; exit 2
 fi
-case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) ;; *) echo "release.sh runs on the Windows host (Linux packages are built in Docker)"; exit 2 ;; esac
+case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) ;; *) echo "release.sh runs on the Windows host (it builds the Windows packages too). On Linux: ci/package-linux.sh [--local] and ci/test-package-linux.sh"; exit 2 ;; esac
 
 step() { echo; echo "######## $*"; }
 die() { echo "release: $*" >&2; exit 1; }

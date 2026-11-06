@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
     QApplication::setApplicationName(QStringLiteral("Notepad++ Qt"));
     QApplication::setOrganizationName(QStringLiteral("NotepadPlusPlusQt"));
     QApplication::setApplicationVersion(QStringLiteral(NPP_QT_VERSION));
-    QApplication::setDesktopFileName(QStringLiteral("notepadpp-qt")); // Wayland: icon / grouping from the .desktop file
+    QApplication::setDesktopFileName(QStringLiteral("io.github.asprenas.notepadpp_qt")); // Wayland: icon / grouping from the .desktop file
     {
         QIcon icon;
         for (int size : {16, 32, 48, 64, 128})

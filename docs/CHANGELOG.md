@@ -3,6 +3,27 @@
 버전 규칙: `0.x.y` (베타 전 `0.`). 원본 기준 버전은 각 항목에 표기한다.
 릴리스 절차는 [release.md](release.md), 빌드는 [build.md](build.md).
 
+## [Unreleased]
+
+### 화면
+- 환경설정 UI 언어 목록: 로케일 기준 정렬(한국어 등 비라틴 이름이 맨 끝으로 밀리지 않음), 스크롤되는 팝업(최대 20개 표시).
+- 파일 > 현재 폴더 열기: OS별 이름(Windows 탐색기·cmd / macOS Finder·Terminal / Linux File Manager·Terminal),
+  Windows 밖에서는 `pwsh`가 있을 때만 PowerShell 표시. 탭 메뉴·폴더 워크스페이스 패널도 같음.
+  파일 관리자는 터미널과 같은 조건(제목 없는 문서는 홈 폴더), macOS Finder는 파일 선택 표시(`open -R`).
+  Linux 터미널: `$TERMINAL` 우선, xfce4-terminal·kitty·alacritty 추가.
+- 파일 대화상자 필터 `All types (*)`: Windows 밖에서 `*.*`가 숨기던 확장자 없는 파일(`/etc/hosts` 등) 표시.
+
+### 저장
+- 보호된 파일(`/etc/hosts` 등)을 원본처럼 편집 가능하게 열기: 읽기 전용은 읽기 전용 속성(POSIX: 쓰기 비트 없음)일 때만.
+- 변경 없는 파일의 저장은 아무것도 하지 않음(권한 상승 요청 없음).
+- Linux 권한 저장: GVfs `admin://`(gio-2.0) 사용 시 세션당 비밀번호 1회, 없으면 저장마다 `pkexec`.
+- macOS 권한 저장: `osascript` 관리자 권한(저장마다 암호). macOS 빌드 미확인.
+
+### 배포본
+- Linux 앱 ID `io.github.asprenas.notepadpp_qt`(`.desktop`·metainfo 파일 이름, Wayland 앱 ID). metainfo 검증 경고 해결.
+- AppImage 빌드 이미지에 `pkg-config`·`libglib2.0-dev`(GVfs 권한 저장 포함, 없으면 빌드 실패).
+- `ci/package-linux.sh --local`: Docker 없이 Linux 호스트에서 AppImage. Docker 오류 안내를 OS·원인별로.
+
 ## [0.2.0] - 2026-11-05
 
 원본 기준: Notepad++ 8.9.8.1. 대상: 0.1.0과 같음 (Windows 10/11 x64, Linux x86_64 glibc 2.35+).

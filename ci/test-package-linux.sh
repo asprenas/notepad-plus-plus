@@ -86,14 +86,14 @@ if [ -f ~/.config/notepad++qt/config.xml ]; then r "settings in ~/.config/notepa
 # 4. install / uninstall (AppImage: copy + menu entry; delete)
 mkdir -p ~/Applications ~/.local/share/applications ~/.local/share/icons/hicolor/128x128/apps
 cp $app ~/Applications/
-sed "s|^Exec=notepadpp-qt|Exec=$HOME/Applications/$APPIMAGE_NAME|" "$d" > ~/.local/share/applications/notepadpp-qt.desktop
+sed "s|^Exec=notepadpp-qt|Exec=$HOME/Applications/$APPIMAGE_NAME|" "$d" > ~/.local/share/applications/io.github.asprenas.notepadpp_qt.desktop
 $app --appimage-extract "usr/share/icons/hicolor/128x128/apps/notepadpp-qt.png" >/dev/null 2>&1
 cp squashfs-root/usr/share/icons/hicolor/128x128/apps/notepadpp-qt.png ~/.local/share/icons/hicolor/128x128/apps/ 2>/dev/null
-if desktop-file-validate ~/.local/share/applications/notepadpp-qt.desktop && [ -f ~/.local/share/icons/hicolor/128x128/apps/notepadpp-qt.png ]; then r "install: menu entry + icon" PASS; else r "install: menu entry + icon" FAIL; fi
+if desktop-file-validate ~/.local/share/applications/io.github.asprenas.notepadpp_qt.desktop && [ -f ~/.local/share/icons/hicolor/128x128/apps/notepadpp-qt.png ]; then r "install: menu entry + icon" PASS; else r "install: menu entry + icon" FAIL; fi
 out=$(xvfb-run -a ~/Applications/$APPIMAGE_NAME --quit-after=2000 2>&1)
 if echo "$out" | grep -q "state: tabs="; then r "installed copy runs" PASS; else r "installed copy runs" FAIL; fi
-rm -f ~/Applications/$APPIMAGE_NAME ~/.local/share/applications/notepadpp-qt.desktop ~/.local/share/icons/hicolor/128x128/apps/notepadpp-qt.png
-if [ ! -e ~/Applications/$APPIMAGE_NAME ] && [ ! -e ~/.local/share/applications/notepadpp-qt.desktop ]; then r "uninstall: files removed" PASS; else r "uninstall: files removed" FAIL; fi
+rm -f ~/Applications/$APPIMAGE_NAME ~/.local/share/applications/io.github.asprenas.notepadpp_qt.desktop ~/.local/share/icons/hicolor/128x128/apps/notepadpp-qt.png
+if [ ! -e ~/Applications/$APPIMAGE_NAME ] && [ ! -e ~/.local/share/applications/io.github.asprenas.notepadpp_qt.desktop ]; then r "uninstall: files removed" PASS; else r "uninstall: files removed" FAIL; fi
 EOS
     ' >"$WORK/$tag.log" 2>&1
     {

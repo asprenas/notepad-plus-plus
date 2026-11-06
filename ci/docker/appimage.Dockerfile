@@ -11,9 +11,9 @@ FROM ubuntu:22.04
 ARG QT_VERSION=6.12.0
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential g++-12 ninja-build git ca-certificates wget file patchelf \
+        build-essential g++-12 ninja-build pkg-config git ca-certificates wget file patchelf \
         python3-pip python3-venv desktop-file-utils squashfs-tools \
-        libgl1-mesa-dev libegl1 libglib2.0-0 libdbus-1-3 libfontconfig1-dev libfreetype6-dev \
+        libgl1-mesa-dev libegl1 libglib2.0-dev libdbus-1-3 libfontconfig1-dev libfreetype6-dev \
         libxkbcommon-dev libxkbcommon-x11-0 libx11-xcb1 libxcb1-dev libxcb-cursor0 libxcb-icccm4 \
         libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 \
         libxcb-xinerama0 libxcb-xkb1 libxcb-sync1 libxcb-xfixes0 libxcb-shm0 libxcb-util1 \
