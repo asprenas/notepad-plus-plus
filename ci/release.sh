@@ -96,7 +96,8 @@ BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 git tag -a "$TAG" -m "Notepad++ Qt $VERSION"
 git push origin "$BRANCH"
 git push origin "$TAG"
+REPO="$(git remote get-url origin | sed -E 's#^(https://github.com/|git@github.com:)##; s#.git$##')"
 PRE=""; [[ "$VERSION" == 0.* ]] && PRE="--prerelease"
-gh release create "$TAG" $PRE --target "$BRANCH" --title "Notepad++ Qt $VERSION (beta)" --notes-file "$NOTES" \
+gh release create --repo "$REPO" "$TAG" $PRE --target "$BRANCH" --title "Notepad++ Qt $VERSION (beta)" --notes-file "$NOTES" \
     "$DIST"/notepadpp-qt-* "$DIST/SHA256SUMS.txt"
-gh release view "$TAG" --json url,assets --jq '.url, (.assets[] | .name)'
+gh release view --repo "$REPO" "$TAG" --json url,assets --jq '.url, (.assets[] | .name)'

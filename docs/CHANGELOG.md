@@ -3,7 +3,9 @@
 버전 규칙: `0.x.y` (베타 전 `0.`). 원본 기준 버전은 각 항목에 표기한다.
 릴리스 절차는 [release.md](release.md), 빌드는 [build.md](build.md).
 
-## [Unreleased]
+## [0.2.0] - 2026-11-05
+
+원본 기준: Notepad++ 8.9.8.1. 대상: 0.1.0과 같음 (Windows 10/11 x64, Linux x86_64 glibc 2.35+).
 
 ### 플러그인 API (7단계)
 - 새 플러그인 인터페이스 v1: C ABI(`app/plugin-api/include/npp_plugin_api.h`), Windows `.dll` / Linux `.so`.
