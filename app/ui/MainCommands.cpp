@@ -1,6 +1,7 @@
 // Command handlers of the main menu (phase 2 MVP subset). Commands without a handler stay
 // visible but disabled (see ActionRegistry::unimplementedMenuCommands).
 #include "MainWindow.h"
+#include "PlatformShell.h"
 
 #include "docking/DockManager.h"
 #include "editor/EditorPane.h"
@@ -258,23 +259,13 @@ void MainWindow::registerFileCommands()
     }, [this] { return !m_lastClosed.empty(); }});
     r->setHandler(IDM_FILE_OPEN_FOLDER, {[this] {
         if (const Buffer* b = currentBuffer(); b && !b->isUntitled()) {
-#if defined(Q_OS_WIN)
-            QProcess::startDetached(QStringLiteral("explorer.exe"), {QStringLiteral("/select,") + QDir::toNativeSeparators(q(b->path))});
-#else
-            QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(q(b->path)).absolutePath()));
-#endif
+            revealInFileManager(q(b->path));
         }
     }, hasFile});
     r->setHandler(IDM_FILE_OPEN_CMD, {[this] {
         const Buffer* b = currentBuffer();
         const QString dir = b && !b->isUntitled() ? QFileInfo(q(b->path)).absolutePath() : QDir::homePath();
-#if defined(Q_OS_WIN)
-        QProcess::startDetached(QStringLiteral("cmd.exe"), {QStringLiteral("/K"), QStringLiteral("cd /d \"%1\"").arg(QDir::toNativeSeparators(dir))});
-#else
-        for (const char* term : {"x-terminal-emulator", "gnome-terminal", "konsole", "xterm"})
-            if (QProcess::startDetached(QString::fromLatin1(term), {}, dir))
-                break;
-#endif
+        openTerminalAt(dir);
     }});
     r->setHandler(IDM_FILE_OPEN_POWERSHELL, {[this] {
         const Buffer* b = currentBuffer();

@@ -2,6 +2,7 @@
 // built-in default), tab colours 1-5 and pinned tabs (ports of Notepad_plus TCN_TABPINNED,
 // fileCloseAllButPinned, DocTabView::setIndividualTabColour, NppParameters::getContextMenuFromXmlTree).
 #include "MainWindow.h"
+#include "PlatformShell.h"
 
 #include "editor/EditorPane.h"
 #include "menu/ActionRegistry.h"
@@ -211,12 +212,16 @@ std::vector<MainWindow::ContextMenuEntry> MainWindow::contextMenuEntries(bool ed
         return it != names.end() ? qs(it->second) : QString::fromUtf8(fallback);
     };
     for (const DefaultTabItem& d : kDefaultTabMenu) {
+        if (d.id == IDM_FILE_OPEN_POWERSHELL && !hasPowerShell())
+            continue;
         ContextMenuEntry e;
         e.id = d.id;
         if (d.folder >= 0)
             e.folder = tr(d.folder, kDefaultTabFolders[d.folder]);
         if (d.id != 0)
             e.text = tr(d.id, d.name);
+        if (const QString platformText = folderCommandText(d.id, true); !platformText.isEmpty())
+            e.text = platformText;
         out.push_back(e);
     }
     return out;

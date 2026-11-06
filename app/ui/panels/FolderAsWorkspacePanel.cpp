@@ -370,8 +370,8 @@ void FolderAsWorkspacePanel::showContextMenu(const QPoint& pos)
     menu.addAction(tr("Copy path"), this, [path] { QApplication::clipboard()->setText(QDir::toNativeSeparators(path)); });
     menu.addAction(tr("Copy file name"), this, [path] { QApplication::clipboard()->setText(QFileInfo(path).fileName()); });
     menu.addSeparator();
-    menu.addAction(tr("Explorer here"), this, [path] { revealInFileManager(path); });
-    menu.addAction(tr("CMD here"), this, [dirPath] { openTerminalAt(dirPath); });
+    menu.addAction(tr("%1 here").arg(fileManagerName()), this, [path] { revealInFileManager(path); });
+    menu.addAction(tr("%1 here").arg(terminalName()), this, [dirPath] { openTerminalAt(dirPath); });
     if (!dir)
         menu.addAction(tr("Run by system"), this, [path] { QDesktopServices::openUrl(QUrl::fromLocalFile(path)); });
     menu.exec(m_tree->viewport()->mapToGlobal(pos));

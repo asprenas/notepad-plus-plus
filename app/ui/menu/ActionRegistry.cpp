@@ -1,6 +1,7 @@
 #include "ActionRegistry.h"
 
 #include "menu/CommandIds.h"
+#include "PlatformShell.h"
 
 #include "core/i18n/NativeLanguage.h"
 #include "core/shortcut/Shortcuts.h"
@@ -213,7 +214,11 @@ std::map<std::string, QMenu*> ActionRegistry::buildMenuBar(QMenuBar* bar, const 
             QString text = QString::fromUtf8(n.text);
             if (lang && lang->isLoaded())
                 text = QString::fromStdString(lang->menuCommand(n.id, n.text));
+            if (const QString platformText = folderCommandText(n.id, false); !platformText.isEmpty())
+                text = platformText;
             a->setText(text);
+            if (n.id == IDM_FILE_OPEN_POWERSHELL)
+                a->setVisible(hasPowerShell());
             if (n.id == IDM_FILE_EXIT)
                 a->setMenuRole(QAction::QuitRole);
             else if (n.id == IDM_ABOUT)

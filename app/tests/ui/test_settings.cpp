@@ -1,5 +1,6 @@
 // Phase 4 UI tests: Preferences pages (bindings, save / reload), UI language switch with dialog
 // translations, light / dark mode, Style Configurator, Shortcut Mapper.
+#include "PlatformShell.h"
 #include "MainWindow.h"
 #include "editor/EditorPane.h"
 #include "menu/ActionRegistry.h"
@@ -494,9 +495,12 @@ private slots:
                 const int id = a->data().toInt(&ok);
                 if (a->isSeparator() || !ok)
                     continue;
-                const QString want = QString::fromStdString(nl.menuCommand(id));
+                QString want = QString::fromStdString(nl.menuCommand(id));
                 if (want.isEmpty())
                     continue;
+                // Outside Windows: platform names for the file manager / terminal
+                if (const QString platformText = npp::ui::folderCommandText(id, false); !platformText.isEmpty())
+                    want = platformText;
                 ++commands;
                 if (a->text() != want)
                     issues << QStringLiteral("command %1: \"%2\" instead of \"%3\"").arg(id).arg(a->text(), want);
