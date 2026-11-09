@@ -106,8 +106,7 @@ bash ci/local-ci.sh --no-smoke      # 스크린샷 스모크 실행 생략
 |---|---|---|
 | Windows MinGW | Qt 설치본 MinGW kit (`NPP_QT_DIR`, `NPP_QT_TOOLS`로 경로 변경) | `build/ci/windows-mingw-<backend>/` |
 | Windows MSVC | Qt `msvc2022_64` kit (`NPP_QT_MSVC_DIR`) + vswhere로 찾은 Visual Studio | `build/ci/windows-msvc-<backend>/` |
-| Linux (Windows 호스트) | Docker 이미지 `npp-qt-linux`, 빌드 트리는 Docker 볼륨 `npp-qt-linux-build`(증분 빌드) | 볼륨 내부 |
-| Linux (Linux 호스트) | 네이티브 | `build/ci/linux-<backend>/` |
+| Linux (모든 호스트) | Docker 이미지 `npp-qt-linux`, 빌드 트리는 Docker 볼륨 `npp-qt-linux-build`(증분 빌드) | 볼륨 내부 |
 | macOS | 2026-11-09 주 추가 예정 | |
 
 결과: 마지막에 요약 표 출력, 실패 시 종료 코드 1. 로그 `build/ci/logs/`, 스크린샷 `build/ci/artifacts/`.

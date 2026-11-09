@@ -65,12 +65,12 @@ Inno Setup 설치본(`-setup.exe`)은 0.2.0에서 배포했고, 현재는 스크
 
 | 항목 | 검증 | 릴리스 |
 |---|---|---|
-| 실행 위치 | Linux 호스트는 네이티브, 그 외는 Docker | Docker (`--local`은 확인용) |
+| 실행 위치 | 모든 호스트에서 Docker | Docker (`--local`은 확인용) |
 | 이미지 | `ci/docker/linux.Dockerfile` | `ci/docker/appimage.Dockerfile` |
 | OS | Ubuntu 26.04 | Ubuntu 22.04 (glibc 2.35) |
 | 컴파일러 | 배포판 기본 GCC | g++ 12 |
 | Qt | 배포판 패키지 6.10 | aqtinstall 공식 바이너리 6.12.0 |
-| CMake 구성 | `linux-release` 프리셋 또는 Docker 내 동일 옵션 | `-DCMAKE_BUILD_TYPE=Release` 직접 지정 |
+| CMake 구성 | `-DCMAKE_BUILD_TYPE=Release` 직접 지정 | `-DCMAKE_BUILD_TYPE=Release` 직접 지정 |
 | 런타임 포함 | 포함 안 함 | `linuxdeploy` + Qt 플러그인으로 번들 |
 
 릴리스를 Ubuntu 22.04에서 빌드하는 이유는 오래된 배포판까지 실행되도록 glibc 기준을 낮추기 위해서다.
