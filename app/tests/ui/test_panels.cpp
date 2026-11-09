@@ -886,8 +886,9 @@ private slots:
             return DockArea::Floating;
         };
         DockLayout moved;
+        const auto panelIds = dm->panelIds();
         for (const std::string& id : ids) {
-            QVERIFY2(std::find(dm->panelIds().begin(), dm->panelIds().end(), id) != dm->panelIds().end(), id.c_str());
+            QVERIFY2(std::find(panelIds.begin(), panelIds.end(), id) != panelIds.end(), id.c_str());
             dm->showPanel(id);
             QVERIFY2(dm->isPanelVisible(id), id.c_str());
             dm->hidePanel(id);

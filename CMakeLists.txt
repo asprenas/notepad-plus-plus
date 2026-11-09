@@ -6,7 +6,7 @@
 cmake_minimum_required(VERSION 3.24)
 
 project(NotepadPlusPlusQt
-    VERSION 0.2.0
+    VERSION 0.2.1
     DESCRIPTION "Notepad++ Qt cross-platform port"
     LANGUAGES C CXX)
 
@@ -25,7 +25,7 @@ if(MSVC)
     add_link_options($<$<CONFIG:Release>:/DEBUG> $<$<CONFIG:Release>:/OPT:REF> $<$<CONFIG:Release>:/OPT:ICF>)
 endif()
 
-set(NPP_DOCKING_BACKEND "ADS" CACHE STRING "Docking backend implementation: ADS or QT")
+set(NPP_DOCKING_BACKEND "QT" CACHE STRING "Docking backend implementation: QT or ADS")
 set_property(CACHE NPP_DOCKING_BACKEND PROPERTY STRINGS ADS QT)
 if(NOT NPP_DOCKING_BACKEND MATCHES "^(ADS|QT)$")
     message(FATAL_ERROR "NPP_DOCKING_BACKEND must be ADS or QT (got '${NPP_DOCKING_BACKEND}')")

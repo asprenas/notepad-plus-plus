@@ -4,9 +4,6 @@
   1. every DLL the executable and the Qt plugins import is in the package or is a Windows DLL
   2. the portable zip runs with a bare PATH (no Qt / compiler on PATH) and keeps its settings
      in its own folder (doLocalConf.xml)
-  3. the installer installs silently for the current user (with the Explorer menu and file
-     association tasks), the installed program runs and opens a file, the registry entries
-     exist; the uninstaller removes the files and the registry entries again
 
   Results go to build/package/test-windows/report.txt.
 .PARAMETER Dist      folder with the packages (default <repo>\dist)
@@ -89,6 +86,7 @@ Check 'portable: opens a file from the command line' ($r.Code -eq 0 -and $r.Err 
 Check 'portable: settings written next to the executable' (Test-Path "$app\config.xml")
 
 # --- 3. installer (current user, silent) --------------------------------------------------------
+<# Deferred until installer releases resume.
 $setup = Join-Path $Dist "$base-setup.exe"
 Check 'installer exists' (Test-Path $setup) $setup
 $dir = Join-Path $Work 'installed'
@@ -128,6 +126,7 @@ $openWith = Get-ItemProperty -Path 'HKCU:\Software\Classes\.txt\OpenWithProgids'
 Check 'uninstall: .txt Open with entry removed' (-not ($openWith -and ($openWith.PSObject.Properties.Name -contains 'NotepadPPQt.File')))
 $cap = Get-ItemProperty -Path 'HKCU:\Software\RegisteredApplications' -ErrorAction SilentlyContinue
 Check 'uninstall: Default Apps registration removed' (-not ($cap -and ($cap.PSObject.Properties.Name -contains 'Notepad++ Qt')))
+#>
 
 $report.Insert(0, "Windows package test $base  $(Get-Date -Format s)  failed: $failed")
 $report | Set-Content -Path (Join-Path $Work 'report.txt') -Encoding utf8

@@ -7,7 +7,7 @@
 #   --mingw            Windows MinGW build only
 #   --msvc             Windows MSVC build only
 #   --linux            Linux build (native on Linux, Docker elsewhere) [default on all hosts]
-#   --backend B        ADS | QT | all (docking backend)            [default: all]
+#   --backend B        ADS | QT | all (docking backend)            [default: QT]
 #   --no-smoke         skip the --screenshot smoke run
 #   -h, --help
 #
@@ -34,7 +34,7 @@ case "$(uname -s)" in
     *)                    HOST=unknown ;;
 esac
 
-DO_MINGW=0; DO_MSVC=0; DO_LINUX=0; EXPLICIT=0; BACKENDS=(ADS QT); SMOKE=1
+DO_MINGW=0; DO_MSVC=0; DO_LINUX=0; EXPLICIT=0; BACKENDS=(QT); SMOKE=1
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --windows) DO_MINGW=1; DO_MSVC=1; EXPLICIT=1 ;;

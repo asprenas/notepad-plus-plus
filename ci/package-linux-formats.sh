@@ -8,6 +8,11 @@ name=notepadpp-qt
 base="$name-$VERSION-linux-x86_64"
 appdir="$BUILD/AppDir"
 work="$BUILD/formats"
+# Keep the same bundled Qt and relative paths as the AppImage, including AppRun.
+tar -C "$BUILD" -czf "$OUT/$base.tar.gz" AppDir
+
+# The deb, rpm and Flatpak formats are deferred to a future release.
+: <<'DEFERRED_FORMATS'
 rm -rf "$work"
 mkdir -p "$work/root/opt/$name" "$work/root/usr/bin" \
     "$work/root/usr/share/applications" "$work/root/usr/share/icons/hicolor/128x128/apps"
@@ -44,6 +49,7 @@ flatpak build-finish --command="$name" --share=ipc --share=network \
 flatpak build-export --arch=x86_64 "$work/repo" "$work/flatpak" stable
 flatpak build-bundle --arch=x86_64 --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo \
     "$work/repo" "$OUT/$base.flatpak" "$app_id" stable
-for format in AppImage deb rpm flatpak tar.gz; do
+DEFERRED_FORMATS
+for format in AppImage tar.gz; do
     test -s "$OUT/$base.$format"
 done

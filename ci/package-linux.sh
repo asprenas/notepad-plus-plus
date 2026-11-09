@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Linux packages of the Qt port: AppImage, deb, rpm, Flatpak and tar.gz.
+# Linux packages of the Qt port: AppImage and tar.gz.
 #
 # Default: built in the ci/docker/appimage.Dockerfile container (Ubuntu 22.04 + official Qt),
 # from any host with Docker (Linux, or Windows with Docker Desktop). These release
@@ -12,7 +12,7 @@
 # glibc of this host.
 #
 # Usage: ci/package-linux.sh [--local] [--dist DIR]
-# Docker output: dist/notepadpp-qt-<version>-linux-x86_64.{AppImage,deb,rpm,flatpak,tar.gz}
+# Docker output: dist/notepadpp-qt-<version>-linux-x86_64.{AppImage,tar.gz}
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -41,7 +41,7 @@ DIST="$(cd "$DIST" && pwd)"
 read -r -d '' PACKAGE_STEPS <<'STEPS' || true
 cmake -S "$SRC" -B "$BUILD/release" -G Ninja ${CMAKE_MAKE_PROGRAM:+-DCMAKE_MAKE_PROGRAM="$CMAKE_MAKE_PROGRAM"} \
       -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$QT_DIR" \
-      -DNPP_DOCKING_BACKEND=ADS -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/usr >/dev/null
+      -DNPP_DOCKING_BACKEND=QT -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/usr >/dev/null
 # Elevated save through GVfs admin:// needs gio-2.0 at build time (pkexec only otherwise)
 grep -q "^GIO_FOUND:INTERNAL=1" "$BUILD/release/CMakeCache.txt" \
     || { echo "gio-2.0 not found (pkg-config, libglib2.0-dev): the package would lack GVfs elevated save"; exit 1; }
@@ -111,12 +111,12 @@ else
         "$IMAGE" bash -euo pipefail -c "$PACKAGE_STEPS"'
             bash "$SRC/ci/package-linux-formats.sh"
             if [ -n "${HOST_OWNER:-}" ]; then
-                chown "$HOST_OWNER" "$OUT/notepadpp-qt-$VERSION-linux-x86_64."{AppImage,deb,rpm,flatpak,tar.gz}
+                chown "$HOST_OWNER" "$OUT/notepadpp-qt-$VERSION-linux-x86_64."{AppImage,tar.gz}
             fi'
 fi
 echo "  AppImage  $DIST/$OUTPUT"
 if [[ $LOCAL -eq 0 ]]; then
-    for format in deb rpm flatpak tar.gz; do
+    for format in tar.gz; do
         echo "  $format  $DIST/notepadpp-qt-$VERSION-linux-x86_64.$format"
     done
 fi

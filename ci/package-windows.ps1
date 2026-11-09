@@ -1,13 +1,12 @@
 <#
 .SYNOPSIS
   Windows packages of the Qt port (docs/phase-6-packaging-stabilization.md 3.1):
-  installer (Inno Setup) + portable zip, built locally (GitHub is a repository only).
+  portable zip and symbols, built locally (GitHub is a repository only).
 
 .DESCRIPTION
-  1. Release build with MSVC (ADS docking backend, tests off) in build/package/windows-msvc
+  1. Release build with MSVC (QT docking backend, tests off) in build/package/windows-msvc
   2. cmake --install into a staging folder, windeployqt (Qt runtime), app-local MSVC runtime
   3. dist/notepadpp-qt-<ver>-windows-x64-portable.zip   (doLocalConf.xml: settings next to the exe)
-     dist/notepadpp-qt-<ver>-windows-x64-setup.exe      (Inno Setup)
      dist/notepadpp-qt-<ver>-windows-x64-symbols.zip    (PDB for crash dumps)
 
 .PARAMETER QtDir      MSVC Qt kit (default $env:NPP_QT_MSVC_DIR or C:\Programs\Qt\6.12.0\msvc2022_64)
@@ -58,11 +57,13 @@ if (-not (Test-Path "$QtDir\bin\windeployqt.exe")) { Fail "Qt MSVC kit not found
 $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 $vs = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
 if (-not $vs) { Fail 'Visual Studio C++ tools not found' }
+<# Installer generation is deferred to a future release.
 if (-not $Iscc) {
     $Iscc = @("$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe", "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
               "$env:ProgramFiles\Inno Setup 6\ISCC.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
 }
 if (-not $Iscc -or -not (Test-Path $Iscc)) { Fail 'Inno Setup 6 (ISCC.exe) not found: winget install JRSoftware.InnoSetup' }
+#>
 
 # --- build + install + deploy (inside the vcvars environment) ----------------------------------
 if (Test-Path $Stage) { Remove-Item -Recurse -Force (Split-Path -Parent $Stage) }
@@ -75,7 +76,7 @@ $lines = @(
     "cd /d `"$Root`""
 )
 if (-not $SkipBuild) {
-    $lines += "cmake --preset windows-msvc-release -B `"$Build`" -DCMAKE_PREFIX_PATH=`"$QtDir`" -DNPP_DOCKING_BACKEND=ADS -DBUILD_TESTING=OFF || exit /b 11"
+    $lines += "cmake --preset windows-msvc-release -B `"$Build`" -DCMAKE_PREFIX_PATH=`"$QtDir`" -DNPP_DOCKING_BACKEND=QT -DBUILD_TESTING=OFF || exit /b 11"
     $lines += "cmake --build `"$Build`" -j || exit /b 12"
 }
 $lines += "cmake --install `"$Build`" --prefix `"$Stage`" || exit /b 13"
@@ -83,7 +84,7 @@ $lines += "windeployqt --release --no-system-d3d-compiler --no-opengl-sw --no-co
 $lines += "for /d %%d in (`"%VCToolsRedistDir%x64\Microsoft.VC*.CRT`") do copy /y `"%%d\*.dll`" `"$Stage`" >nul || exit /b 15"
 Set-Content -Path $bat -Value $lines -Encoding ascii
 $ErrorActionPreference = 'Continue' # native tools write progress to stderr
-& cmd /c $bat 2>&1 | ForEach-Object { "$_" } | Where-Object { $_ -match 'error|warning C|FAILED' } | Select-Object -First 40
+& cmd /c $bat 2>&1 | ForEach-Object { "$_" } | Where-Object { $_ -match 'error|warning C|FAILED' } | Select-Object -Last 40
 $rc = $LASTEXITCODE
 $ErrorActionPreference = 'Stop'
 Remove-Item $bat
@@ -131,8 +132,10 @@ if (Test-Path $pdb) {
 }
 
 # --- installer --------------------------------------------------------------------------------
+<# Deferred until installer releases resume.
 $ErrorActionPreference = 'Continue'
 & $Iscc /Q "/DAppVersion=$Version" "/DStageDir=$Stage" "/DOutputDir=$Dist" `
     "/DIconFile=$(Join-Path $Root 'PowerEditor\src\icons\npp.ico')" (Join-Path $Root 'packaging\windows\notepadpp-qt.iss')
 if ($LASTEXITCODE -ne 0) { Fail 'ISCC failed' }
 Write-Host "  installer $(Join-Path $Dist "$base-setup.exe")"
+#>

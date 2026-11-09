@@ -15,7 +15,6 @@
 | 도구 | 용도 |
 |---|---|
 | Qt 6.12 MinGW + MSVC 키트, Visual Studio C++ | 로컬 CI, Windows 배포본 (MSVC) |
-| Inno Setup 6 (`winget install JRSoftware.InnoSetup`) | Windows 설치본 |
 | Docker Desktop | Linux CI, AppImage 빌드(`ci/docker/appimage.Dockerfile`), 배포판 시험 |
 | GitHub CLI `gh` (로그인) | 릴리스 업로드 |
 
@@ -44,14 +43,13 @@
 
 | 파일 | 내용 |
 |---|---|
-| `notepadpp-qt-<v>-windows-x64-setup.exe` | 설치본 (현재 사용자/모든 사용자, 탐색기 메뉴, 파일 연결 선택) |
 | `notepadpp-qt-<v>-windows-x64-portable.zip` | 포터블 (`doLocalConf.xml`: 설정을 프로그램 폴더에 저장) |
 | `notepadpp-qt-<v>-windows-x64-symbols.zip` | `notepadpp-qt.pdb` (크래시 덤프 분석용, 사용자 배포 불필요) |
 | `notepadpp-qt-<v>-linux-x86_64.AppImage` | Linux (glibc 2.35+, X11·Wayland) |
-| `notepadpp-qt-<v>-linux-x86_64.deb` / `.rpm` | Linux 설치 패키지 (AppImage 포함) |
-| `notepadpp-qt-<v>-linux-x86_64.flatpak` | Linux Flatpak 번들 (freedesktop 24.08 런타임 필요) |
 | `notepadpp-qt-<v>-linux-x86_64.tar.gz` | Linux 포터블 AppDir (`AppDir/AppRun`) |
 | `SHA256SUMS.txt` | 체크섬 |
+
+Windows 설치본과 Linux deb, rpm, Flatpak 생성은 차후 버전을 위해 비활성화되어 있다.
 
 ## 5. 크래시 덤프 분석
 

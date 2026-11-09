@@ -71,13 +71,13 @@ cmake --build --preset linux-release
 ./build/linux-release/bin/notepadpp-qt
 ```
 
-ADS는 Linux에서 `Qt6::GuiPrivate`(qt6-base-private-dev)와 `xcb`가 필요하다.
+선택 사항인 ADS는 Linux에서 `Qt6::GuiPrivate`(qt6-base-private-dev)와 `xcb`가 필요하다.
 
 ## 빌드 옵션
 
 | 옵션 | 값 | 설명 |
 |---|---|---|
-| `NPP_DOCKING_BACKEND` | `ADS` (기본) / `QT` | 도킹 구현 선택. `QT`는 QDockWidget 기반 대체 구현 |
+| `NPP_DOCKING_BACKEND` | `QT` (기본) / `ADS` | 도킹 구현 선택. `QT`는 QDockWidget 기반 구현, `ADS`는 전환 검토용 선택 옵션 |
 | `BUILD_TESTING` | `ON` (기본) / `OFF` | `app/tests` 빌드 |
 
 ## 스모크 테스트
@@ -93,10 +93,12 @@ GitHub은 저장소로만 사용하며 GitHub Actions는 비활성화되어 있�
 **push 전에 실행한다.**
 
 ```bash
-bash ci/local-ci.sh                 # 정적 검사 + Windows(MinGW, MSVC) + Linux(Docker), ADS/QT 백엔드 모두
+bash ci/local-ci.sh                 # 정적 검사 + Windows(MinGW, MSVC) + Linux(Docker), QT 백엔드
 bash ci/local-ci.sh --linux         # Linux만
 bash ci/local-ci.sh --msvc          # Windows MSVC만 (--mingw: MinGW만, --windows: 둘 다)
-bash ci/local-ci.sh --windows --backend ADS
+bash ci/local-ci.sh --windows       # Windows만, QT 백엔드
+bash ci/local-ci.sh --linux --backend ADS  # 선택 사항: ADS 전환 검토
+bash ci/local-ci.sh --linux --backend all  # 선택 사항: 두 백엔드 모두 검증
 bash ci/local-ci.sh --no-smoke      # 스크린샷 스모크 실행 생략
 ```
 
@@ -110,6 +112,10 @@ bash ci/local-ci.sh --no-smoke      # 스크린샷 스모크 실행 생략
 
 결과: 마지막에 요약 표 출력, 실패 시 종료 코드 1. 로그 `build/ci/logs/`, 스크린샷 `build/ci/artifacts/`.
 Docker Desktop이 꺼져 있으면 Linux 항목은 `FAIL (no docker)`로 표시된다.
+
+일반 빌드 프리셋과 Windows/Linux 패키징도 `QT`를 사용한다. 기존 빌드 폴더에 `ADS`가
+캐시되어 있다면 프리셋으로 다시 configure하거나 `-DNPP_DOCKING_BACKEND=QT`를 지정한다.
+Windows 패키징의 `-SkipBuild`는 기존 산출물을 재사용하므로, 전환 후 처음에는 생략한다.
 
 Linux 빌드 볼륨 초기화: `docker volume rm npp-qt-linux-build`
 

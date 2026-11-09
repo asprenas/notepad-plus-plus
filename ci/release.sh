@@ -3,9 +3,9 @@
 # GitHub is a repository only: everything is built, tested and signed (not yet) on this machine.
 #
 #   1. clean working tree, version = project VERSION in CMakeLists.txt, tag v<version> unused
-#   2. local CI (ci/local-ci.sh: static checks, Windows MinGW + MSVC, Linux, both docking backends)
-#   3. packages: Windows installer / portable zip / symbols (ci/package-windows.ps1),
-#      Linux AppImage, deb, rpm, Flatpak and tar.gz (ci/package-linux.sh)
+#   2. local CI (ci/local-ci.sh: static checks, Windows MinGW + MSVC, Linux, QT docking backend)
+#   3. packages: Windows portable zip / symbols (ci/package-windows.ps1),
+#      Linux AppImage and tar.gz (ci/package-linux.sh)
 #   4. package tests (ci/test-package-windows.ps1, ci/test-package-linux.sh)
 #   5. dist/SHA256SUMS.txt, release notes from docs/CHANGELOG.md
 #   6. with --publish: git tag v<version>, push branch + tag, gh release create (pre-release

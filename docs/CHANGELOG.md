@@ -5,6 +5,8 @@
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-09
+
 ### 화면
 - 환경설정 UI 언어 목록: 로케일 기준 정렬(한국어 등 비라틴 이름이 맨 끝으로 밀리지 않음), 스크롤되는 팝업(최대 20개 표시).
 - 파일 > 현재 폴더 열기: OS별 이름(Windows 탐색기·cmd / macOS Finder·Terminal / Linux File Manager·Terminal),
