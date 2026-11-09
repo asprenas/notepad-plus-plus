@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Checks the Windows packages in dist/ (docs/phase-6-packaging-stabilization.md section 5):
+  Checks the Windows packages in dist/ (docs/plan/phase-6-packaging-stabilization.md section 5):
   1. every DLL the executable and the Qt plugins import is in the package or is a Windows DLL
   2. the portable zip runs with a bare PATH (no Qt / compiler on PATH) and keeps its settings
      in its own folder (doLocalConf.xml)

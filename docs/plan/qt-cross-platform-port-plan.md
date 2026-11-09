@@ -381,11 +381,11 @@ notepad-plus-plus/
 | Linux (Ubuntu 26.04 Docker, GCC, Qt 6.10) | 빌드·테스트·offscreen 실행 통과 (ADS, QT 백엔드 모두) |
 | Windows MSVC (VS 2026 / MSVC 19.51, Qt 6.12.0 `msvc2022_64`) | 로컬 CI에서 빌드·테스트·실행 통과 (ADS, QT 백엔드). 경고 1건은 ADS 소스(`DockManager.cpp` nodiscard), 프로젝트 코드 경고 0건 |
 | 자동 테스트 (`app/tests/test_editor_smoke.cpp`) | UTF-8 텍스트, Boost regex(lookahead — 기본 엔진엔 없는 기능으로 연결 확인), Lexilla(`cpp`, Npp UDL `user`), 모델 XML 로드, 확장자→언어, cpp 키워드 스타일이 Npp와 동일 |
-| Linux 이식 중 발견한 vendored 소스 문제 | 2건 수정 — `docs/third-party-patches.md` |
+| Linux 이식 중 발견한 vendored 소스 문제 | 2건 수정 — `docs/reference/third-party-patches.md` |
 | 도킹 추상화 검사 | `ci/check-docking-abstraction.sh` (로컬 CI 포함) |
 
 발견 사항:
-- Qt 온라인 설치본 MinGW kit에 Core5Compat 기본 미포함 → 별도 설치 필요 (`docs/build.md`).
+- Qt 온라인 설치본 MinGW kit에 Core5Compat 기본 미포함 → 별도 설치 필요 (`docs/build/build.md`).
 - Ubuntu 24.04 패키지 Qt는 6.4 → Linux 기준 배포판을 Ubuntu 26.04(Qt 6.10)로 조정. 24.04 지원이 필요하면 aqtinstall 등으로 Qt를 별도 설치해야 함.
 - 키워드 클래스(`instre1`, `type1` …) → Scintilla 키워드 세트 매핑이 언어별로 다름 (upstream `setXxxLexer`). 0단계는 C 계열만 처리, 1단계에서 전 언어 이식 필요.
 - ADS `DockManager.h`와 프로젝트 `docking/DockManager.h` 파일명이 같음 → ADS 헤더는 `<...>`, 프로젝트 헤더는 `"..."`로 include하는 규칙으로 구분.

@@ -1,6 +1,6 @@
 // NPPM_* compatibility messages of the plugin host (phase 7, P7-05): upstream numbers and meaning,
 // strings as UTF-8 char* (sizes in bytes). The list of supported / unsupported messages is in
-// docs/plugin-api-nppm.md; unsupported messages return 0.
+// docs/plugins/plugin-api-nppm.md; unsupported messages return 0.
 #include "plugins/PluginHost.h"
 
 #include "MainWindow.h"

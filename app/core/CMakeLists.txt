@@ -1,5 +1,5 @@
 # npp-core: platform independent core (C++20 + QtCore only).
-# Rules (docs/phase-1-core-extraction.md, checked by ci/check-core-rules.sh):
+# Rules (docs/plan/phase-1-core-extraction.md, checked by ci/check-core-rules.sh):
 #  - no QtGui/QtWidgets
 #  - no <windows.h>, wchar_t, std::wstring outside platform/win/
 

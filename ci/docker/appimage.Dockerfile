@@ -1,4 +1,4 @@
-# AppImage build environment (docs/phase-6-packaging-stabilization.md 3.2).
+# AppImage build environment (docs/plan/phase-6-packaging-stabilization.md 3.2).
 #
 # Built on Ubuntu 22.04 (glibc 2.35) with the official Qt binaries (aqtinstall), so the AppImage
 # runs on distributions of 2022 and later (Ubuntu 22.04+, Debian 12+, Fedora 36+, ...).

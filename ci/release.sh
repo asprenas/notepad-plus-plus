@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Local release of the Qt port (docs/phase-6-packaging-stabilization.md 3.6, docs/release.md).
+# Local release of the Qt port (docs/plan/phase-6-packaging-stabilization.md 3.6, docs/build/release.md).
 # GitHub is a repository only: everything is built, tested and signed (not yet) on this machine.
 #
 #   1. clean working tree, version = project VERSION in CMakeLists.txt, tag v<version> unused

@@ -39,15 +39,15 @@
 | P0-06 | `DockManager` 인터페이스 + ADS/QT 구현 | `app/ui/docking/` | 완료 |
 | P0-07 | 샘플 앱: 탭 편집기, 열기/저장, 렉서·스타일, 패널 2개 | `app/ui/MainWindow.*`, `editor/LanguageConfig.*` | 완료 |
 | P0-08 | 자동 테스트 (UTF-8, Boost regex, Lexilla, 모델 XML) | `app/tests/test_editor_smoke.cpp` | 완료 |
-| P0-09 | Linux 이식 문제 수정 (vendored 소스 2건) | [third-party-patches.md](third-party-patches.md) | 완료 |
+| P0-09 | Linux 이식 문제 수정 (vendored 소스 2건) | [third-party-patches.md](../reference/third-party-patches.md) | 완료 |
 | P0-10 | 로컬 CI (Windows MinGW·MSVC, Linux Docker × ADS/QT) | `ci/local-ci.sh`, `ci/docker/linux.Dockerfile` | 완료 |
 | P0-11 | 도킹 추상화 누수 검사 | `ci/check-docking-abstraction.sh` | 완료 |
-| P0-12 | CLion 실행·디버그 구성 (MSVC + LLDB) | `CMakeUserPresets.json`(로컬), [build.md](build.md) | 완료 |
+| P0-12 | CLion 실행·디버그 구성 (MSVC + LLDB) | `CMakeUserPresets.json`(로컬), [build.md](../build/build.md) | 완료 |
 | P0-13 | macOS 빌드 환경 | — | 차후 구현 항목으로 이동 |
 | P0-14 | **한글 IME 수동 확인** (Windows MS IME, Linux ibus/fcitx5) | 확인 결과 기록 | 미완료 |
 | P0-15 | **도킹 수동 확인**: 패널 플로팅 드래그, 재도킹, 재시작 후 복원 | 확인 결과 기록 | 미완료 |
 | P0-16 | Linux 실제 데스크톱 확인 (X11, Wayland) | 확인 결과 기록 | 미완료 |
-| P0-17 | 기능 체크리스트 작성 (메뉴 기준) | `docs/feature-checklist.md` (`tools/gen-feature-checklist.py`로 생성) | 완료 |
+| P0-17 | 기능 체크리스트 작성 (메뉴 기준) | `docs/reference/feature-checklist.md` (`tools/gen-feature-checklist.py`로 생성) | 완료 |
 | P0-18 | `Parameters.cpp`, `Buffer.cpp`, `Common.cpp` Win32 API 목록 추출 | 1단계 작업 입력 자료 | 1단계 첫 주로 이동 |
 
 ## 4. 남은 작업 상세

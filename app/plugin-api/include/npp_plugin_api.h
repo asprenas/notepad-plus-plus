@@ -17,7 +17,7 @@
  *  - New NppApi members are appended; NppApi.size tells which members exist. A plugin that
  *    uses a member added later checks NPP_API_HAS(api, member) first.
  *
- * Exported by a plugin (see docs/plugin-development.md):
+ * Exported by a plugin (see docs/plugins/plugin-development.md):
  *   npp_plugin_info        required  identification, API version
  *   npp_plugin_init        required  receives the NppApi; return 0 = success
  *   npp_plugin_menu_items  optional  commands of the plugin's sub menu of Plugins
@@ -145,7 +145,7 @@ typedef struct NppApi {
 
     /* --- upstream messages ---------------------------------------------------------------
        NPPM_* message with upstream numbers and meaning, strings as UTF-8 char* instead of
-       wchar_t*. Unsupported messages return 0. See npp_compat.h and docs/plugin-api-nppm.md. */
+       wchar_t*. Unsupported messages return 0. See npp_compat.h and docs/plugins/plugin-api-nppm.md. */
     intptr_t    (*nppMessage)(unsigned msg, uintptr_t w, intptr_t l);
 
     /* --- files of the plugin, toolbar ----------------------------------------------------- */

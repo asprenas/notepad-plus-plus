@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Performance comparison with the ORIGINAL Notepad++ on Windows (docs/phase-6 3.5, docs/performance.md).
+  Performance comparison with the ORIGINAL Notepad++ on Windows (docs/plan/phase-6-packaging-stabilization.md 3.5, docs/reference/performance.md).
 
   Both programs run as separate instances (-multiInst) with temporary settings folders
   (-settingsDir), so installed copies and their settings are not touched. Windows appear on

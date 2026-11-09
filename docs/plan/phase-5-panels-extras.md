@@ -111,7 +111,7 @@ ADS 고유 상태는 별도 파일에 보조 저장 (부록 B.4 규칙 4).
 
 ## 6. 완료 기준
 
-- [x] 기능 체크리스트 90% 이상 완료 (제외 항목은 사유 기록) — [feature-checklist.md](feature-checklist.md) 전체 480/480(100%), 5단계 52/52. 생성 스크립트가 기본 컨텍스트 메뉴 표의 ID까지 "구현"으로 세던 문제를 고쳐 실제 핸들러만 센다(이 수정으로 드러난 인쇄 미구현을 이 단계에서 구현). 원본과 동작이 다른 항목은 8장 "계획과 다르게 한 점"에 사유 기록(업데이트·프록시: 자동 업데이트 없음)
+- [x] 기능 체크리스트 90% 이상 완료 (제외 항목은 사유 기록) — [feature-checklist.md](../reference/feature-checklist.md) 전체 480/480(100%), 5단계 52/52. 생성 스크립트가 기본 컨텍스트 메뉴 표의 ID까지 "구현"으로 세던 문제를 고쳐 실제 핸들러만 센다(이 수정으로 드러난 인쇄 미구현을 이 단계에서 구현). 원본과 동작이 다른 항목은 8장 "계획과 다르게 한 점"에 사유 기록(업데이트·프록시: 자동 업데이트 없음)
 - [x] Function List 테스트 100% — 원본 `PowerEditor/Test/FunctionList`의 언어 폴더·하위 폴더 47개 사례 전부 통과(`core.funclist`, 결과 JSON을 원본 `unitTest.ps1`과 같은 방식으로 비교). 계획서의 "45개"는 폴더 수 기준이었고 하위 폴더 사례까지 모두 포함
 - [x] 모든 패널이 두 도킹 백엔드에서 동작, 도킹 추상화 검사 통과 — `ui.panels`(23개 테스트)가 ADS와 QDockWidget 빌드 양쪽에서 통과. `allPanelsOpenMoveCloseAndRestore`: 10개 패널 모두 열기/닫기/위치 변경/재시작 복원, 백엔드 상태 파일 없이 `config.xml`만으로 복원. `ci/check-docking-abstraction.sh` 통과
 - [x] 로컬 CI 통과 — Windows MinGW/MSVC, Linux Docker × ADS/QT (`ci/local-ci.sh`)

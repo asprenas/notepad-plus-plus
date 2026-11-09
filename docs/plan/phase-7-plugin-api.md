@@ -124,7 +124,7 @@ intptr_t npp_compat_send(unsigned nppmMessage, uintptr_t w, intptr_t l);
 | P7-05 | `npp_compat.h` 1차 50개 메시지 | 4 |
 | P7-06 | 샘플 플러그인 2개 (UI 없음: 텍스트 변환 / UI 있음: Qt 패널) | 4–5 |
 | P7-07 | 기존 공개 플러그인 1개를 이식해 검증 | 5–6 |
-| P7-08 | 플러그인 개발 문서 (`docs/plugin-development.md`) | 6 |
+| P7-08 | 플러그인 개발 문서 (`docs/plugins/plugin-development.md`) | 6 |
 | P7-09 | (선택) 플러그인 관리자: 로컬 폴더 목록·활성/비활성 | 이후 |
 
 ## 5. 테스트
@@ -152,14 +152,14 @@ intptr_t npp_compat_send(unsigned nppmMessage, uintptr_t w, intptr_t l);
 
 | ID | 상태 | 구현 위치 / 비고 |
 |---|---|---|
-| P7-01 | 완료 | `tools/plugin-survey/nppm_usage.py`, 인기 플러그인 10개 조사 → [plugin-api-nppm.md](plugin-api-nppm.md). 상위 50개 중 44개 지원, 6개 새 API로 대체 |
+| P7-01 | 완료 | `tools/plugin-survey/nppm_usage.py`, 인기 플러그인 10개 조사 → [plugin-api-nppm.md](../plugins/plugin-api-nppm.md). 상위 50개 중 44개 지원, 6개 새 API로 대체 |
 | P7-02 | 완료 | `app/plugin-api/include/npp_plugin_api.h` v1 (C ABI, `NppApi.size` + `NPP_API_HAS`로 확장) |
 | P7-03 | 완료 | `app/ui/plugins/PluginHost` (QLibrary 로더, 플러그인 메뉴, `NPPN_*` 19종·`SCN_*` 전달, 플러그인 단위 오류 격리, `-noPlugin`) |
 | P7-04 | 완료 | `registerPanel`/`showPanel`(DockManager, ADS·QT 공통), 단축키 매퍼 "플러그인 명령" 탭·`shortcuts.xml` `<PluginCommands>`, 툴바 버튼(`addToolbarIcon`) |
 | P7-05 | 완료 | `npp_compat.h`, `npp_compat_win32.h`, `npp_msgs.h`(`tools/gen-npp-msgs.py`), `PluginMessages.cpp`: 76개 메시지 |
 | P7-06 | 완료 | `app/plugins/samples/textcase`(C, UI 없음), `app/plugins/samples/docinfo`(Qt 도킹 패널 + 툴바) |
 | P7-07 | 완료 | MIME Tools 3.2 이식 `app/plugins/ports/mimetools` (알고리즘 무수정, 변경 내역 `PORTING.md`/`port.patch`) |
-| P7-08 | 완료 | [plugin-development.md](plugin-development.md) |
+| P7-08 | 완료 | [plugin-development.md](../plugins/plugin-development.md) |
 | P7-09 | 차후 | 플러그인 관리자 (선택) |
 
 테스트: `ui.plugins`(CTest, Windows MinGW·MSVC, Linux, ADS·QT 백엔드): 샘플·이식 플러그인 로드와 메뉴, 명령 실행, 알림 수신,

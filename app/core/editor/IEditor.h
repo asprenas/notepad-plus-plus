@@ -1,4 +1,4 @@
-// Abstract Scintilla editor used by npp-core (docs/phase-1-core-extraction.md 4.2).
+// Abstract Scintilla editor used by npp-core (docs/plan/phase-1-core-extraction.md 4.2).
 // Upstream ScintillaEditView::execute(SCI_xxx, w, l) calls map 1:1 to IEditor::send().
 // The UI implements it on top of ScintillaEditBase (QtWidgets); the core never sees widgets.
 #pragma once

@@ -119,7 +119,7 @@
 
 ## 6. 완료 기준
 
-- [x] 환경설정 23개 페이지, 스타일 설정, 단축키 매퍼 동작 — 원본 `preference.rc`에서 생성한 24개 페이지(원본 8.9.8.1은 "편집 2"가 추가되어 24개), 컨트롤은 `config.xml` 필드에 바인딩(`ui.settings`: `allPagesExist`, `preferenceCheckboxesRoundTrip`, `styleConfiguratorSaves`, `shortcutMapperConflictsAndResult`). [feature-checklist.md](feature-checklist.md) 4단계 16/16
+- [x] 환경설정 23개 페이지, 스타일 설정, 단축키 매퍼 동작 — 원본 `preference.rc`에서 생성한 24개 페이지(원본 8.9.8.1은 "편집 2"가 추가되어 24개), 컨트롤은 `config.xml` 필드에 바인딩(`ui.settings`: `allPagesExist`, `preferenceCheckboxesRoundTrip`, `styleConfiguratorSaves`, `shortcutMapperConflictsAndResult`). [feature-checklist.md](../reference/feature-checklist.md) 4단계 16/16
 - [x] 설정이 원본 Notepad++와 양방향으로 호환 — `tools/settings-compat/run-with-npp.ps1`로 이 저장소의 원본 소스를 빌드한 Notepad++ 8.9.8.1(MSVC Release x64)과 비교: NPP → 포트 다시 저장 시 376줄 중 손실·추가 0, 포트 → NPP(모든 `GUIConfig` 필드를 기본값이 아닌 값으로 바꾸고 `shortcuts.xml`에 단축키·매크로·Scintilla 키 추가) 다시 저장 시 차이 0. 기본값 차이 4개는 원본이 직접 쓰는 값(업데이트 날짜, `shortcutsXmlHmac`, 강조색으로 풀린 Fluent 사용자 색). 결과: `app/tests/data/settings-compat/report.txt`. 이전 8.8.8 대상 실행에서는 8.9.x에만 있는 설정 5개만 빠짐
 - [x] 밝게/어둡게/시스템 모드가 Windows·Linux에서 동작 — `ui.settings`: `lightDarkMode`(원본 다크 톤·테마 자동 전환), `systemModeFollowsColorScheme`(Windows는 실제 플랫폼 `QT_QPA_PLATFORM=windows`, Linux는 Docker 안 Xvfb + xcb + GTK 플랫폼 테마), `allThemesApply`(22개 테마 순회)
 - [x] 한국어 UI에서 모든 메뉴·다이얼로그 번역 적용 — `ui.settings`: `koreanMenus`(korean.xml이 번역하는 모든 메뉴 명령과 `SubEntries` 하위 메뉴 전부), `koreanDialogs`(찾기·바꾸기, 이동, 문자 범위 찾기, 열 편집기, 증분 검색, 결과 내 찾기, 단축키 매퍼, 매크로 대화상자, 환경설정 24페이지, 스타일 설정에서 미번역 컨트롤 0), `uiLanguageSwitch`, `rtlLanguage`(아랍어 RTL). 한국어·일본어·독일어·아랍어 스크린샷(`screenshots`, `NPP_SCREENSHOT_DIR` 설정 시)으로 잘림 없음 확인

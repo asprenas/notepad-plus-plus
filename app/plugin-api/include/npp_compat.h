@@ -8,11 +8,11 @@
  *  - NPPM_* numbers (npp_msgs.h) and NPPN_* codes (npp_plugin_api.h)
  *  - glue for the entry points: npp_compat_init / npp_compat_menu_items / npp_compat_notify
  *
- * Differences from upstream (see docs/plugin-development.md, "Porting"):
+ * Differences from upstream (see docs/plugins/plugin-development.md, "Porting"):
  *  - strings are UTF-8 char*, not wchar_t* (buffer sizes are in bytes)
  *  - handles are not windows: no Win32 calls on them (GetWindowRect, SetParent, ...)
  *  - messages that need Win32 objects (HMENU, HWND of dialogs, HBITMAP) are not supported:
- *    docs/plugin-api-nppm.md lists them and the replacement (registerPanel, ...)
+ *    docs/plugins/plugin-api-nppm.md lists them and the replacement (registerPanel, ...)
  *
  * Minimal port of a plugin:
  *

@@ -1,4 +1,4 @@
-// NPP_QT_STARTUP_LOG=1: start-up phases with the time since main() on stderr (docs/performance.md).
+// NPP_QT_STARTUP_LOG=1: start-up phases with the time since main() on stderr (docs/reference/performance.md).
 #pragma once
 
 #include <QElapsedTimer>

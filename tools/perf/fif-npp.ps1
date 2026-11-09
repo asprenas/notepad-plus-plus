@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Find in Files over 10,000 files with the ORIGINAL Notepad++ (docs/performance.md).
+  Find in Files over 10,000 files with the ORIGINAL Notepad++ (docs/reference/performance.md).
   Same folder layout as the port's ui.find.responsiveness test: 20 folders x 500 files,
   "hit me" in every 1000th file. The dialog is driven with window messages:
   WM_COMMAND IDM_SEARCH_FINDINFILES, WM_SETTEXT on the Find what / Directory combos,

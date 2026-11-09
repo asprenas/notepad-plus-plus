@@ -1,6 +1,6 @@
 // Docking abstraction layer.
 //
-// RULES (docs/qt-cross-platform-port-plan.md, appendix B.4):
+// RULES (docs/plan/qt-cross-platform-port-plan.md, appendix B.4):
 //  - Only this header is included outside ui/docking/. Backend headers
 //    (ADS, QDockWidget implementation) must never leak.
 //  - Panels are plain QWidgets identified by a stable string id.

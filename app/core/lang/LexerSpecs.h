@@ -1,5 +1,5 @@
 // Per-language lexer setup as data (port of the 85 upstream ScintillaEditView::setXxxLexer()
-// functions; docs/phase-1-core-extraction.md 4.4).
+// functions; docs/plan/phase-1-core-extraction.md 4.4).
 #pragma once
 
 #include "core/lang/LangType.h"

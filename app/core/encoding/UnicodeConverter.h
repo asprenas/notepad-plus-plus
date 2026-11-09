@@ -1,6 +1,6 @@
 // Unicode BOM detection and UTF-16 <-> UTF-8 conversion (port of upstream Utf8_16.*).
 //
-// Differences from upstream (documented in docs/phase-1-core-extraction.md):
+// Differences from upstream (documented in docs/plan/phase-1-core-extraction.md):
 //  - UTF-16LE-without-BOM detection uses a statistical heuristic instead of Win32 IsTextUnicode().
 //  - Unpaired UTF-16 surrogates and invalid UTF-8 become U+FFFD instead of being dropped.
 //  - The "skip BOM" state is per instance (upstream used a function-static variable).

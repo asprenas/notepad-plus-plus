@@ -1,7 +1,7 @@
 # 성능 측정 (6단계)
 
-- 관련: [6단계 세부 계획](phase-6-packaging-stabilization.md) 3.5절
-- 측정일: 2026-11-05, 버전 0.1.0 (커밋은 [CHANGELOG](CHANGELOG.md) 참고)
+- 관련: [6단계 세부 계획](../plan/phase-6-packaging-stabilization.md) 3.5절
+- 측정일: 2026-11-05, 버전 0.1.0 (커밋은 [CHANGELOG](../CHANGELOG.md) 참고)
 - 비교 대상: 원본 Notepad++ 8.9.8.1 (`PowerEditor\bin64\notepad++.exe`, 이 저장소에서 MSBuild로 빌드한 x64 Release)
 - 기기: Windows 11 Pro 23H2, 개발 PC (폰트 564개 설치). 같은 기기, 같은 입력.
 - Qt 포트: 배포본과 같은 MSVC Release 빌드 (`build\package\stage-windows`), 일부 항목은 MinGW Release 빌드(표에 표기)
@@ -88,6 +88,6 @@ NPP_QT_STARTUP_LOG=1 notepadpp-qt -multiInst -settingsDir=<dir>
 
 ## 4. Linux
 
-원본이 없으므로 비교하지 않는다. AppImage 시작·파일 열기는 [6단계 문서](phase-6-packaging-stabilization.md)
+원본이 없으므로 비교하지 않는다. AppImage 시작·파일 열기는 [6단계 문서](../plan/phase-6-packaging-stabilization.md)
 8절의 배포판 컨테이너 시험에서 확인한다. 같은 성능 수정(대용량 파일 제한, 문서 목록, 파일에서 찾기)은
 플랫폼 공통 코드다.

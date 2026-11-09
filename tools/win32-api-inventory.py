@@ -1,6 +1,6 @@
 """Inventory of Win32 API usage per function for phase-1 core extraction (P1-01).
 
-Usage: python -I tools/win32-api-inventory.py <file.cpp>... > docs/core-win32-api-inventory.md
+Usage: python -I tools/win32-api-inventory.py <file.cpp>... > docs/reference/core-win32-api-inventory.md
 Heuristic: Win32 calls in Notepad++ sources are written with a leading '::' (e.g. ::GetFileAttributesEx).
 Also counts Win32-only types (HWND, HFONT, ...) and MS CRT wide functions.
 """

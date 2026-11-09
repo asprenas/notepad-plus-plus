@@ -47,7 +47,7 @@
 
 | ID | 작업 | 산출물 |
 |---|---|---|
-| P1-01 | `Parameters.cpp`, `Buffer.cpp`, `Common.cpp`, `NppIO.cpp`의 Win32 API 호출을 함수 단위로 목록화 (0단계 P0-18 이관) | `docs/core-win32-api-inventory.md` |
+| P1-01 | `Parameters.cpp`, `Buffer.cpp`, `Common.cpp`, `NppIO.cpp`의 Win32 API 호출을 함수 단위로 목록화 (0단계 P0-18 이관) | `docs/reference/core-win32-api-inventory.md` |
 | P1-02 | 클래스별 의존 그래프: 어떤 클래스가 `HWND`, `ScintillaEditView`, `Notepad_plus`에 의존하는지 | 위 문서의 의존 표 |
 | P1-03 | 문자열 변환 스크립트 작성 및 시험 적용 | `tools/convert-wstring.py` |
 | P1-04 | 설정 파일 왕복 테스트용 샘플 수집: 실제 사용자 설정 폴더 2–3개(익명화) | `app/tests/data/configs/` |

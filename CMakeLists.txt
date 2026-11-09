@@ -1,7 +1,7 @@
 # Notepad++ Qt port — root build (Windows / Linux / macOS)
 #
 # The legacy Win32 build lives in PowerEditor/ (visual.net, gcc, src/CMakeLists.txt)
-# and is not part of this build. See docs/qt-cross-platform-port-plan.md.
+# and is not part of this build. See docs/plan/qt-cross-platform-port-plan.md.
 
 cmake_minimum_required(VERSION 3.24)
 

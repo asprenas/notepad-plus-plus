@@ -1,6 +1,6 @@
 # 릴리스 절차 (Qt 포트)
 
-- 관련: [6단계 세부 계획](phase-6-packaging-stabilization.md) 3.6절, [변경 기록](CHANGELOG.md), [빌드](build.md)
+- 관련: [6단계 세부 계획](../plan/phase-6-packaging-stabilization.md) 3.6절, [변경 기록](../CHANGELOG.md), [빌드](build.md)
 - GitHub 은 저장소로만 쓴다(Actions 꺼짐). 빌드·시험·패키지·업로드는 모두 개발 PC(Windows)에서 한다.
 
 ## 1. 버전

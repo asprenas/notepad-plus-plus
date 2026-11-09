@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Checks the AppImage in dist/ on fresh containers of several distributions
-# (docs/phase-6-packaging-stabilization.md section 5). Each container gets only what a desktop
+# (docs/plan/phase-6-packaging-stabilization.md section 5). Each container gets only what a desktop
 # already has (X server, Mesa, fontconfig, fonts) - no Qt, no compiler - then:
 #   1. the embedded .desktop file is valid and lists the MIME types
 #   2. the AppImage starts on the xcb platform (Xvfb) and renders a file (--screenshot)

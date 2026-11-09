@@ -1,6 +1,6 @@
 # 플러그인 개발 문서 (Notepad++ Qt 플러그인 API v1)
 
-- 상위 문서: [7단계 세부 계획](phase-7-plugin-api.md)
+- 상위 문서: [7단계 세부 계획](../plan/phase-7-plugin-api.md)
 - 헤더: `app/plugin-api/include/` — `npp_plugin_api.h`(C ABI), `npp_compat.h`·`npp_compat_win32.h`(이식 도움), `npp_msgs.h`(NPPM 번호)
 - 예제: `app/plugins/samples/textcase`(C, UI 없음), `app/plugins/samples/docinfo`(C++/Qt 패널), `app/plugins/ports/mimetools`(기존 플러그인 이식)
 - 메시지 호환 목록: [plugin-api-nppm.md](plugin-api-nppm.md)
@@ -209,7 +209,7 @@ endif()
 | 툴바 아이콘(`NPPM_ADDTOOLBARICON_*`) | `addToolbarIcon` |
 
 주의: `npp_compat_win32.h`를 쓰는 소스 파일에서는 `<windows.h>`를 포함하지 않는다 (`SendMessage`/`MessageBox` 매크로 충돌).
-예: MIME Tools 이식 — 변경 내역 [app/plugins/ports/mimetools/PORTING.md](../app/plugins/ports/mimetools/PORTING.md).
+예: MIME Tools 이식 — 변경 내역 [app/plugins/ports/mimetools/PORTING.md](../../app/plugins/ports/mimetools/PORTING.md).
 
 ## 11. 보안
 

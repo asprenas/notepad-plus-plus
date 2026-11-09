@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Enforces docs/phase-1-core-extraction.md completion rules for app/core:
+# Enforces docs/plan/phase-1-core-extraction.md completion rules for app/core:
 #  1. npp_core links QtCore only (no QtGui / QtWidgets includes or links)
 #  2. no <windows.h>, wchar_t, std::wstring, L"..." literals outside app/core/platform/win/
 set -euo pipefail

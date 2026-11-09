@@ -1,6 +1,6 @@
 # NPPM_* 메시지 호환 목록 (7단계 P7-01, P7-05)
 
-- 상위 문서: [7단계 세부 계획](phase-7-plugin-api.md), [플러그인 개발 문서](plugin-development.md)
+- 상위 문서: [7단계 세부 계획](../plan/phase-7-plugin-api.md), [플러그인 개발 문서](plugin-development.md)
 - 구현: `app/ui/plugins/PluginMessages.cpp` (`NppApi.nppMessage`, 플러그인 쪽은 `npp_compat_send` / `npp_send`)
 - 메시지 번호: `app/plugin-api/include/npp_msgs.h` (원본 `Notepad_plus_msgs.h` v8.9.8.1에서 `tools/gen-npp-msgs.py`로 생성)
 

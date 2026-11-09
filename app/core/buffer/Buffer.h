@@ -1,6 +1,6 @@
 // Document state (port of upstream Buffer, ScintillaComponent/Buffer.h).
 //
-// Difference from upstream (docs/phase-1-core-extraction.md): Scintilla always holds UTF-8.
+// Difference from upstream (docs/plan/phase-1-core-extraction.md): Scintilla always holds UTF-8.
 // Documents in a code page (including "ANSI") are converted on load and converted back on save;
 // upstream kept ANSI documents in the system code page inside Scintilla.
 #pragma once

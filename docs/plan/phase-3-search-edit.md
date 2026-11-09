@@ -103,7 +103,7 @@ Notepad++의 핵심 경쟁력인 **찾기/바꾸기**와 **편집 명령**을 �
 
 ## 6. 완료 기준
 
-- [x] 기능 체크리스트의 3단계 담당 항목(Edit, Search 메뉴) 완료 — [feature-checklist.md](feature-checklist.md) 3단계 185/185. Character Panel·Clipboard History는 패널이므로 5단계, "Change Search Engine..."(환경설정 대화상자)은 4단계로 재배정
+- [x] 기능 체크리스트의 3단계 담당 항목(Edit, Search 메뉴) 완료 — [feature-checklist.md](../reference/feature-checklist.md) 3단계 185/185. Character Panel·Clipboard History는 패널이므로 5단계, "Change Search Engine..."(환경설정 대화상자)은 4단계로 재배정
 - [x] 정규식 호환 테스트 100% 통과 — `core.regexcompat`: 137개 사례, 기대값은 원본 Windows Notepad++ 8.8.8에서 1회 추출(`tools/regex-compat/extract-from-npp.ps1`). Windows(MSVC·MinGW) 137/137 일치. Linux는 136/137 일치 + 1개 비교 제외: `\U`로 `é`를 대문자로 바꾸는 결과가 원본에서도 Windows ANSI 코드 페이지(Win32 locale traits)에 따라 달라지는 사례(`windowsCodepageDependent`). 이 1개는 기준 PC(코드 페이지 949)의 원본 결과라 Linux의 유니코드 결과와 다르며, Linux에서 원본과 같게 만들지는 결정 필요
 - [x] 파일에서 찾기가 1만 개 파일 폴더에서 취소 가능하고 UI가 멈추지 않음 — `ui.find.responsiveness`(Windows, 실제 플랫폼): 1만 개 파일 검색 중 이벤트 루프 최장 정지 약 75 ms(기준 0.5 s), 취소 동작 확인. Linux는 `ui.find`(offscreen)에서 같은 검사(최장 정지 26 ms)
 - [x] 원본에서 녹화한 매크로가 그대로 재생됨 — `tools/macro-compat/record-in-npp.ps1`로 원본 Notepad++에서 메뉴 명령·입력·정규식 모두 바꾸기를 녹화·저장한 매크로를 포트에서 재생해 같은 결과, 같은 동작을 포트에서 녹화하면 같은 단계 생성(`ui.find`, Windows·Linux 모두 자동 실행)

@@ -69,7 +69,7 @@ GitHub은 저장소로만 쓰므로 빌드·서명·업로드는 로컬에서 �
 | 메모리 (빈 문서 1개) | 원본 대비 2배 이내 (Qt 기본 비용 고려) | OS 도구 |
 | 파일에서 찾기 1만 파일 | 원본과 같은 수준 | 시간 측정 |
 
-측정 결과와 원본 수치를 `docs/performance.md`에 기록한다.
+측정 결과와 원본 수치를 `docs/reference/performance.md`에 기록한다.
 
 ### 3.6 릴리스 절차
 
@@ -101,7 +101,7 @@ GitHub은 저장소로만 쓰므로 빌드·서명·업로드는 로컬에서 �
 ## 6. 완료 기준
 
 - [x] Windows·Linux 배포본이 깨끗한 환경에서 설치·실행·제거됨 (8절: Windows 빈 PATH·무인 설치/제거 20항목, Linux 4개 배포판 새 컨테이너 — Windows 새 VM 대신, 8절 제한 참고)
-- [x] 성능 목표 충족 또는 차이 원인 문서화 ([performance.md](performance.md))
+- [x] 성능 목표 충족 또는 차이 원인 문서화 ([performance.md](../reference/performance.md))
 - [x] 크래시 덤프 생성과 복구 안내 동작 (`app.crashrecovery`, Windows·Linux)
 - [x] `ci/release.sh`로 베타 릴리스 1회 수행 — 0.2.0 공개(2026-11-06): 로컬 CI 8/8, 패키지 시험 통과, GitHub pre-release https://github.com/asprenas/notepad-plus-plus/releases/tag/v0.2.0 (0.1.0은 리허설만, 미공개)
 
@@ -122,8 +122,8 @@ GitHub은 저장소로만 쓰므로 빌드·서명·업로드는 로컬에서 �
 | P6-03 | 완료 | `ci/package-linux.sh` + `ci/docker/appimage.Dockerfile`(Ubuntu 22.04 + 공식 Qt 6.12, linuxdeploy): AppImage(X11·Wayland 플러그인, GTK 플랫폼 테마). `packaging/linux/` `.desktop`(MIME 34종)·metainfo·hicolor 아이콘, CMake `install()` FHS 레이아웃. 권한 저장: `pkexec /bin/sh -c 'cat > 대상'`(소유자·권한 유지) |
 | P6-04 | 차후 | macOS 패키징 ([phase-macos.md](phase-macos.md)) |
 | P6-05 | 완료 | `ui/CrashHandler`: Windows `MiniDumpWriteDump`, POSIX 시그널 + 백트레이스 → `<설정 폴더>/crash/`. 실행 표식(`npp-running.marker`, 세션 폴더)으로 비정상 종료 감지 → 다음 시작 때 복원 결과와 덤프 위치 안내(비모달). 스냅숏 모드에서 백업 주기마다 session.xml 저장(원본과 같게; 이전에는 종료 때만 저장해 크래시 후 새 탭이 사라짐). 숨은 옵션 `--crash-test`, `--quit-after=<ms>` |
-| P6-06 | 완료 | [performance.md](performance.md). 대용량 파일 제한(원본 규칙), 탭 200개, 파일에서 찾기, 세션 복원, 시작 시간 개선. `NPP_QT_STARTUP_LOG`, `tools/perf/`, `test_ui_perf` |
-| P6-07 | 완료 | `ci/release.sh`, [release.md](release.md), [CHANGELOG.md](CHANGELOG.md), 버전 0.1.0 |
+| P6-06 | 완료 | [performance.md](../reference/performance.md). 대용량 파일 제한(원본 규칙), 탭 200개, 파일에서 찾기, 세션 복원, 시작 시간 개선. `NPP_QT_STARTUP_LOG`, `tools/perf/`, `test_ui_perf` |
+| P6-07 | 완료 | `ci/release.sh`, [release.md](../build/release.md), [CHANGELOG.md](../CHANGELOG.md), 버전 0.1.0 |
 
 테스트:
 - `app.crashrecovery`(CTest): 강제 크래시 → 덤프/로그 생성, 스냅숏 백업 존재 → 재시작 시 감지 메시지와 저장 안 한 문서 1개 복원 → 정상 종료 후 표식 삭제. Windows·Linux 공통.

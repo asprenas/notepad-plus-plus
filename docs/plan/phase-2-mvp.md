@@ -118,7 +118,7 @@
 
 ## 6. 완료 기준
 
-- [x] 기능 체크리스트의 2단계 담당 항목 완료 ([feature-checklist.md](feature-checklist.md): 2단계 225/225. 탭 색상·고정 탭·비인쇄 문자 표시는 4단계 설정·테마 담당으로 재배정)
+- [x] 기능 체크리스트의 2단계 담당 항목 완료 ([feature-checklist.md](../reference/feature-checklist.md): 2단계 225/225. 탭 색상·고정 탭·비인쇄 문자 표시는 4단계 설정·테마 담당으로 재배정)
 - [ ] 기존 설정 폴더로 시작해 언어 강조, 단축키, 세션이 원본과 같음 — 자동: 원본 형식 `config.xml`/`shortcuts.xml`/`session.xml` 폴더로 시작하는 `upstreamSettingsFolder` 테스트 통과. 남음: 실제 사용자 설정 폴더로 원본과 눈으로 비교(수동)
 - [x] Windows·Linux에서 열기/편집/저장/세션 복원 동작 (offscreen UI 테스트, 양 플랫폼 CI)
 - [ ] 4시간 연속 일상 사용(개발자 본인) 중 데이터 손실·크래시 없음 — 수동(사용자)

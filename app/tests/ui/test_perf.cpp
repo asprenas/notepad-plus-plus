@@ -1,4 +1,4 @@
-// Phase 6 performance measurements (docs/performance.md), run by tools/perf (not part of the
+// Phase 6 performance measurements (docs/reference/performance.md), run by tools/perf (not part of the
 // regular CTest run: the 500 MB case needs time and memory).
 //   test_ui_perf manyTabs        200 documents: open time, tab switch time (avg / max)
 //   test_ui_perf largeFile       NPP_PERF_LARGE_FILE=<file>: open, scroll to end, search, go to top

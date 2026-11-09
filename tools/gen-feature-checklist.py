@@ -1,4 +1,4 @@
-"""Generates docs/feature-checklist.md: every main menu command, its owning phase and whether
+"""Generates docs/reference/feature-checklist.md: every main menu command, its owning phase and whether
 the Qt UI registers a handler for it (P0-17; used by the phase completion criteria).
 
 Usage (from the repository root):  python -I tools/gen-feature-checklist.py
@@ -109,7 +109,7 @@ for top in dict.fromkeys(r[0] for r in rows):
         if t == top:
             out.append(f"| {'[x]' if ok else '[ ]'} | {path.replace('|', '/')} | `{name}` | {ph} |")
     out.append("")
-(root / "docs/feature-checklist.md").write_text("\n".join(out), encoding="utf-8", newline="\n")
+(root / "docs/reference/feature-checklist.md").write_text("\n".join(out), encoding="utf-8", newline="\n")
 print("\n".join(out[5:5 + 4 + len({r[3] for r in rows}) + 1]))
 missing2 = [f"{r[1]} ({r[2]})" for r in rows if r[3] == 2 and not r[4]]
 print("phase 2 missing:", len(missing2))

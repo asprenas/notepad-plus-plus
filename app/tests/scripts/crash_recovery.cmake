@@ -1,4 +1,4 @@
-# Crash report + recovery test (docs/phase-6-packaging-stabilization.md section 5):
+# Crash report + recovery test (docs/plan/phase-6-packaging-stabilization.md section 5):
 #  1. start with a file, add unsaved text, write the snapshot backup and crash (--crash-test)
 #  2. the crash folder holds a dump (Windows .dmp) or a backtrace log (POSIX .log)
 #  3. the next start detects the abnormal end and restores the unsaved document

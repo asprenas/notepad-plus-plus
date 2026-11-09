@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Enforces docs/qt-cross-platform-port-plan.md appendix B.4 rule 1:
+# Enforces docs/plan/qt-cross-platform-port-plan.md appendix B.4 rule 1:
 # ADS headers/types may only be used inside app/ui/docking/ads/.
 #
 # Convention: ADS headers are included with <...>, project headers with "...".

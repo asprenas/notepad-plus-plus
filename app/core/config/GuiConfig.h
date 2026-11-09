@@ -2,7 +2,7 @@
 //
 // Unlike upstream (which deletes and rebuilds <GUIConfigs> on save), saving updates the
 // existing elements in place, so entries/attributes unknown to this version are preserved
-// (round-trip rule of docs/phase-1-core-extraction.md 4.3).
+// (round-trip rule of docs/plan/phase-1-core-extraction.md 4.3).
 #pragma once
 
 #include <array>
