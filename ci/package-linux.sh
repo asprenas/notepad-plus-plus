@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Linux package of the Qt port (docs/phase-6-packaging-stabilization.md 3.2): AppImage.
+# Linux packages of the Qt port: AppImage, deb, rpm, Flatpak and tar.gz.
 #
 # Default: built in the ci/docker/appimage.Dockerfile container (Ubuntu 22.04 + official Qt),
-# from any host with Docker (Linux, or Windows with Docker Desktop). This is the release
-# package: glibc 2.35, it runs on Ubuntu 22.04 and later distributions.
+# from any host with Docker (Linux, or Windows with Docker Desktop). These release
+# packages use glibc 2.35, targeting Ubuntu 22.04 and later distributions.
 #
 # --local: built on this Linux host without Docker (local check of the packaging). Needs Qt
 # (QT_DIR, default ~/Qt/<Qt version of the Dockerfile>/gcc_64), CMake, Ninja (or
@@ -12,7 +12,7 @@
 # glibc of this host.
 #
 # Usage: ci/package-linux.sh [--local] [--dist DIR]
-# Output: dist/notepadpp-qt-<version>-linux-x86_64.AppImage
+# Docker output: dist/notepadpp-qt-<version>-linux-x86_64.{AppImage,deb,rpm,flatpak,tar.gz}
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -45,7 +45,7 @@ cmake -S "$SRC" -B "$BUILD/release" -G Ninja ${CMAKE_MAKE_PROGRAM:+-DCMAKE_MAKE_
 # Elevated save through GVfs admin:// needs gio-2.0 at build time (pkexec only otherwise)
 grep -q "^GIO_FOUND:INTERNAL=1" "$BUILD/release/CMakeCache.txt" \
     || { echo "gio-2.0 not found (pkg-config, libglib2.0-dev): the package would lack GVfs elevated save"; exit 1; }
-cmake --build "$BUILD/release" -j"$(nproc)" | grep -E "error|warning: unused|FAILED" || true
+cmake --build "$BUILD/release" -j"$(nproc)"
 test -x "$BUILD/release/bin/notepadpp-qt"
 rm -rf "$BUILD/AppDir" && DESTDIR="$BUILD/AppDir" cmake --install "$BUILD/release" >/dev/null
 cp "$SRC/LICENSE" "$BUILD/AppDir/usr/share/notepadpp-qt/LICENSE.txt"
@@ -85,7 +85,7 @@ if [[ $LOCAL -eq 1 ]]; then
     SRC="$ROOT" OUT="$DIST" BUILD="$BUILD" QT_DIR="$QT_DIR" VERSION="$VERSION" OUTPUT="$OUTPUT" \
         CMAKE_MAKE_PROGRAM="${CMAKE_MAKE_PROGRAM:-}" PATH="$PATH" bash -euo pipefail -c "$PACKAGE_STEPS"
 else
-    echo "== Notepad++ Qt $VERSION (Linux x86_64 AppImage, Docker)"
+    echo "== Notepad++ Qt $VERSION (Linux x86_64 packages, Docker)"
     if ! docker info >/dev/null 2>&1; then
         case "$(uname -s)" in
             MINGW*|MSYS*|CYGWIN*) echo "Docker daemon not running (start Docker Desktop)" ;;
@@ -98,7 +98,7 @@ else
         esac
         exit 1
     fi
-    docker build -q -t "$IMAGE" -f "$ROOT/ci/docker/appimage.Dockerfile" "$ROOT/ci/docker" >/dev/null
+    docker build --platform linux/amd64 -q -t "$IMAGE" -f "$ROOT/ci/docker/appimage.Dockerfile" "$ROOT/ci/docker" >/dev/null
 
     src="$ROOT"; out="$DIST"
     case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) src="$(cygpath -m "$ROOT")"; out="$(cygpath -m "$DIST")" ;; esac
@@ -106,9 +106,17 @@ else
     # The container runs as root: on a Linux host the AppImage is handed back to the caller's user
     owner=()
     [[ "$(uname -s)" == Linux ]] && owner=(-e HOST_OWNER="$(id -u):$(id -g)")
-    MSYS_NO_PATHCONV=1 docker run --rm -v "$src:/src:ro" -v "$out:/out" -v "$VOLUME:/build" -w /build \
+    MSYS_NO_PATHCONV=1 docker run --platform linux/amd64 --rm -v "$src:/src:ro" -v "$out:/out" -v "$VOLUME:/build" -w /build \
         -e SRC=/src -e OUT=/out -e BUILD=/build -e VERSION="$VERSION" -e OUTPUT="$OUTPUT" "${owner[@]}" \
         "$IMAGE" bash -euo pipefail -c "$PACKAGE_STEPS"'
-            if [ -n "${HOST_OWNER:-}" ]; then chown "$HOST_OWNER" "$OUT/$OUTPUT"; fi'
+            bash "$SRC/ci/package-linux-formats.sh"
+            if [ -n "${HOST_OWNER:-}" ]; then
+                chown "$HOST_OWNER" "$OUT/notepadpp-qt-$VERSION-linux-x86_64."{AppImage,deb,rpm,flatpak,tar.gz}
+            fi'
 fi
 echo "  AppImage  $DIST/$OUTPUT"
+if [[ $LOCAL -eq 0 ]]; then
+    for format in deb rpm flatpak tar.gz; do
+        echo "  $format  $DIST/notepadpp-qt-$VERSION-linux-x86_64.$format"
+    done
+fi

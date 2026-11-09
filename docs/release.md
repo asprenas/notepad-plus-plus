@@ -48,6 +48,9 @@
 | `notepadpp-qt-<v>-windows-x64-portable.zip` | 포터블 (`doLocalConf.xml`: 설정을 프로그램 폴더에 저장) |
 | `notepadpp-qt-<v>-windows-x64-symbols.zip` | `notepadpp-qt.pdb` (크래시 덤프 분석용, 사용자 배포 불필요) |
 | `notepadpp-qt-<v>-linux-x86_64.AppImage` | Linux (glibc 2.35+, X11·Wayland) |
+| `notepadpp-qt-<v>-linux-x86_64.deb` / `.rpm` | Linux 설치 패키지 (AppImage 포함) |
+| `notepadpp-qt-<v>-linux-x86_64.flatpak` | Linux Flatpak 번들 (freedesktop 24.08 런타임 필요) |
+| `notepadpp-qt-<v>-linux-x86_64.tar.gz` | Linux 포터블 AppDir (`AppDir/AppRun`) |
 | `SHA256SUMS.txt` | 체크섬 |
 
 ## 5. 크래시 덤프 분석

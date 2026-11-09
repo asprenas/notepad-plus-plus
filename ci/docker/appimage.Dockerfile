@@ -12,7 +12,7 @@ ARG QT_VERSION=6.12.0
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential g++-12 ninja-build pkg-config git ca-certificates wget file patchelf \
-        python3-pip python3-venv desktop-file-utils squashfs-tools \
+        python3-pip python3-venv desktop-file-utils squashfs-tools ruby ruby-dev rpm flatpak \
         libgl1-mesa-dev libegl1 libglib2.0-dev libdbus-1-3 libfontconfig1-dev libfreetype6-dev \
         libxkbcommon-dev libxkbcommon-x11-0 libx11-xcb1 libxcb1-dev libxcb-cursor0 libxcb-icccm4 \
         libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 \
@@ -26,6 +26,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # CMake >= 3.24 and aqtinstall from PyPI (Ubuntu 22.04 has CMake 3.22)
 RUN python3 -m venv /opt/venv && /opt/venv/bin/pip install --no-cache-dir cmake aqtinstall
 ENV PATH=/opt/venv/bin:$PATH
+
+RUN gem install --no-document fpm \
+    && flatpak remote-add --system --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo \
+    && flatpak install --system -y --noninteractive flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
 
 RUN aqt install-qt linux desktop ${QT_VERSION} linux_gcc_64 -m qt5compat -O /opt/Qt \
     && rm -rf /opt/Qt/Docs /opt/Qt/Examples

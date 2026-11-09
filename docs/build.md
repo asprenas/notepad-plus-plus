@@ -164,7 +164,7 @@ Windows: 레지스트리 `HKCU\Software\NotepadPlusPlusQt`, Linux: `~/.config/No
 | 명령 | 결과 |
 |---|---|
 | `powershell -ExecutionPolicy Bypass -File ci/package-windows.ps1` | `dist/` Windows 설치본(Inno Setup 6 필요), 포터블 zip, PDB zip (MSVC Release) |
-| `bash ci/package-linux.sh` | `dist/` AppImage (Docker: Ubuntu 22.04 + Qt 6.12, `ci/docker/appimage.Dockerfile`) |
+| `bash ci/package-linux.sh` | `dist/` AppImage, deb, rpm, Flatpak 번들, tar.gz (Docker: Ubuntu 22.04 + Qt 6.12, `ci/docker/appimage.Dockerfile`) |
 | `bash ci/package-linux.sh --local` | Docker 없이 이 Linux에서 AppImage (로컬 확인용: `QT_DIR`, ninja, pkg-config + gio-2.0, `linuxdeploy`·`linuxdeploy-plugin-qt`·`linuxdeploy-plugin-appimage` 필요. 이 호스트의 glibc 이상에서만 실행) |
 | `powershell -ExecutionPolicy Bypass -File ci/test-package-windows.ps1` | 의존 DLL, 빈 PATH 실행, 포터블, 설치·파일 연결·제거 시험 |
 | `bash ci/test-package-linux.sh` | Ubuntu 22.04/24.04, Debian 12, Fedora 41 새 컨테이너에서 AppImage 시험 |
@@ -172,3 +172,5 @@ Windows: 레지스트리 `HKCU\Software\NotepadPlusPlusQt`, Linux: `~/.config/No
 
 설치 레이아웃은 CMake `install()` 규칙(`app/ui/CMakeLists.txt`): Windows는 실행 파일 옆 `data/`,
 Linux는 `bin/notepadpp-qt` + `share/notepadpp-qt/data/` + `.desktop`/아이콘/metainfo (앱 ID `io.github.asprenas.notepadpp_qt`).
+
+Linux Docker 패키지는 x86-64용이다. deb와 rpm은 동일한 AppImage를 `/opt/notepadpp-qt/`에 설치하고 실행 래퍼와 데스크톱 항목을 제공한다. tar.gz는 `AppDir`을 담으며 압축 해제 후 `AppDir/AppRun`으로 실행한다. Flatpak 번들은 freedesktop 24.08 런타임이 필요하며 `flatpak install --user 파일명.flatpak`으로 설치한다. 최초 빌드에는 Docker 이미지와 Flatpak 런타임 다운로드가 필요하다. AppImage와 tar.gz 및 deb/rpm은 빌드 환경의 glibc 2.35 이상이 필요하다. `ci/test-package-linux.sh`는 현재 AppImage만 시험한다.
