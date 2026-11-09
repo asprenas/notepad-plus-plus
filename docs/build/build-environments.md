@@ -1,7 +1,7 @@
 # OS별 빌드 환경과 릴리스 파일
 
 Qt 포트의 검증 빌드와 릴리스 빌드가 OS별로 어떤 환경에서 만들어지는지 정리한다.
-기준 버전은 0.2.1이며, 기존 Win32 빌드(`PowerEditor/visual.net`, `PowerEditor/gcc`)는 대상이 아니다.
+기준 버전은 0.2.2이며, 기존 Win32 빌드(`PowerEditor/visual.net`, `PowerEditor/gcc`)는 대상이 아니다.
 
 빌드 명령은 [build.md](build.md), 릴리스 절차는 [release.md](release.md), macOS 작업 목록은 [phase-macos.md](../plan/phase-macos.md)를 본다.
 

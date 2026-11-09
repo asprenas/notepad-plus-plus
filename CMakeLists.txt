@@ -6,7 +6,7 @@
 cmake_minimum_required(VERSION 3.24)
 
 project(NotepadPlusPlusQt
-    VERSION 0.2.1
+    VERSION 0.2.2
     DESCRIPTION "Notepad++ Qt cross-platform port"
     LANGUAGES C CXX)
 

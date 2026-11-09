@@ -5,6 +5,17 @@
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-11-09
+
+앱 기능 변경 없음.
+
+### 배포본
+- GitHub Actions `Release` workflow 추가: Windows MSVC, Linux 패키지 빌드·시험 후 draft 릴리스 생성.
+- 로컬 CI의 Linux 빌드를 모든 호스트에서 Docker로 통일.
+
+### 문서
+- `docs/`를 `build/`, `plan/`, `plugins/`, `reference/`로 분류하고 목차 `docs/README.md` 추가.
+
 ## [0.2.1] - 2026-11-09
 
 ### 화면
