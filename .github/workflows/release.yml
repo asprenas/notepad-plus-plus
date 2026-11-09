@@ -57,7 +57,7 @@ jobs:
         shell: bash
         run: |
           python ci/install-qt-windows.py --version 6.12.0 --output "$RUNNER_TOOL_CACHE/Qt" | tee qt-install.log
-          echo "QT_ROOT_DIR=$(cygpath -w "$(tail -1 qt-install.log | tr -d '')")" >> "$GITHUB_ENV"
+          echo "QT_ROOT_DIR=$(cygpath -w "$(tail -1 qt-install.log | tr -d '\r')")" >> "$GITHUB_ENV"
       - uses: seanmiddleditch/gha-setup-ninja@3b1f8f94a2f8254bd26914c4ab9474d4f0015f67 # v6
       - name: Build, test and smoke run
         shell: bash
