@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Local CI for the Qt port. GitHub is used as a repository only (Actions disabled);
-# every check runs on the developer machine.
+# Local CI for the Qt port: run before every push. GitHub Actions runs it only for releases
+# (.github/workflows/release.yml).
 #
 # Usage: ci/local-ci.sh [options]
 #   --windows          Windows native builds: MinGW + MSVC        [default on Windows hosts]

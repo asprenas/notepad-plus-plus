@@ -89,7 +89,7 @@ QT_QPA_PLATFORM=offscreen ./build/linux-release/bin/notepadpp-qt --screenshot ou
 
 ## 로컬 CI
 
-GitHub은 저장소로만 사용하며 GitHub Actions는 비활성화되어 있다. 모든 검증은 로컬에서 수행한다.
+일상 검증은 로컬에서 수행한다. GitHub Actions는 수동 실행 릴리스 workflow에만 사용한다.
 **push 전에 실행한다.**
 
 ```bash
@@ -168,12 +168,13 @@ Windows: 레지스트리 `HKCU\Software\NotepadPlusPlusQt`, Linux: `~/.config/No
 
 | 명령 | 결과 |
 |---|---|
-| `powershell -ExecutionPolicy Bypass -File ci/package-windows.ps1` | `dist/` 포터블 zip, PDB zip (MSVC Release). 설치본 생성은 비활성화 상태지만 스크립트가 Inno Setup 6 설치 여부를 검사한다 |
+| `powershell -ExecutionPolicy Bypass -File ci/package-windows.ps1` | `dist/` 포터블 zip, PDB zip (MSVC Release). 설치본 생성과 Inno Setup 6 검사는 비활성화되어 있다 |
 | `bash ci/package-linux.sh` | `dist/` AppImage, tar.gz (Docker: Ubuntu 22.04 + Qt 6.12, `ci/docker/appimage.Dockerfile`) |
 | `bash ci/package-linux.sh --local` | Docker 없이 이 Linux에서 AppImage (로컬 확인용: `QT_DIR`, ninja, pkg-config + gio-2.0, `linuxdeploy`·`linuxdeploy-plugin-qt`·`linuxdeploy-plugin-appimage` 필요. 이 호스트의 glibc 이상에서만 실행) |
 | `powershell -ExecutionPolicy Bypass -File ci/test-package-windows.ps1` | 의존 DLL, 빈 PATH 실행, 포터블 시험 (설치본 시험은 비활성화) |
 | `bash ci/test-package-linux.sh` | Ubuntu 22.04/24.04, Debian 12, Fedora 41 새 컨테이너에서 AppImage 시험 |
-| `bash ci/release.sh [--publish]` | 전체 릴리스 ([release.md](release.md)) |
+| `bash ci/release.sh [--publish]` | 로컬 전체 릴리스 ([release.md](release.md)) |
+| GitHub Actions `Release` workflow | GitHub에서 빌드, 시험 후 draft 릴리스 생성 ([release.md](release.md)) |
 
 설치 레이아웃은 CMake `install()` 규칙(`app/ui/CMakeLists.txt`): Windows는 실행 파일 옆 `data/`,
 Linux는 `bin/notepadpp-qt` + `share/notepadpp-qt/data/` + `.desktop`/아이콘/metainfo (앱 ID `io.github.asprenas.notepadpp_qt`).

@@ -1,7 +1,7 @@
 # 릴리스 절차 (Qt 포트)
 
 - 관련: [6단계 세부 계획](../plan/phase-6-packaging-stabilization.md) 3.6절, [변경 기록](../CHANGELOG.md), [빌드](build.md)
-- GitHub 은 저장소로만 쓴다(Actions 꺼짐). 빌드·시험·패키지·업로드는 모두 개발 PC(Windows)에서 한다.
+- 릴리스는 GitHub Actions 또는 개발 PC(Windows)에서 만든다. 절차는 GitHub Actions(3.1절) 또는 로컬(3.2절) 중 하나를 고른다.
 
 ## 1. 버전
 
@@ -19,6 +19,20 @@
 | GitHub CLI `gh` (로그인) | 릴리스 업로드 |
 
 ## 3. 절차
+
+### 3.1 GitHub Actions
+
+1. `docs/CHANGELOG.md` 에 `## [x.y.z] - 날짜` 항목 작성, `CMakeLists.txt` 버전 수정, 커밋 후 `master` 에 push.
+2. GitHub Actions 의 `Release` workflow 를 `master` 에서 수동 실행하고 버전을 입력한다.
+
+   ```bash
+   gh workflow run release.yml --ref master -f version=x.y.z
+   ```
+
+3. 버전 검사 → Windows MSVC, Linux 빌드·시험 → 패키지·패키지 시험 → draft 릴리스 순서로 진행된다. MinGW 는 실행하지 않는다.
+4. draft 의 파일과 노트를 확인하고 게시한다. 태그 `vx.y.z` 는 게시할 때 생성된다.
+
+### 3.2 로컬
 
 1. `docs/CHANGELOG.md` 에 `## [x.y.z] - 날짜` 항목 작성, `CMakeLists.txt` 버전 수정, 커밋.
 2. 시험 실행(태그·업로드 없음):

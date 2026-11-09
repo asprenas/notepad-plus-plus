@@ -30,7 +30,7 @@ Qt 포트의 검증 빌드와 릴리스 빌드가 OS별로 어떤 환경에서 �
 
 릴리스 파일 자체는 `ci/test-package-windows.ps1`, `ci/test-package-linux.sh`로 따로 시험한다.
 
-GitHub Actions는 비활성화되어 있고 모든 빌드는 개발 장비에서 수행한다.
+일상 검증은 개발 장비에서 수행하고, GitHub Actions는 수동 실행 릴리스에만 사용한다. Actions 릴리스의 Windows 검증은 MSVC만 실행하며 MinGW는 제외한다.
 
 ## 3. Windows
 
@@ -125,7 +125,7 @@ macOS는 아직 빌드한 적이 없다. 아래 내용은 [phase-macos.md](../pl
 
 ## 6. 공통 릴리스 흐름
 
-`bash ci/release.sh [--publish]`를 Windows 호스트에서 실행한다. Docker Desktop이 켜져 있어야 한다.
+로컬 릴리스는 `bash ci/release.sh [--publish]`를 Windows 호스트에서 실행한다. Docker Desktop이 켜져 있어야 한다. GitHub 릴리스 절차는 [release.md](release.md)를 본다.
 
 1. 작업 트리와 버전, 태그 미사용 여부를 확인한다.
 2. `ci/local-ci.sh`로 정적 검사와 Windows MinGW, MSVC, Linux 빌드를 검증한다.

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Local release of the Qt port (docs/plan/phase-6-packaging-stabilization.md 3.6, docs/build/release.md).
-# GitHub is a repository only: everything is built, tested and signed (not yet) on this machine.
+# Builds, tests and signs (not yet) on this machine. GitHub alternative: .github/workflows/release.yml.
 #
 #   1. clean working tree, version = project VERSION in CMakeLists.txt, tag v<version> unused
 #   2. local CI (ci/local-ci.sh: static checks, Windows MinGW + MSVC, Linux, QT docking backend)
@@ -77,12 +77,7 @@ fi
 step "checksums"
 ( cd "$DIST" && sha256sum -- notepadpp-qt-* > SHA256SUMS.txt && cat SHA256SUMS.txt )
 NOTES="$DIST/release-notes.md"
-{
-    awk -v v="$VERSION" '$0 ~ "^## \\[" v "\\]" {on=1; next} on && /^## \[/ {exit} on {print}' docs/CHANGELOG.md
-    echo
-    echo "Built locally from commit \`$COMMIT\` with \`ci/release.sh\`; local CI and package tests passed."
-    echo "Packages are not code-signed yet: Windows SmartScreen may warn. Check the files against SHA256SUMS.txt."
-} > "$NOTES"
+bash ci/release-notes.sh "$VERSION" "Built locally from commit \`$COMMIT\` with \`ci/release.sh\`; local CI and package tests passed." > "$NOTES"
 echo "notes: ${NOTES#$ROOT/}"
 
 # --- 6. publish ----------------------------------------------------------------------------------

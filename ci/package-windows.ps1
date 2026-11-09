@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
   Windows packages of the Qt port (docs/plan/phase-6-packaging-stabilization.md 3.1):
-  portable zip and symbols, built locally (GitHub is a repository only).
+  portable zip and symbols.
 
 .DESCRIPTION
   1. Release build with MSVC (QT docking backend, tests off) in build/package/windows-msvc
