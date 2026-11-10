@@ -81,6 +81,35 @@ private slots:
         QVERIFY(w->pane(1)->isHidden());
     }
 
+    void tabBarVisibleAfterRestoringSessionWithLaterActiveTab()
+    {
+        QString files;
+        for (const char* name : {"t1.txt", "t2.txt", "t3.txt"}) {
+            writeAll(work(name), "x");
+            files += QStringLiteral("<File filename=\"%1\"/>").arg(work(name));
+        }
+        const QString session = work("later-active.session");
+        writeAll(session, QStringLiteral("<?xml version=\"1.0\" encoding=\"UTF-8\" ?><NotepadPlus><Session activeView=\"0\">"
+                                         "<mainView activeIndex=\"2\">%1</mainView><subView activeIndex=\"0\"/></Session></NotepadPlus>")
+                              .arg(files)
+                              .toUtf8());
+        CommandLine c;
+        c.noSession = true;
+        c.sessionFile = session;
+        auto w = makeWindow(c);
+        w->resize(900, 600);
+        w->show();
+        QVERIFY(QTest::qWaitForWindowExposed(w.get()));
+        QCoreApplication::processEvents();
+
+        EditorPane* p = w->pane(0);
+        QCOMPARE(p->count(), 3);
+        QCOMPARE(p->tabBar()->currentIndex(), 2);
+        QVERIFY(p->tabBar()->isVisible());
+        QVERIFY(p->tabBar()->height() > 0);
+        QVERIFY(p->editor()->geometry().top() >= p->tabBar()->geometry().bottom());
+    }
+
     void openEditSaveCloseReopen()
     {
         const QString path = work("a.txt");

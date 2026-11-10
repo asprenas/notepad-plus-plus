@@ -32,6 +32,7 @@ signals:
     void doubleClickedEmpty();
     void middleClicked(int index);
 protected:
+    void showEvent(QShowEvent* e) override;
     void paintEvent(QPaintEvent* e) override;
     void mouseDoubleClickEvent(QMouseEvent* e) override;
     void mouseReleaseEvent(QMouseEvent* e) override;

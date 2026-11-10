@@ -22,6 +22,14 @@ DocTabBar::DocTabBar(QWidget* parent) : QTabBar(parent)
     setElideMode(Qt::ElideNone);
 }
 
+void DocTabBar::showEvent(QShowEvent* e)
+{
+    QTabBar::showEvent(e);
+    // Tabs added while hidden do not always invalidate the layout's cached size hint (height 0 from
+    // when the bar was empty), e.g. a restored session whose active tab is not the first one.
+    updateGeometry();
+}
+
 void DocTabBar::paintEvent(QPaintEvent* e)
 {
     QTabBar::paintEvent(e);
