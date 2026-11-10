@@ -6,6 +6,7 @@
 #include "menu/ActionRegistry.h"
 #include "menu/CommandIds.h"
 #include "prefs/PreferencesDialog.h"
+#include <QPushButton>
 #include "search/FindReplaceDialog.h"
 #include "search/SearchResultsPanel.h"
 #include "ShortcutMapper.h"
@@ -135,6 +136,57 @@ private slots:
 #endif
         QVERIFY(d->control(QStringLiteral("Global"), 6124));
         QVERIFY(d->control(QStringLiteral("MISC"), 6331));
+    }
+
+    void translatedPreferenceLayout()
+    {
+        m_w->setUiLanguage("korean.xml");
+        PreferencesDialog* d = m_w->preferencesDialog();
+        auto inside = [d](const char* page, int id, int group) {
+            const QString tag = QString::fromLatin1(page);
+            return d->control(tag, group)->geometry().contains(d->control(tag, id)->geometry());
+        };
+        QVERIFY(inside("MultiInstance", 6152, 6151));
+        QVERIFY(inside("Indentation", 6512, 6511));
+        QVERIFY(inside("Indentation", 6510, 6511));
+        QVERIFY(inside("Backup", 6804, 6802));
+        QVERIFY(inside("Print", 6718, 6719));
+        QCOMPARE(qobject_cast<QComboBox*>(d->control(QStringLiteral("MISC"), 6307))->itemText(0), QStringLiteral("항상 보내지 않음"));
+        m_w->setUiLanguage("english.xml");
+    }
+
+    void customColourSwatches()
+    {
+        PreferencesDialog* d = m_w->preferencesDialog();
+        auto* swatch = d->findChild<QPushButton*>(QStringLiteral("colour7116"));
+        QVERIFY(swatch);
+        QVERIFY(d->findChild<QPushButton*>(QStringLiteral("colour7127")));
+        QVERIFY(d->findChild<QPushButton*>(QStringLiteral("colour6024")));
+        qobject_cast<QRadioButton*>(d->control(QStringLiteral("DarkMode"), 7102))->setChecked(true);
+        QVERIFY(!swatch->isEnabled());
+        qobject_cast<QRadioButton*>(d->control(QStringLiteral("DarkMode"), 7115))->setChecked(true);
+        QVERIFY(swatch->isEnabled());
+        qobject_cast<QRadioButton*>(d->control(QStringLiteral("DarkMode"), 7102))->setChecked(true);
+    }
+
+#if defined(Q_OS_WIN)
+    void fileAssociationCustomEditHidden()
+    {
+        QVERIFY(m_w->preferencesDialog()->control(QStringLiteral("FileAssoc"), 4006)->isHidden());
+    }
+#endif
+
+    void smallPreferenceButtonsStayInsideTheirGroups()
+    {
+        PreferencesDialog* d = m_w->preferencesDialog();
+        const QString page = QStringLiteral("Scintillas2");
+        for (const auto& [button, group] : {std::pair{6253, 6260}, std::pair{6257, 6260}, std::pair{6251, 0}}) {
+            QWidget* b = d->control(page, button);
+            QVERIFY(b);
+            QVERIFY2(b->width() < 60, qPrintable(QString::number(b->width())));
+            if (QWidget* g = group ? d->control(page, group) : nullptr)
+                QVERIFY(g->geometry().contains(b->geometry()));
+        }
     }
 
     void preferenceCheckboxesRoundTrip()

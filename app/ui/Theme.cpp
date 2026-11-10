@@ -74,7 +74,8 @@ void MainWindow::applyTheme()
     if (dark) {
         DarkColors c = toneColors(g.darkModeColorTone);
         if (g.darkModeColorTone == 32) { // customized
-            c.background = c.pureBackground = fromColorRef(g.darkCustomColorMain);
+            c.background = fromColorRef(g.darkCustomColorMain);
+            c.pureBackground = fromColorRef(g.darkCustomColorTop);
             c.softerBackground = fromColorRef(g.darkCustomColorActive);
             c.hotBackground = fromColorRef(g.darkCustomColorMenuHotTrack);
             c.errorBackground = fromColorRef(g.darkCustomColorError);
