@@ -1199,6 +1199,7 @@ Translation note:
 					<Item id="6613" name="위(&amp;T)"/>
 					<Item id="6614" name="오른쪽(&amp;R)"/>
 					<Item id="6615" name="아래(&amp;m)"/>
+					<Item id="6616" name="폼 피드를 쪽 나누기로 인쇄(&amp;s)"/>
 					<Item id="6706" name="굵게(&amp;B)"/>
 					<Item id="6707" name="기울임(&amp;I)"/>
 					<Item id="6708" name="머리글"/>
@@ -1398,6 +1399,7 @@ Translation note:
 					<Item id="6344" name="문서 엿보기"/>
 					<Item id="6345" name="탭 엿보기"/>
 					<Item id="6346" name="문서 맵에서 엿보기"/>
+					<Item id="6366" name="폴더를 작업 영역으로 패널에서 심볼릭 링크 불러오기 허용"/>
 					<Item id="6360" name="모든 효과음 끄기"/>
 					<Item id="6361" name="모두 저장 확인 대화상자 활성화"/>
 				</MISC>

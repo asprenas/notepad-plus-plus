@@ -8,6 +8,7 @@
 
 #include <QCheckBox>
 #include <QCollator>
+#include <QColorDialog>
 #include <QComboBox>
 #include <QFileDialog>
 #include <QFontDatabase>
@@ -100,6 +101,37 @@ struct PreferenceBinder {
         if (QWidget* x = d.control(page, id))
             add([x, cond] { x->setEnabled(cond()); }, {});
     }
+    // Upstream ColourPicker: a swatch opening the colour dialog; the setting is a COLORREF (0x00BBGGRR)
+    void colourSwatch(QWidget* parent, const QRect& at, int name, int GuiConfig::*f, std::function<bool()> enabled, int blackValue = 0)
+    {
+        auto toQColor = [](int v) { return QColor(v & 0xFF, (v >> 8) & 0xFF, (v >> 16) & 0xFF); };
+        auto* button = new QPushButton(parent);
+        button->setObjectName(QStringLiteral("colour%1").arg(name));
+        button->setGeometry(at);
+        add([=, &g = this->g] {
+            const bool on = enabled();
+            button->setEnabled(on);
+            button->setStyleSheet(QStringLiteral("QPushButton { background: %1; border: 1px solid palette(mid); }")
+                                      .arg(on ? toQColor(g.*f).name() : QStringLiteral("palette(window)")));
+        }, {});
+        QObject::connect(button, &QPushButton::clicked, &d, [=, &d = this->d, &g = this->g] {
+            const QColor c = QColorDialog::getColor(toQColor(g.*f), &d);
+            if (!c.isValid())
+                return;
+            const int value = c.red() | (c.green() << 8) | (c.blue() << 16);
+            g.*f = value == 0 ? blackValue : value;
+            d.changed();
+        });
+    }
+    // Swatch on the left of a label, like upstream's move2CtrlLeft
+    void colourLeftOf(int labelId, int GuiConfig::*f, std::function<bool()> enabled)
+    {
+        QWidget* label = d.control(page, labelId);
+        if (!label)
+            return;
+        const int size = 22;
+        colourSwatch(label->parentWidget(), QRect(label->x() - size - 4, label->y() + (label->height() - size) / 2, size, size), labelId, f, std::move(enabled));
+    }
     void browseDir(int buttonId, int editId)
     {
         auto* b = w<QPushButton>(buttonId);
@@ -165,6 +197,9 @@ void PreferencesDialog::setupBindings()
         p.radios<std::string>(&GuiConfig::toolbarIconSet, {{6103, "small"}, {6104, "large"}, {6129, "small2"}, {6130, "large2"}, {6105, "standard"}});
         p.radios<bool>(&GuiConfig::toolbarFluentMono, {{6012, true}, {6013, false}});
         p.radios<int>(&GuiConfig::toolbarFluentColor, {{6015, 0}, {6016, 1}, {6017, 2}, {6018, 3}, {6019, 4}, {6020, 5}, {6021, 6}, {6022, 7}, {6023, 8}, {6024, 9}});
+        if (auto* custom = p.w<QRadioButton>(6024))
+            p.colourSwatch(custom->parentWidget(), QRect(custom->x() + 22, custom->geometry().bottom() + 4, 22, 22), 6024, &GuiConfig::toolbarFluentCustomColor,
+                           [&g] { return g.toolbarFluentColor == 9; }, 1); // 0 means "no custom colour" in the toolbar
     }
 
     // --- Tab Bar
@@ -254,6 +289,17 @@ void PreferencesDialog::setupBindings()
 #endif
         }
         p.radios<int>(&GuiConfig::darkModeColorTone, {{7102, 0}, {7103, 1}, {7104, 2}, {7105, 3}, {7107, 4}, {7108, 5}, {7109, 6}, {7115, 32}});
+        const auto customized = [&g] { return g.darkModeColorTone == 32; };
+        const std::pair<int, int GuiConfig::*> swatches[] = {
+            {7116, &GuiConfig::darkCustomColorMain},         {7117, &GuiConfig::darkCustomColorMenuHotTrack},
+            {7118, &GuiConfig::darkCustomColorActive},       {7119, &GuiConfig::darkCustomColorTop},
+            {7120, &GuiConfig::darkCustomColorError},        {7121, &GuiConfig::darkCustomColorText},
+            {7122, &GuiConfig::darkCustomColorDarkText},     {7123, &GuiConfig::darkCustomColorDisabledText},
+            {7125, &GuiConfig::darkCustomColorLinkText},     {7124, &GuiConfig::darkCustomColorEdge},
+            {7126, &GuiConfig::darkCustomColorHotEdge},      {7127, &GuiConfig::darkCustomColorDisabledEdge},
+        };
+        for (const auto& [label, field] : swatches)
+            p.colourLeftOf(label, field, customized);
         if (auto* reset = p.w<QPushButton>(7130))
             connect(reset, &QPushButton::clicked, this, [this, &g] {
                 const GuiConfig def;
@@ -269,6 +315,7 @@ void PreferencesDialog::setupBindings()
                 g.darkCustomColorEdge = def.darkCustomColorEdge;
                 g.darkCustomColorHotEdge = def.darkCustomColorHotEdge;
                 g.darkCustomColorDisabledEdge = def.darkCustomColorDisabledEdge;
+                reload();
                 emit settingsChanged();
             });
     }
@@ -392,6 +439,9 @@ void PreferencesDialog::setupBindings()
 
     // --- Language (menu) / Indentation
     {
+        // upstream shows this edit over the extension list only for its "customize" entry
+        if (QWidget* customExtension = control(QStringLiteral("FileAssoc"), 4006))
+            customExtension->hide();
         auto p = b("Language");
         p.check(6507, &GuiConfig::langMenuCompact);
         p.check(6335, &GuiConfig::backslashIsEscapeForSql);
