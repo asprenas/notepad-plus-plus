@@ -722,8 +722,8 @@ void MainWindow::registerMiscCommands()
                            tr("Notepad++ Qt %1\nQt port of Notepad++ %2\nQt %3")
                                .arg(QCoreApplication::applicationVersion(), QStringLiteral("8.9.8.1"), QString::fromLatin1(qVersion())));
     }});
-    r->setHandler(IDM_HOMESWEETHOME, {[] { QDesktopServices::openUrl(QUrl(QStringLiteral("https://notepad-plus-plus.org/"))); }});
-    r->setHandler(IDM_PROJECTPAGE, {[] { QDesktopServices::openUrl(QUrl(QStringLiteral("https://github.com/asprenas/notepad-plus-plus"))); }});
+    r->setHandler(IDM_HOMESWEETHOME, {[] { QDesktopServices::openUrl(QUrl(QStringLiteral("https://notepad-plus-plus.org/"))); }, [] { return false; }});
+    r->setHandler(IDM_PROJECTPAGE, {[] { QDesktopServices::openUrl(QUrl(QStringLiteral("https://github.com/asprenas/notepad-plus-plus"))); }, [] { return false; }});
     r->setHandler(IDM_SETTING_EDITCONTEXTMENU, {[this] { openFile(q(m_paths.contextMenuXml())); }});
 }
 
