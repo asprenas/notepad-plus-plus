@@ -398,18 +398,18 @@ void MainWindow::registerToolCommands()
     r->setHandler(IDM_LANG_UDLCOLLECTION_PROJECT_SITE, {[] {
         QDesktopServices::openUrl(QUrl(QStringLiteral("https://github.com/notepad-plus-plus/userDefinedLanguages")));
     }});
-    r->setHandler(IDM_ONLINEDOCUMENT, {[] { QDesktopServices::openUrl(QUrl(QStringLiteral("https://npp-user-manual.org/"))); }});
-    r->setHandler(IDM_FORUM, {[] { QDesktopServices::openUrl(QUrl(QStringLiteral("https://community.notepad-plus-plus.org/"))); }});
+    r->setHandler(IDM_ONLINEDOCUMENT, {[] { QDesktopServices::openUrl(QUrl(QStringLiteral("https://npp-user-manual.org/"))); }, []{ return false;}});
+    r->setHandler(IDM_FORUM, {[] { QDesktopServices::openUrl(QUrl(QStringLiteral("https://community.notepad-plus-plus.org/"))); }, []{ return false;}});
     // No auto-updater in this port (phase 6 packaging): the releases page instead; proxy settings are
     // only used by the upstream updater (WinGup).
     r->setHandler(IDM_UPDATE_NPP, {[] {
         QDesktopServices::openUrl(QUrl(QStringLiteral("https://github.com/asprenas/notepad-plus-plus/releases")));
-    }});
+    }, []{ return false;}});
     r->setHandler(IDM_CONFUPDATERPROXY, {[this] {
         QMessageBox::information(this, tr("Set Updater Proxy"),
                                  tr("This version has no built-in updater: updates come from the release page or the system package manager, "
                                     "which use the system proxy settings."));
-    }});
+    }, []{ return false;}});
     r->setHandler(IDM_CMDLINEARGUMENTS, {[this] { showCommandLineHelp(); }});
     r->setHandler(IDM_DEBUGINFO, {[this] { showDebugInfo(); }});
 }
