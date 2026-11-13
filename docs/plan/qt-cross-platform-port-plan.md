@@ -3,7 +3,7 @@
 - 작성일: 2026-11-02 (v1: Linux 포팅 초안 → v2: Windows/Linux/macOS Qt 통합으로 개정)
 - 대상 소스: Notepad++ v8.9.8.1 (`PowerEditor/src/resource.h` 기준)
 - 프로젝트 성격: **개인 프로젝트 (독립 포크)** — 업스트림(notepad-plus-plus) 기여 목표 없음
-- 목표 플랫폼: Windows, Linux (즉시) / macOS (2026-11-09 주 추가 예정)
+- 목표 플랫폼: Windows, Linux (즉시) / macOS (M2 MacBook으로 진행, [phase-macos.md](phase-macos.md))
 - 상태: 초안 v2.1 — 주요 결정 사항 확정 (2026-11-02, 4.2절)
 
 ---
